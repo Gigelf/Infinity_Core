@@ -2139,7 +2139,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     if (spellId_1 == 35081 && spellInfo_2->SpellIconID==561 && spellInfo_2->SpellVisual[0]==7992)
                         return false;
                     // Drums of Forgotten Kings and Blessing of Kings
-                    if( spellInfo_1->Id == 72586 && spellInfo_2->SpellFamilyFlags & UI64LIT(0x10000000))
+                    if( spellInfo_1->Id == 72586 && spellInfo_2->SpellFamilyFlags & UI64LIT(0x1000000))
                         return true;
                 }
                 case SPELLFAMILY_PRIEST:
@@ -2271,6 +2271,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Defensive/Berserker/Battle stance aura can not stack (needed for dummy auras)
                 if (((spellInfo_1->SpellFamilyFlags & UI64LIT(0x800000)) && (spellInfo_2->SpellFamilyFlags & UI64LIT(0x800000))) ||
                     ((spellInfo_2->SpellFamilyFlags & UI64LIT(0x800000)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x800000))))
+                    return true;
+
+                // Enrage and Wrecking Crew
+                if (spellInfo_1->SpellIconID == 95 && spellInfo_2->SpellIconID == 95)
                     return true;
             }
 
@@ -2566,7 +2570,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 return false;
 
             // Blessing of Kings and Drums of Forgotten Kings
-            if( spellInfo_1->SpellFamilyFlags & UI64LIT(0x10000000) && spellInfo_2->Id == 72586)
+            if( spellInfo_1->SpellFamilyFlags & UI64LIT(0x1000000) && spellInfo_2->Id == 72586)
                 return true;
             break;
 
