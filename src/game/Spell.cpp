@@ -1696,8 +1696,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 50988:                                 // Glare of the Tribunal (Halls of Stone)
                 case 59870:                                 // Glare of the Tribunal (h) (Halls of Stone)
                 case 68950:                                 // Fear (ICC: Forge of Souls)
-                case 63018:                                 // XT002's Light Bomb
-                case 65121:                                 // XT002's Light Bomb (h)
+                case 63018:                                 // Searing Light nonhero
+                case 65121:                                 // Searing Light hero
                 case 63024:                                 // XT002's Gravitiy Bomb
                 case 64234:                                 // XT002's Gravitiy Bomb (h)
                 case 61916:                                 // Lightning Whirl (10 man)
@@ -1711,6 +1711,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 67281:
                 case 67282:
                 case 67283:
+                case 62166:                                 // StoneGrip nh
                 case 62374:                                 // Pursued Ulduar Leviathan
                 case 65950:                                 // Touch of Light
                 case 67296:
@@ -1732,6 +1733,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 31298:                                 // Sleep
                 case 39992:                                 // Needle Spine Targeting (Warlord Najentus)
                 case 51904:                                 // Limiting the count of Summoned Ghouls
+                case 63981:                                 // StoneGrip H
                 case 54522:
                 case 61693:                                 // Arcane Storm (Malygos) (N)
                     unMaxTargets = 3;
@@ -1743,6 +1745,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 42005:                                 // Bloodboil TODO: need to be 5 targets(players) furthest away from caster
                 case 55665:                                 // Life Drain (h)
                 case 58917:                                 // Consume Minions
+                case 64604:                                 // Nature Bomb Freya
                 case 67076:                                 // Mistress' Kiss (Trial of the Crusader, ->
                 case 67078:                                 // -> Lord Jaraxxus encounter, 25 and 25 heroic)
                 case 67700:                                 // Penetrating Cold (25 man)
@@ -2086,6 +2089,15 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         }
         case TARGET_ALL_ENEMY_IN_AREA:
             FillAreaTargets(targetUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+            if (m_spellInfo->Id == 62240 || m_spellInfo->Id == 62920) 
+            { 
+                if (SpellAuraHolder *holder = m_caster->GetSpellAuraHolder(62239)) 
+                    unMaxTargets = holder->GetStackAmount(); 
+                else 
+                    unMaxTargets = 1; 
+            }
+           //break;    might need a break  here  gonna have to do some testing
+
          // Ghoul Taunt (Army of the Dead) - exclude Player and WorldBoss targets 
             if (m_spellInfo->Id == 43263) 
             { 
@@ -2480,6 +2492,20 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 Unit *pUnitTarget = *itr;
                 targetUnitMap.push_back(pUnitTarget);
             }
+            // Searing Light 
+            if (m_spellInfo->Id == 63023 || m_spellInfo->Id == 65120) 
+            { 
+                FillAreaTargets(targetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_SELF_CENTER, SPELL_TARGETS_HOSTILE); 
+                break; 
+            } 
+            // Gravity Bomb 
+            else if (m_spellInfo->Id == 63025 || m_spellInfo->Id == 64233) 
+            { 
+                FillAreaTargets(targetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_SELF_CENTER, SPELL_TARGETS_HOSTILE); 
+                targetUnitMap.remove(m_caster); 
+                break; 
+            }
+
             // Death Pact (in fact selection by player selection)
             else if (m_spellInfo->Id == 48743)
             {
