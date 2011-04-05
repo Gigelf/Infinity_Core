@@ -911,8 +911,8 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficu
             {
                 if (!((DungeonPersistentState*)itr->second)->IsExtended())
                 {
-                    _ResetSave(m_instanceSaveByInstanceId, itr);
                     DeleteInstanceFromDB(itr->first, false);
+                    _ResetSave(m_instanceSaveByInstanceId, itr);
                 }
                 else
                 {

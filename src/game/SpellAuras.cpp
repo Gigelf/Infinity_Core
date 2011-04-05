@@ -426,9 +426,46 @@ m_isPersistent(false), m_in_use(0), m_spellAuraHolder(holder)
 
     Player* modOwner = caster ? caster->GetSpellModOwner() : NULL;
 
+
     // Apply periodic time mod
     if (modOwner && m_modifier.periodictime)
+    {
         modOwner->ApplySpellMod(spellproto->Id, SPELLMOD_ACTIVATION_TIME, m_modifier.periodictime);
+
+        bool applyHaste = (spellproto->AttributesEx5 & SPELL_ATTR_EX5_AFFECTED_BY_HASTE) != 0;
+
+        if (!applyHaste)
+        {
+            Unit::AuraList const& mModByHaste = caster->GetAurasByType(SPELL_AURA_MOD_PERIODIC_HASTE);
+            for (Unit::AuraList::const_iterator itr = mModByHaste.begin(); itr != mModByHaste.end(); ++itr)
+            {
+                if ((*itr)->isAffectedOnSpell(spellproto))
+                {
+                    applyHaste = true;
+                    break;
+                }
+            }
+        }
+
+        // Apply haste to duration
+        if (applyHaste)
+        {
+            uint32 oldDuration = GetHolder()->GetAuraDuration();
+
+            int32 new_duration = (int32)(oldDuration * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+            GetHolder()->SetAuraMaxDuration(new_duration);
+            GetHolder()->SetAuraDuration(new_duration);
+
+            uint32 _periodicTime = m_modifier.periodictime;
+
+            // Calculate new periodic timer
+            int32 ticks = oldDuration / _periodicTime;
+
+            _periodicTime = new_duration / ticks;
+
+            m_modifier.periodictime = _periodicTime;
+        }
+    }
 
     // Start periodic on next tick or at aura apply
     if (!(spellproto->AttributesEx5 & SPELL_ATTR_EX5_START_PERIODIC_AT_APPLY))
@@ -4014,6 +4051,23 @@ void Aura::HandleForceReaction(bool apply, bool Real)
     // stop fighting if at apply forced rank friendly or at remove real rank friendly
     if ((apply && faction_rank >= REP_FRIENDLY) || (!apply && player->GetReputationRank(faction_id) >= REP_FRIENDLY))
         player->StopAttackFaction(faction_id);
+
+    // drop BG flag if player is carrying
+    if (SpellEntry const *spellInfo = GetSpellProto())
+    {
+        switch(spellInfo->Id)
+        {
+            case 1953:  // Blink
+            case 48020: // Demonic Circle
+            case 54861: // Nitro Boosts
+                if (player->InBattleGround() && (player->HasAura(23335) || player->HasAura(23333) || player->HasAura(34976)))
+                    if (BattleGround *bg = player->GetBattleGround())
+                        bg->EventPlayerDroppedFlag(player);
+                break;
+            default:
+                break; 
+        }
+    }
 }
 
 void Aura::HandleAuraModSkill(bool apply, bool /*Real*/)
