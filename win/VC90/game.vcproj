@@ -827,6 +827,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\LFG.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\LFG.h"
 				>
 			</File>
