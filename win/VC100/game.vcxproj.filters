@@ -544,8 +544,6 @@
     <ClCompile Include="..\..\src\game\vmap\WorldModel.cpp">
       <Filter>vmaps</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\MapUpdater.cpp">
-    </ClCompile>
     <ClCompile Include="..\..\src\game\PathFinder.cpp">
       <Filter>Motion generators</Filter>
     </ClCompile>
@@ -580,6 +578,9 @@
       <Filter>IRC</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\LFG.cpp">
+      <Filter>World/Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\MapUpdater.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
   </ItemGroup>
