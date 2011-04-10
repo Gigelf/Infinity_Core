@@ -167,19 +167,19 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket &recv_data)
 	recv_data >> unkPackedTime;
 	recv_data >> flags;
 
-	CalendarEvent event;
-	event.id = sCalendarMgr->GetNextEventID();
-	event.name = title;
-	event.description = description;
-	event.type = type;
-	event.unk = unkbyte;
-	event.dungeonID = dungeonId;
-	event.flags = flags;
-	event.time = eventPackedTime;
-	event.unkTime = unkPackedTime;
-	event.creator_guid = GetPlayer()->GetGUID();
+	CalendarEvent m_event;
+	m_event.id = sCalendarMgr->GetNextEventID();
+	m_event.name = title;
+	m_event.description = description;
+	m_event.type = type;
+	m_event.unk = unkbyte;
+	m_event.dungeonID = dungeonId;
+	m_event.flags = flags;
+	m_event.time = eventPackedTime;
+	m_event.unkTime = unkPackedTime;
+	m_event.creator_guid = GetPlayer()->GetGUID();
 
-   sCalendarMgr->AddEvent(event);
+   sCalendarMgr->AddEvent(m_event);
 
 	if (((flags >> 6) & 1))
 		return;
@@ -201,12 +201,12 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket &recv_data)
 		guid = recv_data.readPackGUID();
 		recv_data >> status;
 		recv_data >> rank;
-		invite.event = event.id;
+		invite.event = m_event.id;
 		invite.creator_guid = GetPlayer()->GetGUID();
 		invite.target_guid = guid;
 		invite.status = status;
 		invite.rank = rank;
-		invite.time = event.time;
+		invite.time = m_event.time;
 		invite.text = ""; // hmm...
 		invite.unk1 = invite.unk2 = invite.unk3 = 0;
 		sCalendarMgr->AddInvite(invite);
@@ -350,19 +350,20 @@ void WorldSession::SendCalendarEvent(uint64 eventId, bool added)
 {
 	sLog.outDebug("SMSG_CALENDAR_SEND_EVENT");
 	WorldPacket data(SMSG_CALENDAR_SEND_EVENT);
-	data << uint8(added);                                   // from add_event
-	data.appendPackGUID(0);                                 // creator GUID
-	data << uint64(0);                                      // event ID
-	data << uint8(0);                                       // event name
-	data << uint8(0);                                       // event description
-	data << uint8(0);                                       // event type
-	data << uint8(0);                                       // unk
-	data << uint32(100);                                    // Max invites
-	data << int32(0);                                       // dungeon ID
-	data << uint32(0);                                      // unk time
-	data << uint32(0);                                      // event time
-	data << uint32(0);                                      // event flags
-	data << uint32(0);                                      // event guild id
+	CalendarEvent *m_event = sCalendarMgr->GetEvent(eventId);
+	data << uint8(added);											// from add_event
+	data.appendPackGUID(m_event->creator_guid);						// creator GUID
+	data << uint64(eventId);										// event ID
+	data << m_event->name.c_str();                                  // event name
+	data << m_event->description.c_str();                           // event description
+	data << uint8(m_event->type);                                   // event type
+	data << uint8(m_event->unk);                                    // unk
+	data << uint32(100);											// Max invites
+	data << int32(m_event->dungeonID);                              // dungeon ID
+	data << uint32(m_event->unkTime);                               // unk time
+	data << uint32(m_event->time);                                  // event time
+	data << uint32(m_event->flags);                                 // event flags
+	data << uint32(m_event->guildID);                               // event guild id
 
 	if (false) // invites exist
 	{
@@ -386,18 +387,20 @@ void WorldSession::SendCalendarEventInviteAlert(uint64 eventId, uint64 inviteId)
 {
 	sLog.outDebug("SMSG_CALENDAR_EVENT_INVITE_ALERT");
 	WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_ALERT);
-	data << uint64(0);                           // event ID
-	data << uint8(0);                            // event title
-	data << uint32(0);                           // event time
+	CalendarEvent *m_event = sCalendarMgr->GetEvent(eventId);
+	CalendarInvite *invite = sCalendarMgr->GetInvite(inviteId);
+	data << uint64(eventId);						// event ID
+	data << m_event->name;							// event title
+	data << uint32(m_event->time);					// event time
 	uint32 unknum = 1;
 	data << uint32(unknum);
-	data << uint8(0);                            // event type
-	data << uint32(0);                           // dungeon id
-	data << uint64(0);                           // invite id
-	data << uint8(0);                            // invite status
-	data << uint8(0);                            // invite rank
-	data.appendPackGUID(0);                      // event creator
-	data.appendPackGUID(0);                      // invite sender
+	data << uint8(m_event->type);					// event type
+	data << uint32(m_event->dungeonID);				// dungeon id
+	data << uint64(inviteId);						// invite id
+	data << uint8(invite->status);					// invite status
+	data << uint8(invite->rank);					// invite rank
+	data.appendPackGUID(m_event->creator_guid);     // event creator
+	data.appendPackGUID(invite->creator_guid);		// invite sender
 	SendPacket(&data);
 }
 
