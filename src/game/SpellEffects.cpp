@@ -6332,10 +6332,14 @@ void Spell::DoSummonPossessed(SpellEffectIndex eff_idx, uint32 forceFaction)
         pos = CreatureCreatePos(m_caster, m_caster->GetOrientation());
 
     Team p_team = p_caster->GetTeam();
-    if (!pCreature->Create(p_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, creature_entry, p_team))
+    const CreatureInfo* creature_info = sCreatureStorage.LookupEntry<CreatureInfo>(creature_entry);
+    if(creature_info)
     {
-        delete pCreature;
-        return;
+        if (!pCreature->Create(p_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, creature_info, p_team))
+        {
+            delete pCreature;
+            return;
+        }
     }
 
     pCreature->SetSummonPoint(pos);
@@ -10970,14 +10974,17 @@ void Spell::DoSummonSnakes(SpellEffectIndex eff_idx)
         pTrap->GetClosePoint(x, y, z, 2.0f, frand(0.0f, 5.0f), frand(0.0f, M_PI_F*2));
         CreatureCreatePos pos(m_caster->GetMap(), x, y, z, -m_caster->GetOrientation(), m_caster->GetPhaseMask());
 
-        if (!pSummon->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, creature_entry, team))
+        const CreatureInfo* creature_info = sCreatureStorage.LookupEntry<CreatureInfo>(creature_entry);
+        if(creature_info)
         {
-            delete pSummon;
-            return;
+            if (!pSummon->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, creature_info, team))
+            {
+                delete pSummon;
+                return;
+            }
         }
 
         pSummon->SetSummonPoint(pos);
-
         if(!pSummon->IsPositionValid())
         {
             sLog.outError("EffectSummonSnakes failed to summon snakes for Unit %s (GUID: %u) bacause of invalid position (x = %f, y = %f, z = %f map = %u)"

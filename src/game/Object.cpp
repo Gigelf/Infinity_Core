@@ -2351,6 +2351,7 @@ GameObject* WorldObject::GetClosestGameObjectWithEntry(WorldObject* pSource, uin
     cell.Visit(p, grid_gobject_searcher,*(pSource->GetMap()), *this, fMaxSearchRange);
 
     return pGameObject;
+}
 
 bool WorldObject::PrintCoordinatesError(float x, float y, float z, char const* descr) const
 {
