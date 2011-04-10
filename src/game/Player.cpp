@@ -12399,28 +12399,6 @@ void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
 {
     if (!pItem)
          return;
-		
-    /*  Flying Everywhere   */
-    if (sWorld.getConfig(CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE))
-    {
-        ItemPrototype const *pProto = sObjectMgr.GetItemPrototype(pItem->GetEntry());
-        if (pProto)
-        {
-            for(int i = 0; i < 5; i++)
-            {
-                SpellEntry const *sEntry = sSpellStore.LookupEntry(pProto->Spells[i].SpellId);
-                if(!sEntry)
-                    continue;
-
-                if (isFlyingSpell(sEntry) || isFlyingFormSpell(sEntry))
-                {
-                    pItem->SetSpellCharges(0, 1);
-                    pItem->SetState(ITEM_CHANGED, this);
-                    return;
-                }
-            }
-        }
-    }
 
     DEBUG_LOG( "STORAGE: DestroyItemCount item (GUID: %u, Entry: %u) count = %u", pItem->GetGUIDLow(),pItem->GetEntry(), count);
 
