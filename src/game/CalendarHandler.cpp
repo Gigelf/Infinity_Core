@@ -24,6 +24,7 @@
 #include "Opcodes.h"
 #include "World.h"
 #include "MapPersistentStateMgr.h"
+#include "CalendarMgr.h"
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket &/*recv_data*/)
 {
@@ -33,38 +34,8 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &/*recv_data*/)
 
     WorldPacket data(SMSG_CALENDAR_SEND_CALENDAR, 4+4*0+4+4*0+4+4);
 
-	if (false) // if we have invites
-	{
-		data << uint32(0);                       // invite count
-		for (uint8 i = 0; i < 0; ++i)
-		{
-			data << uint64(0);                   // Invite ID
-			data << uint64(0);                   // Event ID
-			data << uint8(0);                    // rank
-			data << uint8(0);                    // unk
-			data << uint8(0);                    // unk
-			data.appendPackGUID(0);              // creator's guid
-		}
-	}
-	else
-		data << uint32(0);                       // invite count
-
-	if (false) // if we have events
-	{
-		data << uint32(0);                       // event count
-		for (uint8 i = 0; i < 0; ++i)
-		{
-			data << uint64(0);                   // event ID
-			data << uint8(0);                    // event title
-			data << uint32(0);                   // event type
-			data << uint32(0);                   // event time as time bit field
-			data << uint32(0);                   // event flags
-			data << uint32(0);                   // dungeon ID
-			data.appendPackGUID(0);              // creator guid
-		}
-	}
-	else
-		data << uint32(0);
+	sCalendarMgr->AppendInvitesToCalendarPacketForPlayer(data, GetPlayer());
+	sCalendarMgr->AppendEventsToCalendarPacketForPlayer(data, GetPlayer());
 
     data << uint32(cur_time);                               // current time, unix timestamp
     data << (uint32) secsToTimeBitFields(cur_time);         // current packed time
@@ -186,11 +157,10 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket &recv_data)
 	uint8 type;
 	uint8 unkbyte;
 	uint32 maxInvites;
-	int32 dungeonId;
+	uint32 dungeonId;
 	uint32 eventPackedTime;
 	uint32 unkPackedTime;
 	uint32 flags;
-	uint64 eventId = 0;
 
 	recv_data >> title;
 	recv_data >> description;
@@ -202,7 +172,19 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket &recv_data)
 	recv_data >> unkPackedTime;
 	recv_data >> flags;
 
-	// TODO make new event
+	CalendarEvent event;
+	event.id = sCalendarMgr->GetNextEventID();
+	event.name = title;
+	event.description = description;
+	event.type = type;
+	event.unk = unkbyte;
+	event.dungeonID = dungeonId;
+	event.flags = flags;
+	event.time = eventPackedTime;
+	event.unkTime = unkPackedTime;
+	event.creator_guid = GetPlayer()->GetGUID();
+
+   sCalendarMgr->AddEvent(event);
 
 	if (((flags >> 6) & 1))
 		return;
@@ -213,16 +195,26 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket &recv_data)
 	if (!inviteCount)
 		return;
 
-	// TODO make invites
 	uint64 guid;
 	uint8 status;
 	uint8 rank;
 
 	for (uint32 i = 0; i < inviteCount; ++i)
 	{
+		CalendarInvite invite;
+		invite.id = sCalendarMgr->GetNextInviteID();
 		guid = recv_data.readPackGUID();
 		recv_data >> status;
 		recv_data >> rank;
+		invite.event = event.id;
+		invite.creator_guid = GetPlayer()->GetGUID();
+		invite.target_guid = guid;
+		invite.status = status;
+		invite.rank = rank;
+		invite.time = event.time;
+		invite.text = ""; // hmm...
+		invite.unk1 = invite.unk2 = invite.unk3 = 0;
+		sCalendarMgr->AddInvite(invite);
 	}
 	//SendCalendarEvent(eventId, true); 
 }
@@ -360,3 +352,68 @@ void WorldSession::HandleCalendarGetNumPending(WorldPacket & /*recv_data*/)
     data << uint32(0);                                      // 0 - no pending invites, 1 - some pending invites
     SendPacket(&data);
 }
+
+void WorldSession::SendCalendarEvent(uint64 eventId, bool added)
+{
+	sLog.outDebug("SMSG_CALENDAR_SEND_EVENT");
+	WorldPacket data(SMSG_CALENDAR_SEND_EVENT);
+	data << uint8(added);                                   // from add_event
+	data.appendPackGUID(0);                                 // creator GUID
+	data << uint64(0);                                      // event ID
+	data << uint8(0);                                       // event name
+	data << uint8(0);                                       // event description
+	data << uint8(0);                                       // event type
+	data << uint8(0);                                       // unk
+	data << uint32(100);                                    // Max invites
+	data << int32(0);                                       // dungeon ID
+	data << uint32(0);                                      // unk time
+	data << uint32(0);                                      // event time
+	data << uint32(0);                                      // event flags
+	data << uint32(0);                                      // event guild id
+
+	if (false) // invites exist
+	{
+		data << uint32(0);                                  // invite count
+		for (uint8 i = 0; i < 0; ++i)
+		{
+			data << uint64(0);                              // invite played guid
+			data << uint8(0);                               // unk
+			data << uint8(0);                               // status
+			data << uint8(0);                               // rank
+			data << uint8(0);                               // unk
+			data << uint64(0);                              // invite ID
+			data << uint32(0);                              // unk
+			data << uint8(0);                               // text
+		}
+	}
+	SendPacket(&data);
+}
+
+void WorldSession::SendCalendarEventInviteAlert(uint64 eventId, uint64 inviteId)
+{
+	sLog.outDebug("SMSG_CALENDAR_EVENT_INVITE_ALERT");
+	WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_ALERT);
+	data << uint64(0);                           // event ID
+	data << uint8(0);                            // event title
+	data << uint32(0);                           // event time
+	uint32 unknum = 1;
+	data << uint32(unknum);
+	data << uint8(0);                            // event type
+	data << uint32(0);                           // dungeon id
+	data << uint64(0);                           // invite id
+	data << uint8(0);                            // invite status
+	data << uint8(0);                            // invite rank
+	data.appendPackGUID(0);                      // event creator
+	data.appendPackGUID(0);                      // invite sender
+	SendPacket(&data);
+}
+
+void WorldSession::SendCalendarEventRemovedAlert(uint64 eventId)
+{
+	sLog.outDebug("SMSG_CALENDAR_EVENT_REMOVED_ALERT");
+	WorldPacket data(SMSG_CALENDAR_EVENT_REMOVED_ALERT);
+	data << uint8(0);                            // unk
+	data << uint64(0);                           // invite id
+	data << uint32(0);                           // invite time
+	SendPacket(&data);
+ }

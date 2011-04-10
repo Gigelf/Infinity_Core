@@ -808,6 +808,9 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleCalendarEventModeratorStatus(WorldPacket& recv_data);
         void HandleCalendarComplain(WorldPacket& recv_data);
         void HandleCalendarGetNumPending(WorldPacket& recv_data);
+		void SendCalendarEvent(uint64 eventId, bool added = false);
+		void SendCalendarEventInviteAlert(uint64 eventId, uint64 inviteId);
+		void SendCalendarEventRemovedAlert(uint64 eventId);
 
         void HandleSpellClick(WorldPacket& recv_data);
         void HandleMirrorImageDataRequest( WorldPacket & recv_data );
