@@ -2287,14 +2287,8 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                     if (this == pVictim)
                         return SPELL_AURA_PROC_FAILED;
 
-                    // dont count overhealing
-                    uint32 diff = GetMaxHealth()-GetHealth();
-                    if (!diff)
-                        return SPELL_AURA_PROC_FAILED;
-                    if (damage > diff)
-                        basepoints[0] = triggerAmount*diff/100;
-                    else
-                        basepoints[0] = triggerAmount*damage/100;
+                    basepoints[0] = triggerAmount*damage/100;
+
                     target = this;
                     triggered_spell_id = 31786;
                     break;

@@ -852,7 +852,8 @@ void MapPersistentStateManager::_ResetInstance(uint32 mapid, uint32 instanceId)
         {
             //MANGOS_ASSERT(iMap->IsDungeon());
 
-            ((DungeonMap*)iMap)->Reset(INSTANCE_RESET_RESPAWN_DELAY);
+            if (iMap->IsDungeon())
+                ((DungeonMap*)iMap)->Reset(INSTANCE_RESET_RESPAWN_DELAY);
             return;
         }
 

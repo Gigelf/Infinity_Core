@@ -1308,6 +1308,9 @@ void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask)
     if (!unit || !effectMask && !damage)
         return;
 
+    if (!unit->IsInWorld())
+        return;
+
     Unit* realCaster = GetAffectiveCaster();
 
     // Recheck immune (only for delayed spells)
@@ -1889,7 +1892,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             if (radius > 0.0f)
             {
                 // caster included here?
-                FillAreaTargets(targetUnitMap, dest_x, dest_y, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+                FillAreaTargets(targetUnitMap, dest_x, dest_y, radius, PUSH_DEST_CENTER, SPELL_TARGETS_ALL);
             }
             else if (IsPositiveSpell(m_spellInfo->Id))
                     targetUnitMap.push_back(m_caster);
