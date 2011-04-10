@@ -87,9 +87,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &/*recv_data*/)
     }
     data.put<uint32>(p_counter,counter);
 
-    data << (uint32) 0;                                     // unk counter 5
-
-    /*std::string holidayName = "";
+    std::string holidayName = "";
 	uint32 holidaycount = 0;
 	data << uint32(holidaycount);
 	// holiday count
@@ -114,10 +112,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &/*recv_data*/)
     }
 
     sLog.outDebug("Sending calendar");
-    data.hexlike();*/
-	data << uint32(0);
-	data << uint32(0);
-
+    data.hexlike();
     SendPacket(&data);
 }
 
@@ -265,8 +260,6 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket &recv_data)
 void WorldSession::HandleCalendarEventInvite(WorldPacket &recv_data)
 {
     DEBUG_LOG("WORLD: CMSG_CALENDAR_EVENT_INVITE");
-    recv_data.hexlike();
-    recv_data.rpos(recv_data.wpos());                       // set to end to avoid warnings spam
 
 	uint64 eventId;
 	uint64 inviteId;
