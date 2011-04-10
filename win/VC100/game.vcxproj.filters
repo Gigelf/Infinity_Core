@@ -583,6 +583,9 @@
     <ClCompile Include="..\..\src\game\MapUpdater.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\CalendarMgr.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\game\AccountMgr.h">
@@ -1107,6 +1110,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\game\mangchat\MCS_OnlinePlayers.h">
       <Filter>IRC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\CalendarMgr.h">
+      <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

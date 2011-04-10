@@ -382,6 +382,7 @@
     <ClCompile Include="..\..\src\game\BattleGroundWS.cpp" />
     <ClCompile Include="..\..\src\game\Calendar.cpp" />
     <ClCompile Include="..\..\src\game\CalendarHandler.cpp" />
+    <ClCompile Include="..\..\src\game\CalendarMgr.cpp" />
     <ClCompile Include="..\..\src\game\Camera.cpp" />
     <ClCompile Include="..\..\src\game\Channel.cpp" />
     <ClCompile Include="..\..\src\game\ChannelHandler.cpp" />
@@ -571,6 +572,7 @@
     <ClInclude Include="..\..\src\game\BattleGroundSA.h" />
     <ClInclude Include="..\..\src\game\BattleGroundWS.h" />
     <ClInclude Include="..\..\src\game\Calendar.h" />
+    <ClInclude Include="..\..\src\game\CalendarMgr.h" />
     <ClInclude Include="..\..\src\game\Camera.h" />
     <ClInclude Include="..\..\src\game\Cell.h" />
     <ClInclude Include="..\..\src\game\CellImpl.h" />

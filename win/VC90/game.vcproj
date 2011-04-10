@@ -1253,6 +1253,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\CalendarMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\CalendarMgr.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\Camera.cpp"
 				>
 			</File>

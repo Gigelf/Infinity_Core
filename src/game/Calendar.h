@@ -42,8 +42,37 @@ enum CalendarInviteStatus
 	CALENDARSTATUS_NOT_SIGNEDUP,
 };
 
-class Calendar
+struct CalendarEvent
 {
-
+   uint64 id;
+   uint64 creator_guid;
+   std::string name;
+   std::string description;
+   uint8 type;
+   uint8 unk;
+   uint32 dungeonID;
+   uint32 unkTime;
+   uint32 time;
+   uint32 flags;
+   uint32 guildID;
 };
+
+struct CalendarInvite
+{
+   uint64 id;
+   uint64 event;
+   uint8 status;
+   uint8 rank;
+   uint8 unk1;
+   uint8 unk2;
+   uint8 unk3;
+   std::string text;
+   uint64 creator_guid;
+   uint32 time;
+   uint64 target_guid;
+};
+
+typedef UNORDERED_MAP<uint64, CalendarInvite> CalendarInviteMap;
+typedef UNORDERED_MAP<uint64, CalendarEvent> CalendarEventMap;
+
 #endif
