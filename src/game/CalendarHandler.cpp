@@ -87,29 +87,29 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &/*recv_data*/)
     }
     data.put<uint32>(p_counter,counter);
 
-    std::string holidayName = "";
-	uint32 holidaycount = 0;
-	data << uint32(holidaycount);
 	// holiday count
-	for (uint32 i = 0; i < holidaycount; ++i)
-    {
-        data << uint32(0);                                   // holiday id
-        data << uint32(0);                                   // Holidays.dbc field 37 (flags)
-        data << uint32(0);                                   // Holidays.dbc field 38 (flags)
-        data << uint32(0);                                   // Holidays.dbc field 52
-        data << uint32(0);                                   // Holidays.dbc field RepeatingMethod
+	for (uint32 i = 1; i < sHolidaysStore.GetNumRows(); ++i)
+	{
+		if (HolidaysEntry const* holiday = sHolidaysStore.LookupEntry(i))
+		{
+			data << holiday->ID;
+			data << holiday->unk37;
+			data << holiday->unk38;
+			data << holiday->unk52;
+			data << holiday->RepeatingMethod;
 
-        for(uint32 j = 0; j < 26; j++)
-            data << uint32(0);                               // Holidays.dbc field Dates
+			for(uint32 j = 0; j < 26; j++)
+				data << holiday->Dates[j];
 
-        for(uint32 j = 0; j < 10; j++)
-            data << uint32(0);                               // Holidays.dbc field unk1
+			for(uint32 j = 0; j < 10; j++)
+				data << holiday->unk1[j];
 
-        for(uint32 j = 0; j < 10; j++)
-            data << uint32(0);                               // Holidays.dbc field unk39
+			for(uint32 j = 0; j < 10; j++)
+				data << holiday->unk39[j];
 
-        data << holidayName.c_str();                         // Holidays.dbc field texture
-    }
+			data << holiday->texture;
+		}
+	}
 
     sLog.outDebug("Sending calendar");
     data.hexlike();
@@ -379,9 +379,9 @@ void WorldSession::SendCalendarEvent(uint64 eventId, bool added)
 	data << uint8(m_event->Repeat_Option);                          // Repeat_Option
 	data << uint32(100);											// Max invites
 	data << int32(m_event->dungeonID);                              // dungeon ID
-	data << uint32(m_event->lockoutTime);                           // LockoutTime
-	data << uint32(m_event->time);                                  // event time
 	data << uint32(m_event->flags);                                 // event flags
+	data << uint32(m_event->time);                                  // event time
+	data << uint32(m_event->lockoutTime);                           // LockoutTime
 	data << uint32(m_event->guildID);                               // event guild id
 
 	if (false) // invites exist
