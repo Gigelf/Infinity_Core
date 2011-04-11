@@ -30,8 +30,8 @@ CalendarMgr::~CalendarMgr()
 void CalendarMgr::AppendInvitesToCalendarPacketForPlayer(WorldPacket &data, Player *pPlayer)
 {
    size_t p_counter = data.wpos();
-   data << uint32(0);
    uint32 counter = 0;
+   data << uint32(counter);
    for (CalendarInviteMap::iterator itr = _inviteMap.begin(); itr != _inviteMap.end(); ++itr)
    {
        CalendarInvite invite = itr->second;
@@ -41,7 +41,7 @@ void CalendarMgr::AppendInvitesToCalendarPacketForPlayer(WorldPacket &data, Play
            data << uint64(invite.id);					// Invite ID
            data << uint8(invite.status);				// status
 		   data << uint8(invite.mod_Type);				// Mod Type
-		   data << uint8(invite.invite_Type);			// unk
+		   data << uint8(invite.invite_Type);			// invite_Type
            data.appendPackGUID(invite.creator_guid);	// creator's guid
            counter++;
        }
@@ -53,8 +53,8 @@ void CalendarMgr::AppendEventsToCalendarPacketForPlayer(WorldPacket &data, Playe
 {
    // TODO: There's gotta be a better way to do this
    size_t p_counter = data.wpos();
-   data << uint32(0);
    uint32 counter = 0;
+   data << uint32(counter);
    std::set<uint64> alreadyAdded;
    for (CalendarInviteMap::iterator itr = _inviteMap.begin(); itr != _inviteMap.end(); ++itr)
    {

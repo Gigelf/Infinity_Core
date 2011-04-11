@@ -28,7 +28,7 @@
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket &/*recv_data*/)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_GET_CALENDAR");         // empty
+    DEBUG_LOG("WORLD: CMSG_CALENDAR_GET_CALENDAR");
 
     time_t cur_time = time(NULL);
 
@@ -86,9 +86,12 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &/*recv_data*/)
         ++counter;
     }
     data.put<uint32>(p_counter,counter);
+	uint32 holidaycount;
 
 	// holiday count
-	for (uint32 i = 1; i < sHolidaysStore.GetNumRows(); ++i)
+	holidaycount = sHolidaysStore.GetNumRows();
+	data << uint32(holidaycount);
+	for (uint32 i = 1; i < holidaycount; ++i)
 	{
 		if (HolidaysEntry const* holiday = sHolidaysStore.LookupEntry(i))
 		{
@@ -112,7 +115,6 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &/*recv_data*/)
 	}
 
     sLog.outDebug("Sending calendar");
-    data.hexlike();
     SendPacket(&data);
 }
 
@@ -132,7 +134,6 @@ void WorldSession::HandleCalendarGuildFilter(WorldPacket &recv_data)
 	uint32 minLevel;
 	uint32 maxLevel;
 	uint32 minRank;
-	uint32 m_guildID;
 	recv_data >> minLevel;
 	recv_data >> maxLevel;
 	recv_data >> minRank;
