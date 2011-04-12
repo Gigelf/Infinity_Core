@@ -6750,13 +6750,13 @@ void Player::RewardReputation(Unit *pVictim, float rate)
     uint32 Repfaction1 = Rep->repfaction1;
     uint32 Repfaction2 = Rep->repfaction2;
     uint32 tabardFactionID = 0;
-    
+
     // Championning tabard reputation system
     if(HasAura(Rep->championingAura))
     {
         if( Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_TABARD ) )
-        {                 
-            if ( tabardFactionID = pItem->GetProto()->RequiredReputationFaction ) 
+        {
+            if ( tabardFactionID = pItem->GetProto()->RequiredReputationFaction )
             {
                 Repfaction1 = tabardFactionID;
                 Repfaction2 = tabardFactionID;
@@ -6876,7 +6876,7 @@ void Player::UpdateHonorFields()
     }
 
     m_lastHonorUpdateTime = now;
-	
+
     uint32 HonorKills = GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS);
     uint32 victim_rank = 0;
 
@@ -17880,7 +17880,7 @@ void Player::SendRaidInfo()
                 data << ObjectGuid(state->GetInstanceGuid());   // instance guid
                 data << uint8((state->GetResetTime() > now) ? 1 : 0 );   // expired = 0
                 data << uint8(itr->second.extend ? 1 : 0);      // extended = 1
-                data << uint32(state->GetResetTime() > now ? state->GetResetTime() - now 
+                data << uint32(state->GetResetTime() > now ? state->GetResetTime() - now
                     : DungeonResetScheduler::CalculateNextResetTime(GetMapDifficultyData(state->GetMapId(), state->GetDifficulty()), now));    // reset time
                 ++counter;
             }
@@ -24002,7 +24002,7 @@ ReferAFriendError Player::GetReferFriendError(Player * target, bool summon)
     return ERR_REFER_A_FRIEND_NONE;
 }
 
-void Player::ChangeGrantableLevels(uint8 increase) 
+void Player::ChangeGrantableLevels(uint8 increase)
 {
     if (increase)
     {
@@ -24011,10 +24011,10 @@ void Player::ChangeGrantableLevels(uint8 increase)
     }
     else
     {
-        m_GrantableLevelsCount -= 1; 
+        m_GrantableLevelsCount -= 1;
 
-        if (m_GrantableLevelsCount < 0) 
-            m_GrantableLevelsCount = 0; 
+        if (m_GrantableLevelsCount < 0)
+            m_GrantableLevelsCount = 0;
     }
 
     // set/unset flag - granted levels
@@ -24178,10 +24178,17 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
 
     bool isRegularTargetMap = GetDifficulty(mapEntry->IsRaid()) == REGULAR_DIFFICULTY;
 
-    if (!isRegularTargetMap &&
-        ((at->heroicKey && !HasItemCount(at->heroicKey, 1)) || 
-        (at->heroicKey2 && !HasItemCount(at->heroicKey2, 1))))
+    if (!isRegularTargetMap)
+    {
+        // only one key is needed
+        if (at->heroicKey && HasItemCount(at->heroicKey, 1))
+            break;
+
+        if (at->heroicKey2 && HasItemCount(at->heroicKey2, 1))
+            break;
+
         return AREA_LOCKSTATUS_MISSING_ITEM;
+    }
 
     if ((!isRegularTargetMap &&
         (at->requiredQuestHeroic && !GetQuestRewardStatus(at->requiredQuestHeroic))) ||
@@ -24192,7 +24199,7 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
     return AREA_LOCKSTATUS_OK;
 };
 
-AreaLockStatus Player::GetAreaLockStatus(uint32 mapId, Difficulty difficulty) 
+AreaLockStatus Player::GetAreaLockStatus(uint32 mapId, Difficulty difficulty)
 {
     return GetAreaTriggerLockStatus(sObjectMgr.GetMapEntranceTrigger(mapId), difficulty);
 };
