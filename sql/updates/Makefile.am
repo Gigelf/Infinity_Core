@@ -306,5 +306,14 @@ EXTRA_DIST = \
     11169_02_mangos_command \
     11190_01_mangos_pool_creature_template \
     11190_01_mangos_pool_gameobject_template \
-    11200_01_mangos_spell_bonus_data
+    11200_01_mangos_spell_bonus_data \
+	11205_01_mangos_spell_proc_event \
+	11214_01_mangos_mangos_string \
+	11214_02_mangos_command \
+	11217_01_mangos_creature_addon \
+	11234_01_mangos_command \
+	11299_01_characters_character_aura \
+	11299_02_characters_pet_aura \
+	11310_01_mangos_mangos_string \
+	11312_01_mangos_mangos_string
 	README
