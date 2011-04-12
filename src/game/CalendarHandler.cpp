@@ -255,6 +255,8 @@ void WorldSession::HandleCalendarRemoveEvent(WorldPacket &recv_data)
 	recv_data >> eventId;
 	recv_data >> creatorGuid;
 	recv_data >> unk1;
+
+	sCalendarMgr->RemoveEvent(eventId);
 }
 
 void WorldSession::HandleCalendarCopyEvent(WorldPacket &recv_data)
@@ -383,21 +385,19 @@ void WorldSession::SendCalendarEvent(uint64 eventId, bool added)
 	data << uint32(m_event->flags);                                 // event flags
 	data << uint32(m_event->time);                                  // event time
 	data << uint32(m_event->lockoutTime);                           // LockoutTime
-	data << uint32(m_event->guildID);                               // event guild id
 
 	if (false) // invites exist
 	{
 		data << uint32(0);                                  // invite count
 		for (uint8 i = 0; i < 0; ++i)
 		{
-			data << uint64(0);                              // invite player guid
-			data << uint8(0);                               // unk
+			data.appendPackGUID(0);                         // invite player guid
+			data << uint8(0);                               // level
 			data << uint8(0);                               // status
 			data << uint8(0);                               // rank
 			data << uint8(0);                               // unk
 			data << uint64(0);                              // invite ID
-			data << uint32(0);                              // unk
-			data << uint8(0);                               // text
+			data << uint32(0);                              // last Updated
 		}
 	}
 	SendPacket(&data);
