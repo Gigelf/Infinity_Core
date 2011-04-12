@@ -1636,11 +1636,16 @@ Creature* BattleGround::AddCreature(uint32 entry, uint32 type, uint32 teamval, f
 
     Creature* pCreature = new Creature;
 	CreatureCreatePos pos(map, x, y, z, o, PHASEMASK_NORMAL);
-    if (!pCreature->Create(GetBgMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, entry, TEAM_NONE))
+
+    const CreatureInfo* creature_info = sCreatureStorage.LookupEntry<CreatureInfo>(entry);
+    if(creature_info)
     {
-        sLog.outError("Can't create creature entry: %u",entry);
-        delete pCreature;
-        return NULL;
+        if (!pCreature->Create(GetBgMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos,  creature_info, TEAM_NONE))
+        {
+            sLog.outError("Can't create creature entry: %u",entry);
+            delete pCreature;
+            return NULL;
+        }
     }
 
     CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(entry);
@@ -1662,7 +1667,7 @@ Creature* BattleGround::AddCreature(uint32 entry, uint32 type, uint32 teamval, f
     return pCreature;
 }
 
-bool BattleGround::AddSpiritGuide(uint32 type, float x, float y, float z, float o, uint32 team)
+bool BattleGround::AddSpiritGuide(uint32 type, float x, float y, float z, float o, uint32 team) // should last parameter be }Team team{
 {
     uint32 entry = 0;
 
