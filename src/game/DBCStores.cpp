@@ -107,6 +107,8 @@ DBCStorage <GtOCTRegenHPEntry>            sGtOCTRegenHPStore(GtOCTRegenHPfmt);
 DBCStorage <GtRegenHPPerSptEntry>         sGtRegenHPPerSptStore(GtRegenHPPerSptfmt);
 DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptStore(GtRegenMPPerSptfmt);
 
+DBCStorage <HolidayNamesEntry>            sHolidaysNamesStore(HolidayNamesfmt);
+DBCStorage <HolidayDescriptionsEntry>     sHolidaysDescriptionsStore(HolidayDescriptionsfmt);
 DBCStorage <HolidaysEntry>                sHolidaysStore(Holidaysfmt);
 
 DBCStorage <ItemEntry>                    sItemStore(Itemfmt);
@@ -376,7 +378,7 @@ void LoadDBCStores(const std::string& dataPath)
         exit(1);
     }
 
-    const uint32 DBCFilesCount = 94;
+    const uint32 DBCFilesCount = 96;
 
     barGoLink bar( (int)DBCFilesCount );
 
@@ -470,6 +472,8 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sGtRegenHPPerSptStore,     dbcPath,"gtRegenHPPerSpt.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sGtRegenMPPerSptStore,     dbcPath,"gtRegenMPPerSpt.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sHolidaysStore,            dbcPath,"Holidays.dbc");
+	LoadDBC(availableDbcLocales,bar,bad_dbc_files,sHolidaysNamesStore,       dbcPath,"HolidayNames.dbc");
+	LoadDBC(availableDbcLocales,bar,bad_dbc_files,sHolidaysDescriptionsStore,dbcPath,"HolidayDescriptions.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemStore,                dbcPath,"Item.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemBagFamilyStore,       dbcPath,"ItemBagFamily.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sLFGDungeonStore,          dbcPath,"LFGDungeons.dbc");

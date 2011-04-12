@@ -49,9 +49,9 @@ struct CalendarEvent
    std::string name;
    std::string description;
    uint8 type;
-   uint8 unk;
+   uint8 Repeat_Option;
    uint32 dungeonID;
-   uint32 unkTime;
+   uint32 lockoutTime;
    uint32 time;
    uint32 flags;
    uint32 guildID;
@@ -63,8 +63,8 @@ struct CalendarInvite
    uint64 event;
    uint8 status;
    uint8 rank;
-   uint8 unk1;
-   uint8 unk2;
+   uint8 mod_Type;
+   uint8 invite_Type;
    uint8 unk3;
    std::string text;
    uint64 creator_guid;
