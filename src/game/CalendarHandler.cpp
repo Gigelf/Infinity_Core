@@ -376,8 +376,8 @@ void WorldSession::SendCalendarEvent(uint64 eventId, bool added)
 	data << uint8(added);											// from add_event
 	data.appendPackGUID(m_event->creator_guid);						// creator GUID
 	data << uint64(eventId);										// event ID
-	data << m_event->name.c_str();                                  // event name
-	data << m_event->description.c_str();                           // event description
+	data << m_event->name;											// event name
+	data << m_event->description;									// event description
 	data << uint8(m_event->type);                                   // event type
 	data << uint8(m_event->Repeat_Option);                          // Repeat_Option
 	data << uint32(100);											// Max invites
