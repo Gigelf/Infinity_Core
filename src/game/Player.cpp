@@ -24180,14 +24180,14 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
 
     if (!isRegularTargetMap)
     {
-        // only one key is needed
-        if (at->heroicKey && HasItemCount(at->heroicKey, 1))
-            break;
-
-        if (at->heroicKey2 && HasItemCount(at->heroicKey2, 1))
-            break;
-
-        return AREA_LOCKSTATUS_MISSING_ITEM;
+        // only one heroic key is needed 
+        if (at->heroicKey) 
+        { 
+            if (!HasItemCount(at->heroicKey, 1) && (!at->heroicKey2 || !HasItemCount(at->heroicKey2, 1))) 
+                return AREA_LOCKSTATUS_MISSING_ITEM; 
+        } 
+        else if (at->heroicKey2 && !HasItemCount(at->heroicKey2, 1)) 
+            return AREA_LOCKSTATUS_MISSING_ITEM;
     }
 
     if ((!isRegularTargetMap &&
