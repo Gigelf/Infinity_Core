@@ -432,6 +432,20 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                         }
                         break;
                     }
+                    // Biting Cold 
+                    case 62188:    
+                    { 
+                        if (!unitTarget) 
+                            return; 
+ 
+                        // no damage info in spell? simple power 400 * 2^stack (from Tooltip) 
+                        if (SpellAuraHolder *holder = unitTarget->GetSpellAuraHolder(62039)) 
+                        { 
+                            double stackamount = double(holder->GetStackAmount()); 
+                            damage = 400 * pow(2,stackamount-1); 
+                        } 
+                        break; 
+                    }
                     // Tympanic Tantrum
                     case 62775:
                     {
