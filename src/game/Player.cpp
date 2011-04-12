@@ -1663,7 +1663,7 @@ void Player::SetDeathState(DeathState s)
                 SetTemporaryUnsummonedPetNumber(pet->GetCharmInfo()->GetPetNumber());
 
         //FIXME: is pet dismissed at dying or releasing spirit? if second, add SetDeathState(DEAD) to HandleRepopRequestOpcode and define pet unsummon here with (s == DEAD)
-            RemovePet(PET_SAVE_REAGENTS);
+            RemovePet(PET_SAVE_NOT_IN_SLOT);
         }
 
         // save value before aura remove in Unit::SetDeathState
@@ -23477,8 +23477,8 @@ void Player::_SaveEquipmentSets()
                     "item5=?, item6=?, item7=?, item8=?, item9=?, item10=?, item11=?, item12=?, item13=?, item14=?, "
                     "item15=?, item16=?, item17=?, item18=? WHERE guid=? AND setguid=? AND setindex=?");
 
-                stmt.addString(eqset.IconName);
                 stmt.addString(eqset.Name);
+				stmt.addString(eqset.IconName);
 
                 for (int i = 0; i < EQUIPMENT_SLOT_END; ++i)
                     stmt.addUInt32(eqset.Items[i]);
@@ -23499,8 +23499,8 @@ void Player::_SaveEquipmentSets()
                 stmt.addUInt32(GetGUIDLow());
                 stmt.addUInt64(eqset.Guid);
                 stmt.addUInt32(index);
-                stmt.addString(eqset.IconName);
                 stmt.addString(eqset.Name);
+				stmt.addString(eqset.IconName);
 
                 for (int i = 0; i < EQUIPMENT_SLOT_END; ++i)
                     stmt.addUInt32(eqset.Items[i]);
@@ -24180,13 +24180,13 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
 
     if (!isRegularTargetMap)
     {
-        // only one heroic key is needed 
-        if (at->heroicKey) 
-        { 
-            if (!HasItemCount(at->heroicKey, 1) && (!at->heroicKey2 || !HasItemCount(at->heroicKey2, 1))) 
-                return AREA_LOCKSTATUS_MISSING_ITEM; 
-        } 
-        else if (at->heroicKey2 && !HasItemCount(at->heroicKey2, 1)) 
+        // only one heroic key is needed
+        if (at->heroicKey)
+        {
+            if (!HasItemCount(at->heroicKey, 1) && (!at->heroicKey2 || !HasItemCount(at->heroicKey2, 1)))
+                return AREA_LOCKSTATUS_MISSING_ITEM;
+        }
+        else if (at->heroicKey2 && !HasItemCount(at->heroicKey2, 1))
             return AREA_LOCKSTATUS_MISSING_ITEM;
     }
 

@@ -359,7 +359,7 @@ void WorldSession::HandleCalendarComplain(WorldPacket &recv_data)
 
 void WorldSession::HandleCalendarGetNumPending(WorldPacket & /*recv_data*/)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_GET_NUM_PENDING");  // empty
+    DEBUG_LOG("WORLD: CMSG_CALENDAR_GET_NUM_PENDING");      // empty
 
     WorldPacket data(SMSG_CALENDAR_SEND_NUM_PENDING, 4);
     data << uint32(0);                                      // 0 - no pending invites, 1 - some pending invites
