@@ -1743,6 +1743,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 71340:                                 // Pact of darkfallen (hack for script work)
                 case 72385:                                 // Boiling Blood (10N)
                 case 72442:                                 // Boiling Blood (10H)
+                case 66152:                                 // Bullet Foced Cast (Trial of the Crusader, ->
+                case 66153:                                 // -> Twin Valkyr encounter, 10 and 25 mode)
                     unMaxTargets = 1;
                     break;
                 case 28542:                                 // Life Drain
