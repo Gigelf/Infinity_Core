@@ -8468,6 +8468,7 @@ void Aura::PeriodicDummyTick()
                         case 2: target->CastSpell(target, 55739, true); break;
                     }
                     return;
+                }
                 case 62038: // Biting Cold (Ulduar: Hodir) 
                 { 
                     if (target->GetTypeId() != TYPEID_PLAYER) 
