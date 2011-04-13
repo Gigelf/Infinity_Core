@@ -48,7 +48,7 @@ class ChatCommand
 {
     public:
         const char *       Name;
-        uint32             SecurityLevel;                   // function pointer required correct align (use uint32)
+        uint32             SecurityLevel;                  // function pointer required correct align (use uint32)
         bool               AllowConsole;
         bool (ChatHandler::*Handler)(char* args);
         std::string        Help;
@@ -134,6 +134,7 @@ class ChatHandler
         bool HandleAccountSetAddonCommand(char* args);
         bool HandleAccountSetGmLevelCommand(char* args);
         bool HandleAccountSetPasswordCommand(char* args);
+		bool HandleAHBotOptionsCommand(char* args);
 
         bool HandleAccountFriendAddCommand(char* args);
         bool HandleAccountFriendDeleteCommand(char* args);
@@ -198,6 +199,7 @@ class ChatHandler
         bool HandleDebugSpellModsCommand(char* args);
         bool HandleDebugUpdateWorldStateCommand(char* args);
 		bool HandleDebugEnterVehicleCommand(char* args);
+        bool HandleSetVehicleIdCommand(char* args);
         bool HandleDebugSendCalendarResultCommand(char* args);
 
         bool HandleDebugPlayCinematicCommand(char* args);
@@ -589,8 +591,15 @@ class ChatHandler
         bool HandleRepairitemsCommand(char* args);
         bool HandleStableCommand(char* args);
         bool HandleWaterwalkCommand(char* args);
+        bool HandlePlayerbotCommand(char* args);
         bool HandleQuitCommand(char* args);
         bool HandleIRCpmCommand(char* args);
+
+        // Jail by WarHead
+        bool HandleJailCommand(char* args);
+        bool HandleJailInfoCommand(char* args);
+        bool HandleUnJailCommand(char* args);
+        bool HandleJailReloadCommand(char* args);
 
         bool HandleMmapPathCommand(char* args);
         bool HandleMmapLocCommand(char* args);

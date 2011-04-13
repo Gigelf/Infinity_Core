@@ -1,4 +1,4 @@
--- Alterac Valley: add missing NPC and movement at Alliance start location (by Bastek)
+/*-- Alterac Valley: add missing NPC and movement at Alliance start location (by Bastek)
 
 -- Stormpike Batteguard (with owls)
 UPDATE creature SET position_x = 805.184082, position_y = -494.273804, position_z = 99.953552, orientation = 6.120978 WHERE guid = 150139;
@@ -14,8 +14,9 @@ UPDATE creature SET position_x = 804.536072, position_y = -497.691895, position_
 UPDATE creature SET position_x = 393.981384, position_y = -389.373291, position_z = -1.243851, orientation = 3.204396 WHERE guid = 150128;
 UPDATE creature SET position_x = 394.327148, position_y = -394.871399, position_z = -1.031908, orientation = 3.204396 WHERE guid = 150129;
 
--- Stormpike Battleguard (inside)
+-- Stormpike Battleguard (inside)  
 -- Existing NPC's
+
 DELETE FROM creature WHERE id = 14284;
 INSERT INTO creature VALUES
 (16583, 14284, 0, 1, 1, 0, 0, 105.145, -180.779, 128.093, 4.08407, 600, 0, 0, 4100, 0, 0, 0),

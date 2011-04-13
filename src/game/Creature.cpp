@@ -706,6 +706,10 @@ void Creature::Regenerate(Powers power)
 
 void Creature::RegenerateHealth()
 {
+    // Creatures in Sota or IoC (vehicles) shouldn't regenerate health
+    if ((GetMapId() == 607 || GetMapId() == 628) && GetMap()->IsBattleGround())
+        return;
+
     if (!IsRegeneratingHealth())
         return;
 
@@ -750,6 +754,9 @@ void Creature::DoFleeToGetAssistance()
 
         SetNoSearchAssistance(true);
         UpdateSpeed(MOVE_RUN, false);
+
+        // Interrupt spells cause of flee movement  
+        InterruptNonMeleeSpells(false);
 
         if(!pCreature)
             SetFeared(true, getVictim()->GetObjectGuid(), 0 ,sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY));
@@ -1482,9 +1489,17 @@ void Creature::SetDeathState(DeathState s)
         if (Pet* pet = GetPet())
             pet->Unsummon(PET_SAVE_AS_DELETED, this);
 
-        // return, since we promote to CORPSE_FALLING. CORPSE_FALLING is promoted to CORPSE at next update.
-        if (CanFly() && FallGround())
-            return;
+       // exclusion for falling down 
+        switch (GetCreatureInfo()->Entry) 
+        { 
+            case 32930:         // Kologarn 10 
+            case 33909:         // Kologarn 25 
+                break; 
+            default: 
+            // return, since we promote to CORPSE_FALLING. CORPSE_FALLING is promoted to CORPSE at next update. 
+            if (CanFly() && FallGround()) 
+                return; 
+        }
 
         Unit::SetDeathState(CORPSE);
     }

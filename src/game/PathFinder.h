@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ class PathInfo
         PathType        m_type;             // tells what kind of path this is
 
         bool            m_useStraightPath;  // type of path will be generated
-		bool            m_forceDestination; // when set, we will always arrive at given point
+        bool            m_forceDestination; // when set, we will always arrive at given point
 
         PathNode        m_startPosition;    // {x, y, z} of current location
         PathNode        m_nextPosition;     // {x, y, z} of next location on the path
@@ -107,7 +107,7 @@ class PathInfo
 
         dtPolyRef getPathPolyByPosition(dtPolyRef *polyPath, uint32 polyPathSize, const float* point, float *distance = NULL);
         dtPolyRef getPolyByLocation(const float* point, float *distance);
-		bool HaveTiles(const PathNode p) const;
+        bool HaveTiles(const PathNode p) const;
 
         void BuildPolyPath(PathNode startPos, PathNode endPos);
         void BuildPointPath(float *startPoint, float *endPoint);

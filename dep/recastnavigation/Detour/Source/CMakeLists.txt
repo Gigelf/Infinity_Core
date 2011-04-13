@@ -35,3 +35,4 @@ include_directories(
 add_library(detour STATIC
   ${detour_SRCS}
 )
+

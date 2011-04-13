@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,8 @@ PathInfo::PathInfo(const Unit* owner, const float destX, const float destY, cons
 
     createFilter();
 
-    if (m_navMesh && m_navMeshQuery && HaveTiles(endPoint) && !m_sourceUnit->hasUnitState(UNIT_STAT_IGNORE_PATHFINDING) && !(m_sourceUnit->GetTypeId() == TYPEID_UNIT ? ((Creature*)m_sourceUnit)->IsWorldBoss() : false))
+    if (m_navMesh && m_navMeshQuery && HaveTiles(endPoint) && !m_sourceUnit->hasUnitState(UNIT_STAT_IGNORE_PATHFINDING) &&
+        !(m_sourceUnit->GetTypeId() == TYPEID_UNIT ? ((Creature*)m_sourceUnit)->IsWorldBoss() : false))
     {
         BuildPolyPath(startPoint, endPoint);
     }
@@ -81,12 +82,13 @@ bool PathInfo::Update(const float destX, const float destY, const float destZ,
     setStartPosition(newStart);
 
     m_useStraightPath = useStraightPath;
-	m_forceDestination = forceDest;
+    m_forceDestination = forceDest;
 
     DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathInfo::Update() for %u \n", m_sourceUnit->GetGUID());
 
     // make sure navMesh works - we can run on map w/o mmap
-    if (!m_navMesh || !m_navMeshQuery || !HaveTiles(newDest) || m_sourceUnit->hasUnitState(UNIT_STAT_IGNORE_PATHFINDING)  || (m_sourceUnit->GetTypeId() == TYPEID_UNIT ? ((Creature*)m_sourceUnit)->IsWorldBoss() : false))
+    if (!m_navMesh || !m_navMeshQuery || !HaveTiles(newDest) ||
+            m_sourceUnit->hasUnitState(UNIT_STAT_IGNORE_PATHFINDING))
     {
         BuildShortcut();
         m_type = PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH);
@@ -225,7 +227,7 @@ void PathInfo::BuildPolyPath(PathNode startPos, PathNode endPos)
             if (m_sourceUnit->GetTerrain()->IsUnderWater(p.x, p.y, p.z))
             {
                 DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: underWater case\n");
-                if (owner->CanSwim())
+                if (owner->CanSwim() || owner->IsPet())
                     buildShotrcut = true;
             }
             else
@@ -270,6 +272,7 @@ void PathInfo::BuildPolyPath(PathNode startPos, PathNode endPos)
         m_polyLength = 1;
 
         m_type = farFromPoly ? PATHFIND_INCOMPLETE : PATHFIND_NORMAL;
+
         DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: path type %d\n", m_type);
         return;
     }
@@ -286,7 +289,7 @@ void PathInfo::BuildPolyPath(PathNode startPos, PathNode endPos)
         {
             // here to carch few bugs
             MANGOS_ASSERT(m_pathPolyRefs[pathStartIndex] != INVALID_POLYREF);
- 
+
             if (m_pathPolyRefs[pathStartIndex] == startPoly)
             {
                 startPolyFound = true;
@@ -417,7 +420,9 @@ void PathInfo::BuildPointPath(float *startPoint, float *endPoint)
     float pathPoints[MAX_POINT_PATH_LENGTH*VERTEX_SIZE];
     uint32 pointCount = 0;
     dtStatus dtResult = DT_FAILURE;
-	bool usedOffmesh = false;
+
+    bool usedOffmesh = false;
+
     if (m_useStraightPath)
     {
         dtResult = m_navMeshQuery->findStraightPath(
@@ -440,7 +445,9 @@ void PathInfo::BuildPointPath(float *startPoint, float *endPoint)
                 m_polyLength,       // length of current path
                 pathPoints,         // [out] path corner points
                 (int*)&pointCount,
-				usedOffmesh,
+
+                usedOffmesh,
+
                 MAX_POINT_PATH_LENGTH);    // maximum number of points
     }
 
@@ -449,7 +456,9 @@ void PathInfo::BuildPointPath(float *startPoint, float *endPoint)
         // only happens if pass bad data to findStraightPath or navmesh is broken
         // single point paths can be generated here
         // TODO : check the exact cases
+
         DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathInfo::BuildPointPath FAILED! path sized %d returned\n", pointCount);
+
         BuildShortcut();
         m_type = PATHFIND_NOPATH;
         return;
@@ -466,7 +475,7 @@ void PathInfo::BuildPointPath(float *startPoint, float *endPoint)
 
     // first point is always our current location - we need the next one
     setNextPosition(m_pathPoints[1]);
-	setActualEndPosition(m_pathPoints[pointCount-1]);
+    setActualEndPosition(m_pathPoints[pointCount-1]);
 
     // force the given destination, if needed
     if(m_forceDestination &&
@@ -510,11 +519,13 @@ void PathInfo::createFilter()
             includeFlags |= NAV_GROUND;          // walk
 
         // creatures don't take environmental damage
-        if (creature->CanSwim())
+        if (creature->CanSwim() || creature->IsPet())
             includeFlags |= (NAV_WATER | NAV_MAGMA | NAV_SLIME);           // swim
     }
     else if (m_sourceUnit->GetTypeId() == TYPEID_PLAYER)
     {
+        Player* player = (Player*)m_sourceUnit;
+
         // perfect support not possible, just stay 'safe'
         includeFlags |= (NAV_GROUND | NAV_WATER);
     }
@@ -659,7 +670,8 @@ dtStatus PathInfo::findSmoothPath(const float* startPos, const float* endPos,
     MANGOS_ASSERT(polyPathSize <= MAX_PATH_LENGTH);
     *smoothPathSize = 0;
     uint32 nsmoothPath = 0;
-	usedOffmesh = false;
+
+    usedOffmesh = false;
 
     dtPolyRef polys[MAX_PATH_LENGTH];
     memcpy(polys, polyPath, sizeof(dtPolyRef)*polyPathSize);
@@ -749,7 +761,8 @@ dtStatus PathInfo::findSmoothPath(const float* startPos, const float* endPos,
             npolys -= npos;
 
             // Handle the connection.
-			float startPos[VERTEX_SIZE], endPos[VERTEX_SIZE];
+
+            float startPos[VERTEX_SIZE], endPos[VERTEX_SIZE];
             if (DT_SUCCESS == m_navMesh->getOffMeshConnectionPolyEndPoints(prevRef, polyRef, startPos, endPos))
             {
                 if (nsmoothPath < maxSmoothPathSize)
@@ -760,7 +773,7 @@ dtStatus PathInfo::findSmoothPath(const float* startPos, const float* endPos,
                 // Move position at the other side of the off-mesh link.
                 dtVcopy(iterPos, endPos);
                 m_navMeshQuery->getPolyHeight(polys[0], iterPos, &iterPos[1]);
-             }
+            }
         }
 
         // Store results.

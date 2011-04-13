@@ -63,6 +63,11 @@
 #include "AccountMgr.h"
 #include "mangchat/IRCClient.h"
 
+// Playerbot mod:
+#include "playerbot/PlayerbotAI.h"
+#include "playerbot/PlayerbotMgr.h"
+#include "Config/Config.h"
+
 #include <cmath>
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
@@ -78,6 +83,8 @@
 #define SKILL_TEMP_BONUS(x)    int16(PAIR32_LOPART(x))
 #define SKILL_PERM_BONUS(x)    int16(PAIR32_HIPART(x))
 #define MAKE_SKILL_BONUS(t, p) MAKE_PAIR32(t,p)
+
+extern Config botConfig;
 
 enum CharacterFlags
 {
@@ -406,6 +413,28 @@ UpdateMask Player::updateVisualBits;
 
 Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this)
 {
+    // Jail by WarHead
+    m_jail_guid     = 0;
+    m_jail_char     = "";
+    m_jail_amnestie = false;
+    m_jail_warning  = false;
+    m_jail_isjailed = false;
+    m_jail_amnestietime =0;
+    m_jail_release  = 0;
+    m_jail_times    = 0;
+    m_jail_reason   = "";
+    m_jail_gmacc    = 0;
+    m_jail_gmchar   = "";
+    m_jail_lasttime = "";
+    m_jail_duration = 0;
+    // Jail end
+
+    m_transport = 0;
+
+    // Playerbot mod:
+    m_playerbotAI = 0;
+    m_playerbotMgr = 0;
+
     m_speakTime = 0;
     m_speakCount = 0;
 
@@ -538,7 +567,7 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
 
     m_stableSlots = 0;
 
-    /////////////////// Instance System /////////////////////
+    /////////////////// Instance System ////////////////////
 
     m_HomebindTimer = 0;
     m_InstanceValid = true;
@@ -562,6 +591,7 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
     m_baseSpellPower = 0;
     m_baseFeralAP = 0;
     m_baseManaRegen = 0;
+    m_baseHealthRegen = 0;
     m_armorPenetrationPct = 0.0f;
     m_spellPenetrationItemMod = 0;
 
@@ -635,6 +665,15 @@ Player::~Player ()
     delete m_anticheat;
     delete m_LFGState;
 
+    // Playerbot mod
+    if (m_playerbotAI) {
+        delete m_playerbotAI;
+        m_playerbotAI = 0;
+    }
+    if (m_playerbotMgr) {
+        delete m_playerbotMgr;
+        m_playerbotMgr = 0;
+    }
 }
 
 void Player::CleanupsBeforeDelete()
@@ -1226,6 +1265,79 @@ void Player::Update( uint32 update_diff, uint32 p_time )
     Unit::Update( update_diff, p_time );
     SetCanDelayTeleport(false);
 
+    if (m_jail_isjailed)
+    {
+        time_t localtime;
+        localtime = time(NULL);
+
+        if (m_jail_release <= localtime)
+        {
+            m_jail_isjailed = false;
+            m_jail_release = 0;
+
+            _SaveJail();
+
+            sWorld.SendWorldText(LANG_JAIL_CHAR_FREE, GetName());
+
+            CastSpell(this,8690,false);
+
+            return;
+        }
+
+        if (m_team == ALLIANCE)
+        {
+            if (GetDistance(sObjectMgr.m_jailconf_ally_x, sObjectMgr.m_jailconf_ally_y, sObjectMgr.m_jailconf_ally_z) > sObjectMgr.m_jailconf_radius)
+            {
+                TeleportTo(sObjectMgr.m_jailconf_ally_m, sObjectMgr.m_jailconf_ally_x,
+                    sObjectMgr.m_jailconf_ally_y, sObjectMgr.m_jailconf_ally_z, sObjectMgr.m_jailconf_ally_o);
+                return;
+            }
+        }
+        else
+        {
+            if (GetDistance(sObjectMgr.m_jailconf_horde_x, sObjectMgr.m_jailconf_horde_y, sObjectMgr.m_jailconf_horde_z) > sObjectMgr.m_jailconf_radius)
+            {
+                TeleportTo(sObjectMgr.m_jailconf_horde_m, sObjectMgr.m_jailconf_horde_x,
+                    sObjectMgr.m_jailconf_horde_y, sObjectMgr.m_jailconf_horde_z, sObjectMgr.m_jailconf_horde_o);
+                return;
+            }
+
+        }
+    }
+
+    if(m_jail_warning == true)
+    {
+        m_jail_warning  = false;
+
+        if(sObjectMgr.m_jailconf_warn_player == m_jail_times || sObjectMgr.m_jailconf_warn_player <= m_jail_times)
+        {
+            if ((sObjectMgr.m_jailconf_max_jails-1 == m_jail_times-1) && sObjectMgr.m_jailconf_ban-1)
+            {
+                ChatHandler(this).PSendSysMessage(LANG_JAIL_WARNING_BAN, m_jail_times , sObjectMgr.m_jailconf_max_jails-1);
+            }
+            else
+            {
+                ChatHandler(this).PSendSysMessage(LANG_JAIL_WARNING, m_jail_times , sObjectMgr.m_jailconf_max_jails);
+            }
+
+        }
+                return;
+    }
+
+    if(m_jail_amnestie == true && sObjectMgr.m_jailconf_amnestie > 0 )
+    {
+        m_jail_amnestie =false;
+        time_t localtime;
+        localtime    = time(NULL);
+
+        if(localtime >  m_jail_amnestietime)
+        {
+            CharacterDatabase.PExecute("DELETE FROM `jail` WHERE `guid` = '%u'",GetGUIDLow());
+            ChatHandler(this).PSendSysMessage(LANG_JAIL_AMNESTII);
+        }
+        return;
+    }
+
     // update player only attacks
     if(uint32 ranged_att = getAttackTimer(RANGED_ATTACK))
     {
@@ -1430,9 +1542,16 @@ void Player::Update( uint32 update_diff, uint32 p_time )
         SetHealth(0);
 
     if (m_deathState == JUST_DIED)
-        KillPlayer();
+    {   // Prevent death of jailed players
+        if (!m_jail_isjailed) KillPlayer();
+        else
+        {
+            m_deathState = ALIVE;
+            RegenerateAll();
+        }
+    }
 
-    if(m_nextSave > 0)
+    if(m_nextSave > 0 && !m_jail_isjailed)
     {
         if(update_diff >= m_nextSave)
         {
@@ -1512,6 +1631,12 @@ void Player::Update( uint32 update_diff, uint32 p_time )
 
     if (IsHasDelayedTeleport())
         TeleportTo(m_teleport_dest, m_teleport_options);
+
+	    // Playerbot mod
+    if (m_playerbotAI)
+        m_playerbotAI->UpdateAI(p_time);
+    else if (m_playerbotMgr)
+        m_playerbotMgr->UpdateAI(p_time);
 }
 
 void Player::SetDeathState(DeathState s)
@@ -1774,6 +1899,11 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     // preparing unsummon pet if lost (we must get pet before teleportation or will not find it later)
     Pet* pet = GetPet();
 
+    // Playerbot mod: if this user has bots, tell them to stop following master
+    // so they don't try to follow the master after the master teleports
+    if (GetPlayerbotMgr())
+        GetPlayerbotMgr()->Stay();
+
     MapEntry const* mEntry = sMapStore.LookupEntry(mapid);
 
     // don't let enter battlegrounds without assigned battleground id (for example through areatrigger)...
@@ -1824,7 +1954,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     // reset movement flags at teleport, because player will continue move with these flags after teleport
     m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
 
-    if (GetMapId() == mapid && !m_transport)
+    if (GetMapId() == mapid && !m_transport || (GetTransport() && GetMapId() == 628))
     {
         //lets reset far teleport flag if it wasn't reset during chained teleports
         SetSemaphoreTeleportFar(false);
@@ -2285,6 +2415,7 @@ void Player::RegenerateHealth(uint32 diff)
 
     // always regeneration bonus (including combat)
     addvalue += GetTotalAuraModifier(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT);
+    addvalue += m_baseHealthRegen / 2.5f; //From ITEM_MOD_HEALTH_REGEN. It is correct tick amount?
 
     if(addvalue < 0)
         addvalue = 0;
@@ -4464,6 +4595,10 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
             CharacterDatabase.PExecute("DELETE FROM character_homebind WHERE guid = '%u'", lowguid);
             CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%u'", lowguid);
             CharacterDatabase.PExecute("DELETE FROM group_instance WHERE leaderGuid = '%u'", lowguid);
+            CharacterDatabase.PExecute("DELETE FROM group_member WHERE groupId = '%u'",lowguid);
+            CharacterDatabase.PExecute("DELETE FROM group_member WHERE memberGuid = '%u'",lowguid);
+            CharacterDatabase.PExecute("DELETE FROM groups WHERE leaderGuid = '%u'",lowguid);
+            CharacterDatabase.PExecute("DELETE FROM `jail` WHERE `guid` = '%u'",lowguid);
             CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE guid = '%u'", lowguid);
             CharacterDatabase.PExecute("DELETE FROM character_queststatus WHERE guid = '%u'", lowguid);
             CharacterDatabase.PExecute("DELETE FROM character_queststatus_daily WHERE guid = '%u'", lowguid);
@@ -4579,7 +4714,7 @@ void Player::BuildPlayerRepop()
     if(GetCorpse())
     {
         sLog.outError("BuildPlayerRepop: player %s(%d) already has a corpse", GetName(), GetGUIDLow());
-        sLog.outError("Removing player %s(%d) corpse from DB", GetName(), GetGUIDLow());
+        sLog.outError("Removing player %s(%d) corpse from DB", GetName(), GetGUIDLow()); 
         CharacterDatabase.PExecute("DELETE FROM corpse WHERE player = '%d'",GetGUIDLow());
     }
 
@@ -4713,6 +4848,12 @@ void Player::KillPlayer()
     UpdateCorpseReclaimDelay();                             // dependent at use SetDeathPvP() call before kill
 
     // don't create corpse at this moment, player might be falling
+	
+    if (InBattleGround())
+    {
+        if (BattleGround* bg = GetBattleGround())
+            bg->HandlePlayerResurrect(this);
+    }
 
     // update visibility
     UpdateObjectVisibility();
@@ -6922,6 +7063,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
             honor /= groupsize;
 
         honor *= (((float)urand(8,12))/10);                 // approx honor: 80% - 120% of real honor
+        honor *= 2.0f;                                      //increase honor for hk's by 100% as of 3.3.3
     }
 
     // honor - for show honor points in log
@@ -7164,7 +7306,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
             pvpInfo.endTimer = time(0);                     // start toggle-off
     }
 
-    if(zone->flags & AREA_FLAG_SANCTUARY)                   // in sanctuary
+    if(zone->flags & AREA_FLAG_SANCTUARY || GetZoneId() == 4298)                   // in sanctuary
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
         if(sWorld.IsFFAPvPRealm())
@@ -7524,6 +7666,9 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto, uint8 slot, bool appl
                 break;
             case ITEM_MOD_SPELL_POWER:
                 ApplySpellPowerBonus(int32(val), apply);
+                break;
+            case ITEM_MOD_HEALTH_REGEN: 
+                ApplyHealthRegenBonus(int32(val), apply); 
                 break;
             case ITEM_MOD_SPELL_PENETRATION:
                 ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, -int32(val), apply);
@@ -9098,6 +9243,32 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 data << uint32(0xe2b) << uint32(0x1);       // 29 3627 Beach1 - Alliance control
                 data << uint32(0xe2a) << uint32(0x1);       // 30 3626 Beach2 - Alliance control
                 // and many unks...
+            }
+            break;	
+        case 4710:
+            if (bg && bg->GetTypeID(true) == BATTLEGROUND_IC)
+                bg->FillInitialWorldStates(data, count);
+            else
+            {
+                data << uint32(4221) << uint32(1); // 7
+                data << uint32(4222) << uint32(1); // 8
+                data << uint32(4226) << uint32(300); // 9
+                data << uint32(4227) << uint32(300); // 10
+                data << uint32(4322) << uint32(1); // 11
+                data << uint32(4321) << uint32(1); // 12
+                data << uint32(4320) << uint32(1); // 13
+                data << uint32(4323) << uint32(1); // 14
+                data << uint32(4324) << uint32(1); // 15
+                data << uint32(4325) << uint32(1); // 16 
+                data << uint32(4317) << uint32(1); // 17
+
+                data << uint32(4301) << uint32(1); // 18
+                data << uint32(4296) << uint32(1); // 19
+                data << uint32(4306) << uint32(1); // 20
+                data << uint32(4311) << uint32(1); // 21
+                data << uint32(4294) << uint32(1); // 22
+                data << uint32(4243) << uint32(1); // 23
+                data << uint32(4345) << uint32(1); // 24
             }
             break;
         default:
@@ -12226,8 +12397,8 @@ void Player::DestroyConjuredItems( bool update )
 
 void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
 {
-    if(!pItem)
-        return;
+    if (!pItem)
+         return;
 
     DEBUG_LOG( "STORAGE: DestroyItemCount item (GUID: %u, Entry: %u) count = %u", pItem->GetGUIDLow(),pItem->GetEntry(), count);
 
@@ -13576,6 +13747,22 @@ void Player::PrepareGossipMenu(WorldObject *pSource, uint32 menuId)
                 case GOSSIP_OPTION_TABARDDESIGNER:
                 case GOSSIP_OPTION_AUCTIONEER:
                     break;                                  // no checks
+                case GOSSIP_OPTION_BOT:
+                {
+                    if(botConfig.GetBoolDefault("PlayerbotAI.DisableBots", false) && !pCreature->isInnkeeper())
+                    {
+                        ChatHandler(this).PSendSysMessage("|cffff0000Playerbot system is currently disabled!");
+                        hasMenuItem = false;
+                        break;
+                    }
+
+                    std::string reqQuestIds = botConfig.GetStringDefault("PlayerbotAI.BotguyQuests","");
+                    uint32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost",0);
+                    if((reqQuestIds == "" || requiredQuests(reqQuestIds.c_str())) && !pCreature->isInnkeeper() && this->GetMoney() >= cost)
+                        pCreature->LoadBotMenu(this);
+                    hasMenuItem = false;
+                    break;
+                }
                 default:
                     sLog.outErrorDb("Creature entry %u have unknown gossip option %u for menu %u", pCreature->GetEntry(), itr->second.option_id, itr->second.menu_id);
                     hasMenuItem = false;
@@ -13723,12 +13910,12 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
         }
     }
 
-    GossipMenuItemData pMenuData = gossipmenu.GetItemData(gossipListId);
-
     switch(gossipOptionId)
     {
         case GOSSIP_OPTION_GOSSIP:
         {
+            GossipMenuItemData pMenuData = gossipmenu.GetItemData(gossipListId);
+
             if (pMenuData.m_gAction_poi)
                 PlayerTalkClass->SendPointOfInterest(pMenuData.m_gAction_poi);
 
@@ -13816,6 +14003,59 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
             }
 
             GetSession()->SendBattlegGroundList(guid, bgTypeId);
+            break;
+        }
+        case GOSSIP_OPTION_BOT:
+        {
+            // DEBUG_LOG("GOSSIP_OPTION_BOT");
+            PlayerTalkClass->CloseGossip();
+            uint32 guidlo = PlayerTalkClass->GossipOptionSender(gossipListId);
+            uint32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost",0);
+
+            if (!GetPlayerbotMgr())
+                SetPlayerbotMgr(new PlayerbotMgr(this));
+
+            if(GetPlayerbotMgr()->GetPlayerBot(guidlo) != NULL)
+            {
+                GetPlayerbotMgr()->LogoutPlayerBot(guidlo);
+            }
+            else if(GetPlayerbotMgr()->GetPlayerBot(guidlo) == NULL)
+            {
+                QueryResult *resultchar = CharacterDatabase.PQuery("SELECT COUNT(*) FROM characters WHERE online = '1' AND account = '%u'", m_session->GetAccountId());
+                if(resultchar)
+                {
+                    Field *fields = resultchar->Fetch();
+                    int maxnum = botConfig.GetIntDefault("PlayerbotAI.MaxNumBots", 9);
+                    int acctcharcount = fields[0].GetUInt32();
+                    if(!(m_session->GetSecurity() > SEC_PLAYER))
+                        if(acctcharcount > maxnum)
+                        {
+                            ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon anymore bots.(Current Max: |cffffffff%u)",maxnum);
+                            delete resultchar;
+                            break;
+                        }
+                }
+                delete resultchar;
+
+                QueryResult *resultlvl = CharacterDatabase.PQuery("SELECT level,name FROM characters WHERE guid = '%u'", guidlo);
+                if(resultlvl)
+                {
+                    Field *fields=resultlvl->Fetch();
+                    int maxlvl = botConfig.GetIntDefault("PlayerbotAI.RestrictBotLevel", 80);
+                    int charlvl = fields[0].GetUInt32();
+                    if(!(m_session->GetSecurity() > SEC_PLAYER))
+                        if(charlvl > maxlvl)
+                        {
+                            ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high.(Current Max:lvl |cffffffff%u)",fields[1].GetString(),maxlvl);
+                            delete resultlvl;
+                            break;
+                        }
+                }
+                delete resultlvl;
+
+                GetPlayerbotMgr()->AddPlayerBot(guidlo);
+                this->ModifyMoney(-(int32)cost);
+            }
             break;
         }
     }
@@ -15716,43 +15956,6 @@ void Player::SendQuestUpdateAddCreatureOrGo( Quest const* pQuest, ObjectGuid gui
 /***                   LOAD SYSTEM                     ***/
 /*********************************************************/
 
-bool Player::MinimalLoadFromDB(uint64 lowguid)
-{
-    if (!lowguid) return false;
-
-     //                                                     0     1     2           3           4           5    6          7          8          9    10     11    12
-    QueryResult* result = CharacterDatabase.PQuery("SELECT guid, name, position_x, position_y, position_z, map, totaltime, leveltime, at_login, zone, level, race, class FROM characters WHERE guid = '%u'",lowguid);
-
-    if (!result)
-        return false;
-
-    Field *fields = result->Fetch();
-
-    Object::_Create(ObjectGuid(HIGHGUID_PLAYER, uint32(lowguid)));
-
-    sLog.outDebug("Player #%d minimal data loaded",lowguid);
-
-    m_name = fields[1].GetCppString();
-    Relocate(fields[2].GetFloat(),fields[3].GetFloat(),fields[4].GetFloat());
-    SetLocationMapId(fields[5].GetUInt32());
-    m_Played_time[PLAYED_TIME_TOTAL] = fields[6].GetUInt32();
-    m_Played_time[PLAYED_TIME_LEVEL] = fields[7].GetUInt32();
-    m_atLoginFlags = fields[8].GetUInt32();
-    uint8 m_race  = fields[11].GetUInt8();
-    uint8 m_class = fields[12].GetUInt8();
-
-    for (int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
-        m_items[i] = NULL;
-
-    if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
-        m_deathState = DEAD;
-
-    // all fields read
-    delete result;
-
-    return true;
-}
-
 void Player::_LoadDeclinedNames(QueryResult* result)
 {
     if(!result)
@@ -16519,11 +16722,86 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder )
 
     _LoadDeclinedNames(holder->GetResult(PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES));
 
+    // Loads the jail datas and if jailed it corrects the position to the corresponding jail
+    _LoadJail();
+
     m_achievementMgr.CheckAllAchievementCriteria();
 
     _LoadEquipmentSets(holder->GetResult(PLAYER_LOGIN_QUERY_LOADEQUIPMENTSETS));
 
     return true;
+}
+
+// Loads the jail datas (added by WarHead).
+void Player::_LoadJail(void)
+{
+    CharacterDatabase.BeginTransaction();
+    QueryResult *result = CharacterDatabase.PQuery("SELECT * FROM `jail` WHERE `guid`='%u' LIMIT 1", GetGUIDLow());
+    CharacterDatabase.CommitTransaction();
+
+    if (!result)
+    {
+        m_jail_isjailed = false;
+        return;
+    }
+
+    Field *fields = result->Fetch();
+    m_jail_warning = true;
+    m_jail_isjailed = true;
+    m_jail_guid = fields[0].GetUInt32();
+    m_jail_char = fields[1].GetString();
+    m_jail_release = fields[2].GetUInt32();
+    m_jail_amnestietime = fields[3].GetUInt32();
+    m_jail_reason = fields[4].GetString();
+    m_jail_times = fields[5].GetUInt32();
+    m_jail_gmacc = fields[6].GetUInt32();
+    m_jail_gmchar = fields[7].GetString();
+    m_jail_lasttime = fields[8].GetString();
+    m_jail_duration = fields[9].GetUInt32();
+
+    if (m_jail_release == 0)
+    {
+        m_jail_isjailed = false;
+        delete result;
+        return;
+    }
+
+    time_t localtime;
+    localtime = time(NULL);
+
+    if (m_jail_release <= localtime)
+    {
+        m_jail_isjailed = false;
+        m_jail_release = 0;
+
+        _SaveJail();
+
+        sWorld.SendWorldText(LANG_JAIL_CHAR_FREE, GetName());
+
+        CastSpell(this,8690,false);
+
+        delete result;
+        return;
+    }
+
+    if (m_jail_isjailed)
+    {
+        if (m_team == ALLIANCE)
+        {
+            TeleportTo(sObjectMgr.m_jailconf_ally_m, sObjectMgr.m_jailconf_ally_x,
+                sObjectMgr.m_jailconf_ally_y, sObjectMgr.m_jailconf_ally_z, sObjectMgr.m_jailconf_ally_o);
+        }
+        else
+        {
+            TeleportTo(sObjectMgr.m_jailconf_horde_m, sObjectMgr.m_jailconf_horde_x,
+                sObjectMgr.m_jailconf_horde_y, sObjectMgr.m_jailconf_horde_z, sObjectMgr.m_jailconf_horde_o);
+        }
+
+        sWorld.SendWorldText(LANG_JAIL_CHAR_TELE, GetName() );
+    }
+
+    delete result;
+
 }
 
 bool Player::isAllowedToLoot(Creature* creature)
@@ -17761,8 +18039,23 @@ bool Player::_LoadHomeBind(QueryResult *result)
 /***                   SAVE SYSTEM                     ***/
 /*********************************************************/
 
+// Saves the jail datas (added by WarHead).
+void Player::_SaveJail(void)
+{
+    CharacterDatabase.BeginTransaction();
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `guid` FROM `jail` WHERE `guid`='%u' LIMIT 1", m_jail_guid);
+    if (!result) CharacterDatabase.PExecute("INSERT INTO `jail` VALUES ('%u','%s','%u', '%u','%s','%u','%u','%s',CURRENT_TIMESTAMP,'%u')", m_jail_guid, m_jail_char.c_str(), m_jail_release, m_jail_amnestietime, m_jail_reason.c_str(), m_jail_times, m_jail_gmacc, m_jail_gmchar.c_str(), m_jail_duration);
+    else CharacterDatabase.PExecute("UPDATE `jail` SET `release`='%u', `amnestietime`='%u',`reason`='%s',`times`='%u',`gmacc`='%u',`gmchar`='%s',`duration`='%u' WHERE `guid`='%u' LIMIT 1", m_jail_release, m_jail_amnestietime, m_jail_reason.c_str(), m_jail_times, m_jail_gmacc, m_jail_gmchar.c_str(), m_jail_duration, m_jail_guid);
+    CharacterDatabase.CommitTransaction();
+
+    if (result) delete result;
+}
+
 void Player::SaveToDB()
 {
+    // Jail: Prevent saving of jailed players
+    if (m_jail_isjailed) return;
+
     // we should assure this: ASSERT((m_nextSave != sWorld.getConfig(CONFIG_UINT32_INTERVAL_SAVE)));
     // delay auto save at any saves (manual, in code, or autosave)
     m_nextSave = sWorld.getConfig(CONFIG_UINT32_INTERVAL_SAVE);
@@ -18581,40 +18874,101 @@ void Player::_SaveStats()
     if(!sWorld.getConfig(CONFIG_UINT32_MIN_LEVEL_STAT_SAVE) || getLevel() < sWorld.getConfig(CONFIG_UINT32_MIN_LEVEL_STAT_SAVE))
         return;
 
-    static SqlStatementID delStats ;
-    static SqlStatementID insertStats ;
+	std::ostringstream equipmentCache;
 
-    SqlStatement stmt = CharacterDatabase.CreateStatement(delStats, "DELETE FROM character_stats WHERE guid = ?");
-    stmt.PExecute(GetGUIDLow());
+    for(uint16 i = 0; i < m_valuesCount; ++i )
+    {
+        equipmentCache << GetUInt32Value(i) << " ";
+    }
 
-    stmt = CharacterDatabase.CreateStatement(insertStats, "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, maxpower6, maxpower7, "
+    std::string sql_name = m_name;
+    CharacterDatabase.escape_string(sql_name);
+
+    std::ostringstream data_armory;
+    for(uint16 i = 0; i < m_valuesCount; i++)
+    {
+	    data_armory << GetUInt32Value(i) << " ";
+    }
+
+    CharacterDatabase.PExecute("DELETE FROM character_stats WHERE guid = '%u'", GetGUIDLow());
+    std::ostringstream ss;
+    ss << "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, maxpower6, maxpower7, "
         "strength, agility, stamina, intellect, spirit, armor, resHoly, resFire, resNature, resFrost, resShadow, resArcane, "
-        "blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower) "
-        "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
-    stmt.addUInt32(GetGUIDLow());
-    stmt.addUInt32(GetMaxHealth());
+        "blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower, "
+       "apmelee, ranged, blockrating, defrating, dodgerating, parryrating, resilience, manaregen, "
+       "melee_hitrating, melee_critrating, melee_hasterating, melee_mainmindmg, melee_mainmaxdmg, "
+       "melee_offmindmg, melee_offmaxdmg, melee_maintime, melee_offtime, ranged_critrating, ranged_hasterating, "
+       "ranged_hitrating, ranged_mindmg, ranged_maxdmg, ranged_attacktime, "
+       "spell_hitrating, spell_critrating, spell_hasterating, spell_bonusdmg, spell_bonusheal, spell_critproc, account, name, race, class, gender, level, map, money, totaltime, online, arenaPoints, totalHonorPoints, totalKills, equipmentCache, specCount, activeSpec, data) VALUES ("
+        << GetGUIDLow() << ", "
+        << GetMaxHealth() << ", ";
     for(int i = 0; i < MAX_POWERS; ++i)
-        stmt.addUInt32(GetMaxPower(Powers(i)));
+        ss << GetMaxPower(Powers(i)) << ", ";
     for(int i = 0; i < MAX_STATS; ++i)
-        stmt.addFloat(GetStat(Stats(i)));
+        ss << GetStat(Stats(i)) << ", ";
     // armor + school resistances
     for(int i = 0; i < MAX_SPELL_SCHOOL; ++i)
-        stmt.addUInt32(GetResistance(SpellSchools(i)));
-    stmt.addFloat(GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
-    stmt.addFloat(GetFloatValue(PLAYER_DODGE_PERCENTAGE));
-    stmt.addFloat(GetFloatValue(PLAYER_PARRY_PERCENTAGE));
-    stmt.addFloat(GetFloatValue(PLAYER_CRIT_PERCENTAGE));
-    stmt.addFloat(GetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE));
-    stmt.addFloat(GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1));
-    stmt.addUInt32(GetUInt32Value(UNIT_FIELD_ATTACK_POWER));
-    stmt.addUInt32(GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER));
-    stmt.addUInt32(GetBaseSpellPowerBonus());
-
-    stmt.Execute();
+        ss << GetResistance(SpellSchools(i)) << ",";
+    ss << GetFloatValue(PLAYER_BLOCK_PERCENTAGE) << ", "
+      << GetFloatValue(PLAYER_DODGE_PERCENTAGE) << ", "
+      << GetFloatValue(PLAYER_PARRY_PERCENTAGE) << ", "
+      << GetFloatValue(PLAYER_CRIT_PERCENTAGE) << ", "
+      << GetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE) << ", "
+      << GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1) << ", "
+      << GetUInt32Value(UNIT_FIELD_ATTACK_POWER) << ", "
+      << GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER) << ", "
+      << GetBaseSpellPowerBonus() << ", "
+      << (GetUInt32Value(INFINITY_AP_MELEE_1)+GetUInt32Value(INFINITY_AP_MELEE_2)) << ", "
+      << (GetUInt32Value(INFINITY_AP_RANGED_1)+GetUInt32Value(INFINITY_AP_RANGED_2)) << ", "
+      << GetUInt32Value(INFINITY_BLOCKRATING) << ", "
+      << GetUInt32Value(INFINITY_DEFRATING) << ", "
+      << GetUInt32Value(INFINITY_DODGERATING) << ", "
+      << GetUInt32Value(INFINITY_PARRYRATING) << ", "
+      << GetUInt32Value(INFINITY_RESILIENCE) << ", "
+      << GetFloatValue(INFINITY_MANAREGEN) << ", "
+      << GetUInt32Value(INFINITY_MELEE_HITRATING) << ", "
+      << GetUInt32Value(INFINITY_MELEE_CRITRATING) << ", "
+      << GetUInt32Value(INFINITY_MELEE_HASTERATING) << ", "
+      << GetFloatValue(INFINITY_MELEE_MAINMINDMG) << ", "
+      << GetFloatValue(INFINITY_MELEE_MAINMAXDMG) << ", "
+      << GetFloatValue(INFINITY_MELEE_OFFMINDMG) << ", "
+      << GetFloatValue(INFINITY_MELEE_OFFMAXDMG) << ", "
+      << GetFloatValue(INFINITY_MELLE_MAINTIME) << ", "
+      << GetFloatValue(INFINITY_MELLE_OFFTIME) << ", "
+      << GetUInt32Value(INFINITY_RANGED_CRITRATING) << ", "
+      << GetUInt32Value(INFINITY_RANGED_HASTERATING) << ", "
+      << GetUInt32Value(INFINITY_RANGED_HITRATING) << ", "
+      << GetFloatValue(INFINITY_RANGED_MINDMG) << ", "
+      << GetFloatValue(INFINITY_RANGED_MAXDMG) << ", "
+      << GetFloatValue(INFINITY_RANGED_ATTACKTIME) << ", "
+      << GetUInt32Value(INFINITY_SPELL_HITRATING) << ", "
+      << GetUInt32Value(INFINITY_SPELL_CRITRATING) << ", "
+      << GetUInt32Value(INFINITY_SPELL_HASTERATING) << ", "
+      << GetUInt32Value(INFINITY_SPELL_BONUSDMG) << ", "
+      << GetUInt32Value(INFINITY_SPELL_BONUSHEAL) << ", "
+      << GetFloatValue(INFINITY_SPELL_CRITPROC) << ", "
+	  << GetSession()->GetAccountId() << ", '"
+      << sql_name << "', "
+      << (uint32)getRace() << ", "
+      << (uint32)getClass() << ", "
+      << (uint32)getGender() << ", "
+      << getLevel() << ", "
+	  << GetMapId() << ", "
+	  << GetMoney() << ", "
+	  << m_Played_time[PLAYED_TIME_TOTAL] << ", "
+	  << (IsInWorld() ? 1 : 0) << ", "
+	  << GetArenaPoints() << ", "
+      << GetHonorPoints() << ", "
+	  << GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS) << ", '"
+	  << equipmentCache.str().c_str() << "',"
+	  << uint32(m_specsCount) << ", "
+      << uint32(m_activeSpec) << ", '"
+	  << data_armory.str().c_str() << "')";
+    CharacterDatabase.Execute( ss.str().c_str() );
 }
 
 void Player::outDebugStatsValues() const
+
 {
     // optimize disabled debug output
     if(!sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG) || sLog.HasLogFilter(LOG_FILTER_PLAYER_STATS))

@@ -36,9 +36,7 @@ DEBUG_SUFFIX=$(findstring _debug,_$(cfg))
 #------------------------------------------------------------
 # Define static pattern rules dealing with .cpp source files
 #------------------------------------------------------------
-# MaNGOS changes
-# $(warning CONFIG: cfg=$(cfg) arch=$(arch) compiler=$(compiler) os=$(tbb_os) runtime=$(runtime))
-# MaNGOS changes end
+$(warning CONFIG: cfg=$(cfg) arch=$(arch) compiler=$(compiler) os=$(tbb_os) runtime=$(runtime))
 
 default_tbb: $(TBB.DLL)
 .PHONY: default_tbb tbbvars clean

@@ -32,6 +32,8 @@
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
 #include "SpellMgr.h"
+#include "SpellAuras.h"
+#include "World.h"
 
 bool ChatHandler::HandleDebugSendSpellFailCommand(char* args)
 {
@@ -1186,4 +1188,32 @@ bool ChatHandler::HandleDebugEnterVehicleCommand(char* args)
     
     m_session->GetPlayer()->EnterVehicle(target->GetVehicleKit(), seat);
     return true;
+}
+
+bool ChatHandler::HandleSetVehicleIdCommand(char* args) 
+{ 
+    Unit* target = getSelectedUnit(); 
+    if (!target) 
+    { 
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE); 
+        SetSentErrorMessage(true); 
+        return false; 
+    } 
+ 
+    if (!*args) 
+        return false; 
+ 
+    uint32 vehicleId = atoi(args); 
+ 
+    VehicleEntry const* vehicleInfo = sVehicleStore.LookupEntry(vehicleId); 
+    if(!vehicleInfo) 
+    { 
+        SendSysMessage("Vehicle ID is invalid."); 
+        SetSentErrorMessage(true); 
+        return false; 
+    } 
+ 
+    target->RemoveVehicleKit(); 
+    target->CreateVehicleKit(vehicleId); 
+    return true; 
 }

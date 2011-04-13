@@ -66,7 +66,7 @@ WHERE entry IN (30066);
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (30066);
 INSERT INTO `npc_spellclick_spells` VALUES
 (30066, 44002, 12953, 1, 12953, 1);
-INSERT IGNORE INTO `spell_script_target` VALUES (55812, 1, 30096);
+-- INSERT IGNORE INTO `spell_script_target` VALUES (55812, 1, 30096); needs fixed
 
 -- From lanc
 /* 7th Legion Chain Gun */
@@ -158,7 +158,7 @@ DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (29598);
 INSERT INTO `npc_spellclick_spells` VALUES
 (29598, 54908, 12851, 1, 12851, 1);
 
-INSERT IGNORE INTO `spell_script_target` VALUES (54897, 1, 29358);
+-- INSERT IGNORE INTO `spell_script_target` VALUES (54897, 1, 29358); needs fixed
 
 /* Scourge Gryphon */
 UPDATE creature_template SET
@@ -258,7 +258,7 @@ DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (25334, 27107);
 INSERT INTO `npc_spellclick_spells` VALUES
 (25334, 47917, 11652, 1, 11652, 1);
 
-REPLACE INTO `spell_script_target` VALUES (47962, 1, 27107);
+-- REPLACE INTO `spell_script_target` VALUES (47962, 1, 27107); needs fixed
 
 REPLACE INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_start_active`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`) 
 VALUES ('47917','4027','11652','1','11652','0','0','2','0'), ('47917','4130','11652','1','11652','0','0','2','0');
@@ -277,7 +277,7 @@ WHERE `entry` IN (27061);
 
 DELETE FROM `npc_spellclick_spells` WHERE npc_entry IN (27061);
 INSERT INTO `npc_spellclick_spells` VALUES (27061, 47920, 0, 0, 0, 1);
-REPLACE INTO `spell_script_target` VALUES (47939, 2, 188539);
+-- REPLACE INTO `spell_script_target` VALUES (47939, 2, 188539);   needs fixed
 
 -- Argent Cannon (quest 13086)
 UPDATE `creature_template` SET
@@ -342,8 +342,8 @@ UPDATE `creature_template` SET spell1=48766, spell2=54469, spell3=54467, spell4=
 REPLACE INTO `creature_template_addon` (entry,auras) VALUES (29414,'57403');
 
 -- Quest: Defending Wyrmrest Temple (12372)
-REPLACE INTO `gossip_scripts` (id,command,datalong,datalong2) VALUES (27629,15,49256,3);
-REPLACE INTO `gossip_menu_option` VALUES (9568,0,0,'We need to get into the fight. Are you ready?',1,1,-1,0,27629,0,0,NULL,9,12372,0,0,0,0,0,0,0);
+--REPLACE INTO `gossip_scripts` (id,command,datalong,datalong2) VALUES (27629,15,49256,3);
+-- REPLACE INTO `gossip_menu_option` VALUES (9568,0,0,'We need to get into the fight. Are you ready?',1,1,-1,0,27629,0,0,NULL,9,12372,0,0,0,0,0,0,0); needs fixed
 UPDATE `creature_template` SET spell1=49161,spell2=49243,spell3=49263,spell4=49264,spell5=49367,unit_flags=0,InhabitType=3 WHERE entry=27629;
 REPLACE INTO `creature_template_addon` (entry,bytes1,b2_0_sheath,auras) VALUES (27629,33554432,1,'50069');
 REPLACE INTO `creature_ai_scripts` VALUES (2769801,27698,8,0,100,0,49367,-1,0,0,33,27698,6,0,0,0,0,0,0,0,0,0,'q12372');

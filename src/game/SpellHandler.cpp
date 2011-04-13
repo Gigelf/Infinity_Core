@@ -709,32 +709,25 @@ void WorldSession::HandleMirrorImageDataRequest( WorldPacket & recv_data )
 
 void WorldSession::HandleUpdateProjectilePosition(WorldPacket& recvPacket)
 {
-    uint64 casterGuid;  // actually target ?
-    uint32 spellId;     // Spell Id
-    uint8  cast_Id;     // Some counter ? the fuck
+	DEBUG_LOG("CMSG_UPDATE_PROJECTILE_POSITION");
+
+    uint64 casterGuid;
+    uint32 spellId;
+    uint8  castCount;
     float m_targetX, m_targetY, m_targetZ; // Position of missile hit
 
-    recvPacket >> casterGuid;
+	casterGuid = recvPacket.readPackGUID();
     recvPacket >> spellId;
-    recvPacket >> cast_Id;
+    recvPacket >> castCount;
+	recvPacket >> m_targetX;
+    recvPacket >> m_targetY;
+	recvPacket >> m_targetZ;
 
-    recvPacket >> m_targetX >> m_targetY >> m_targetZ;
-
-    // Do we need unit as we use 3d position anyway ?
-    Unit * pCaster = ObjectAccessor::GetUnit(*_player, casterGuid);
-    if (!pCaster)
-        return;
-
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-
-    if(!spellInfo)
-    {
-        sLog.outError("CMSG_UPDATE_PROJECTILE_POSITION: unknown spell id %u", spellId);
-        recvPacket.rpos(recvPacket.wpos());                 // prevent spam at ignore packet
-        return;
-    }
-
-    for(int i = 0; i < 3; ++i)
-        if(spellInfo->EffectTriggerSpell[i])
-            pCaster->CastSpell(m_targetX, m_targetY, m_targetZ, spellInfo->EffectTriggerSpell[i], true);
+	WorldPacket data(SMSG_SET_PROJECTILE_POSITION, 21);
+	data << uint64(casterGuid);
+	data << uint8(castCount);
+	data << float(m_targetX);
+	data << float(m_targetY);
+	data << float(m_targetZ);
+	SendPacket(&data);
 }

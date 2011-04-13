@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,6 @@ using namespace VMAP;
 namespace MMAP
 {
     typedef map<uint32,set<uint32>*> TileList;
-
     struct Tile
     {
         Tile() : chf(NULL), solid(NULL), cset(NULL), pmesh(NULL), dmesh(NULL) {}
@@ -73,7 +72,7 @@ namespace MMAP
             ~MapBuilder();
 
             // builds all mmap tiles for the specified map id (ignores skip settings)
-			// TODO: it is pretty much the same code as buildTile()
+           // TODO: it is pretty much the same code as buildTile()
             void buildMap(uint32 mapID);
 
             // builds an mmap tile for the specified map tile (ignores skip settings)
@@ -110,7 +109,8 @@ namespace MMAP
 
             bool m_debugOutput;
 
-			const char* m_offMeshFilePath;
+            const char* m_offMeshFilePath;
+
             bool m_skipContinents;
             bool m_skipJunkMaps;
             bool m_skipBattlegrounds;

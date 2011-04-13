@@ -1010,38 +1010,35 @@ struct GtRegenMPPerSptEntry
     float    ratio;
 };
 
-/* no used
 struct HolidayDescriptionsEntry
 {
-    uint32 ID;                                              // 0, this is NOT holiday id
-    //char*     name[16]                                    // 1-16 m_name_lang
-                                                            // 17 name flags
+    uint32 ID;												// 0, this is NOT holiday id
+    char* name[16];											// 1-16 m_name_lang
+    uint32 flags;											// 17 name flags
 };
-*/
 
-/* no used
 struct HolidayNamesEntry
 {
     uint32 ID;                                              // 0, this is NOT holiday id
-    //char*     name[16]                                    // 1-16 m_name_lang
-    // 17 name flags
+    char* name[16];											// 1-16 m_name_lang
+    uint32 flags;											// 17 name flags
 };
-*/
+
 
 struct HolidaysEntry
 {
     uint32 ID;                                              // 0, holiday id
-    //uint32 unk1[10];                                      // 1-10 timers
-    //uint32 Dates[26];                                     // 11-36, dates in unix time starting at January, 1, 2000
-    //uint32 unk37;                                         // 37, flags (wow region mask?)
-    //uint32 unk38;                                         // 38, flags (display related?)
-    //uint32 unk39[10];                                     // 39-48, counters?
-    //uint32 holidayNameId;                                 // 49, id for HolidayNames.dbc
-    //uint32 holidayDescriptionId;                          // 50, id for HolidayDescriptions.dbc
-    //char *texture;                                        // 51
-    //uint32 unk52;                                         // 52
-    //uint32 RepeatingMethod;                               // 53, (-1,0,1 or 2)
-    //uint32 unk54;                                         // 54
+    uint32 unk1[10];                                      // 1-10 timers
+    uint32 Dates[26];                                     // 11-36, dates in unix time starting at January, 1, 2000
+    uint32 unk37;                                         // 37, flags (wow region mask?)
+    uint32 unk38;                                         // 38, flags (display related?)
+    uint32 unk39[10];                                     // 39-48, counters?
+    uint32 holidayNameId;                                 // 49, id for HolidayNames.dbc
+    uint32 holidayDescriptionId;                          // 50, id for HolidayDescriptions.dbc
+    char *texture;                                        // 51
+    uint32 unk52;                                         // 52
+    uint32 RepeatingMethod;                               // 53, (-1,0,1 or 2)
+    uint32 unk54;                                         // 54
 };
 
 struct ItemEntry

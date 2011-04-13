@@ -86,6 +86,7 @@ class AuctionHouseObject
 
         uint32 Getcount() { return AuctionsMap.size(); }
 
+		// Added by AHBot
         AuctionEntryMap::iterator GetAuctionsBegin() {return AuctionsMap.begin();}
         AuctionEntryMap::iterator GetAuctionsEnd() {return AuctionsMap.end();}
 

@@ -23,6 +23,7 @@
 #include "World.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/Config.h"
+#include "playerbot/config.h"
 #include "Platform/Define.h"
 #include "SystemConfig.h"
 #include "Log.h"
@@ -64,7 +65,7 @@
 #include "GMTicketMgr.h"
 #include "Util.h"
 #include "CharacterDatabaseCleaner.h"
-#include "AuctionHouseBot.h"
+#include "AuctionHouseBot/AuctionHouseBot.h"
 #include "LFGMgr.h"
 
 INSTANTIATE_SINGLETON_1( World );
@@ -81,6 +82,7 @@ float World::m_MaxVisibleDistanceInFlight     = DEFAULT_VISIBILITY_DISTANCE;
 float World::m_VisibleUnitGreyDistance        = 0;
 float World::m_VisibleObjectGreyDistance      = 0;
 
+extern Config botConfig;
 float  World::m_relocation_lower_limit_sq     = 10.f * 10.f;
 uint32 World::m_relocation_ai_notify_delay    = 1000u;
 
@@ -1310,6 +1312,10 @@ void World::SetInitialWorldSettings()
     ///- Handle outdated emails (delete/return)
     sLog.outString( "Returning old mails..." );
     sObjectMgr.ReturnOrDeleteOldMails(false);
+	
+    // Loads the jail conf out of the database
+	sLog.outString( "Loading Jail.config from configs in Database..." );
+    sObjectMgr.LoadJailConf();
 
     ///- Load and initialize scripts
     sLog.outString( "Loading Scripts..." );
@@ -1381,6 +1387,9 @@ void World::SetInitialWorldSettings()
 
     m_timers[WUPDATE_EXT_MAIL].SetInterval(m_configUint32Values[CONFIG_UINT32_EXTERNAL_MAIL_INTERVAL] * MINUTE * IN_MILLISECONDS);
 
+	// for AhBot
+	m_timers[WUPDATE_AHBOT].SetInterval(20*IN_MILLISECONDS); // every 20 sec
+
     //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions
     //one second is 1000 -(tested on win system)
@@ -1432,6 +1441,16 @@ void World::SetInitialWorldSettings()
     auctionbot.Initialize();
 
     sLog.outString("Starting Autobroadcast system by Xeross..." );
+
+    //Get playerbot configuration file
+    if (!botConfig.SetSource(_PLAYERBOT_CONFIG))
+        sLog.outError("Playerbot: Unable to open configuration file. Database will be unaccessible. Configuration values will use default.");
+    else
+        sLog.outString("Playerbot: Using configuration file %s",_PLAYERBOT_CONFIG);
+
+    //Check playerbot config file version
+    if (botConfig.GetIntDefault("ConfVersion", 0) != PLAYERBOT_CONF_VERSION)
+        sLog.outError("Playerbot: Configuration file version doesn't match expected version. Some config variables may be wrong or missing.");
 
     sLog.outString( "WORLD: World initialized" );
 
@@ -1520,7 +1539,6 @@ void World::Update(uint32 diff)
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
     {
-        auctionbot.Update();
         m_timers[WUPDATE_AUCTIONS].Reset();
 
         ///- Update mails (return old mails with item, or delete them)
@@ -1534,6 +1552,13 @@ void World::Update(uint32 diff)
         ///- Handle expired auctions
         sAuctionMgr.Update();
     }
+
+	/// <li> Handle AHBot operations
+	if (m_timers[WUPDATE_AHBOT].Passed())
+	{
+		auctionbot.Update();
+		m_timers[WUPDATE_AHBOT].Reset();
+	}
 
     /// <li> Handle session updates when the timer has passed
     if (m_timers[WUPDATE_SESSIONS].Passed())

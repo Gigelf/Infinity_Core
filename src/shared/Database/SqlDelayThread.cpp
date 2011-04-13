@@ -71,6 +71,7 @@ void SqlDelayThread::ProcessRequests()
     SqlOperation* s = NULL;
     while (m_sqlQueue.next(s))
     {
+        if (!s) continue;
         s->Execute(m_dbConnection);
         delete s;
     }

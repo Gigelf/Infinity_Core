@@ -10,6 +10,8 @@
 #     Default: 1 - Enable
 #              0 - Disable
 #
+##################################################
+
 irc.active = 1
 
 ##################################################
@@ -19,18 +21,24 @@ irc.active = 1
 #              375 - Beginning Of MOTD
 #              376 - End Of MOTD
 #
+##################################################
+
 irc.icc = 001
 
 ##################################################
 # irc.host
 #     IRC server to have MangChat connect to
 #
+##################################################
+
 irc.host = "irc.freenode.net"
 
 ##################################################
 # irc.port
 #     IRC server port to use
 #
+##################################################
+
 irc.port = "6667"
 
 ##################################################
@@ -41,6 +49,8 @@ irc.port = "6667"
 # irc.pass
 #     The password to be used to identify to NickServ (IRC NickName Enforcement Services)
 #
+##################################################
+
 irc.user = "MangChat"
 irc.nick = "MangChat"
 irc.pass = "MyDumbPass"
@@ -56,6 +66,8 @@ irc.pass = "MyDumbPass"
 # irc.auth.nick
 #     IRC Nickname to use if Auth method 2 or 4 is used
 #
+##################################################
+
 irc.auth = 1
 irc.auth.nick = "AuthNick"
 
@@ -67,6 +79,8 @@ irc.auth.nick = "AuthNick"
 # irc.defchan
 #     IRC channel to leave on server connect if irc.ldef is on
 #
+##################################################
+
 irc.ldef = 0
 irc.defchan = "lobby"
 
@@ -78,6 +92,7 @@ irc.defchan = "lobby"
 #     Maximum attempts to try IRC server
 #     Default: 20
 #
+##################################################
 irc.wct = 30000
 irc.maxattempt = 20
 
@@ -86,6 +101,8 @@ irc.maxattempt = 20
 #     Time to wait in Minutes to announce random messages from database.
 #     Default: 30 - (30 Minutes)
 #
+##################################################
+
 irc.auto.announce = 30
 
 ##################################################
@@ -94,6 +111,8 @@ irc.auto.announce = 30
 #     Default: 1 - Enable
 #              0 - Disable
 #
+##################################################
+
 irc.autojoin_kick = 1
 
 ##################################################
@@ -101,6 +120,8 @@ irc.autojoin_kick = 1
 #     IRC command prefix
 #     Example: (.)online all
 #
+##################################################
+
 irc.command_prefix = "."
 
 ##################################################
@@ -109,6 +130,8 @@ irc.command_prefix = "."
 # irc.kickmsg
 #     MangChat bot join/restart/kick messages
 #
+##################################################
+
 irc.joinmsg = "Whhaaazzzzaaaa, MangChat $Ver Is Up And Running! Command Trigger Is: $Trigger"
 irc.rstmsg  = "MangChat Is Restarting, I Will Be Right Back!!"
 irc.kickmsg = "Do Not Kick Me Again, Severe Actions Will Be Taken!"
@@ -122,6 +145,8 @@ irc.kickmsg = "Do Not Kick Me Again, Severe Actions Will Be Taken!"
 #              wow.chan_1 = "world"
 #              wow.chan_2 = "LookingForGroup"
 #
+##################################################
+
 irc.chan_1 = "mangos"
 wow.chan_1 = "world"
 
@@ -133,6 +158,8 @@ wow.chan_1 = "world"
 #     Channel Number To Display Announcements In (Announces, Notifies, Event)
 #     Default: 1 - Channel ID 1
 #
+##################################################
+
 irc.StatusChannel = 1
 irc.AnnounceChannel = 1
 
@@ -145,6 +172,8 @@ irc.AnnounceChannel = 1
 #     The Minimum GM Level Required To Have The Bot Op The User
 #     Default: 5 - GM Level 5
 #
+##################################################
+
 irc.op_gm_login = 0
 irc.op_gm_level = 3
 
@@ -157,6 +186,8 @@ irc.op_gm_level = 3
 # irc.ajchan
 #     Channel to join if above is Enabled.
 #
+##################################################
+
 irc.ajoin = 1
 irc.ajchan = "world"
 
@@ -164,6 +195,8 @@ irc.ajchan = "world"
 # irc.online.result
 #     Maximum number of results per line for the online command
 #
+##################################################
+
 irc.online.result = 30
 
 ##################################################
@@ -172,6 +205,8 @@ irc.online.result = 30
 #     irc_* - String is displayed in WOW channel
 #     Options: $Name, $Level, $Msg, $GM (not all options work in every string)
 #
+##################################################
+
 chat.wow_irc = "<WoW>[$Name($Level)] $Msg"
 chat.irc_wow = "<IRC>[$Name]: $Msg"
 chat.join_wow = "12>>04 $GM$Name Joined The $Channel Channel!"
@@ -197,6 +232,8 @@ chat.change_nick = "<> $Name Is Now Known As $NewName!"
 #       (512)Do Not Let Players Use Commands On Higher GM Level Players
 #       (1024)Enable AuctionHouse Announcements
 #
+##################################################
+
 Botmask = 1023
 
 ##################################################
@@ -206,6 +243,8 @@ Botmask = 1023
 #     The prefix of the IRC logfile. Directories can be added here.
 #     Example: "IRC/IRC_" outputs IRC_YYYY-MM-DD.log to the IRC subdirectory in your logs dir
 #
+##################################################
+
 irc.gmlog = 1
 irc.logfile.prefix = "IRC_"
 
@@ -215,12 +254,16 @@ irc.logfile.prefix = "IRC_"
 #     Default: 0 - Disable
 #              1 - Enable
 #
+##################################################
+
 irc.fun.games = 0
 
 ##################################################
 # irc.gm#
 #     GM tag to append to (GM onjoin / online command) IRC color codes are acceptable
 #
+##################################################
+
 irc.gm1 = "[Moderator]"
 irc.gm2 = "[Game Master]"
 irc.gm3 = "[BugTracker]"

@@ -1442,6 +1442,12 @@ void GameObject::Use(Unit* user)
                 user->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
             AddUse();
+            // For Isle of Conquest teleports
+            if (user->GetTypeId() == TYPEID_PLAYER)
+                if (((Player*)user)->InBattleGround())
+                    if (BattleGround *bg = ((Player*)user)->GetBattleGround())
+                        bg->EventPlayerUsedGO(((Player*)user), this);
+
             break;
         }
         case GAMEOBJECT_TYPE_MEETINGSTONE:                  //23

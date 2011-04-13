@@ -1,10 +1,12 @@
-﻿-- Strand of the Ancients BattleGround
+-- Strand of the Ancients BattleGround
 
+REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `ScriptName`) VALUES
+(300000, 0, 7203, 'Forcefield 000', '', '', '', 1375, 32, 0.05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '');
 UPDATE `creature_template` SET npcflag=1, `ScriptName` = 'npc_sa_vendor' WHERE entry in (29260,29262);
 -- Seaforium source
 DELETE FROM `creature_template` WHERE `entry` in (50000);
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid_1`, `modelid_2`, `modelid_3`, `modelid_4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `minhealth`, `maxhealth`, `minmana`, `maxmana`, `armor`, `faction_A`, `faction_H`, `npcflag`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `PetSpellDataId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `unk16`, `unk17`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`) VALUES
-(50000, 0, 0, 0, 0, 0, 27462, 0, 27462, 0, 'Carga de Seforio', NULL, NULL, 0, 80, 80, 5000, 5000, 0, 0, 9730, 7, 7, 0, 1, 0.5, 0, 420, 630, 0, 157, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 336, 504, 126, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 94, 1, 0, 0, 0, 'npc_sa_bomb');
+(50000, 0, 0, 0, 0, 0, 27462, 0, 27462, 0, 'Seaforium Charge', NULL, NULL, 0, 80, 80, 5000, 5000, 0, 0, 9730, 7, 7, 0, 1, 0.5, 0, 420, 630, 0, 157, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 336, 504, 126, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 94, 1, 0, 0, 0, 'npc_sa_bomb');
 -- Doors
 UPDATE `gameobject_template` SET `faction` = 14 WHERE `entry` in (192549,190727,190726,190723,190724,190722);
 -- Seaforium barrels
@@ -13,12 +15,13 @@ INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconNa
 (190753, 22, 8582, 'Seaforium Barrel', '', '', '', 12, 0, 2, 0, 0, 0, 0, 0, 0, 52415, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ''),
 (194086, 22, 8582, 'Seaforium Barrel', '', '', '', 29, 0, 2, 0, 0, 0, 0, 0, 0, 52415, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '');
 -- Demolisher
-UPDATE creature_template SET npcflag = 1, minlevel = 70, maxlevel = 70, minhealth = 89820, maxhealth = 89820, spell1 = 52338, spell2 = 60206, `ScriptName` = 'npc_sa_demolisher' WHERE entry = 28781;
+UPDATE creature_template SET npcflag = 1, minlevel = 70, maxlevel = 70, minhealth = 50000, maxhealth = 89820, spell1 = 52338, spell2 = 60206, `ScriptName` = 'npc_sa_demolisher' WHERE entry = 28781;
+UPDATE `creature_template` SET `difficulty_entry_1` = 0 WHERE `entry` = 28781;
 UPDATE creature_template SET npcflag = 1, minlevel = 80, maxlevel = 80, minhealth = 126000, maxhealth = 126000, spell1 = 52338, spell2 = 60206, `ScriptName` = 'npc_sa_demolisher' WHERE entry = 32796;
 DELETE FROM npc_spellclick_spells WHERE npc_entry = 28781;
 INSERT INTO npc_spellclick_spells VALUES (28781, 60968, 0, 0, 0, 0);
 -- AP Cannon
-UPDATE `creature_template` SET `npcflag` = '1', unit_flags = '4108', minhealth = '60000', maxhealth = '60000', `faction_A` = '35', `faction_H` = '35', `ScriptName` = 'npc_sa_cannon' WHERE entry = '27894';
+UPDATE `creature_template` SET `npcflag` = '1', `difficulty_entry_1` = '0', unit_flags = '4108', minhealth = '25000', maxhealth = '60000', `faction_A` = '35', `faction_H` = '35', `ScriptName` = 'npc_sa_cannon' WHERE entry = '27894';
 DeleTe From `npc_spellclick_spells` WHERE npc_entry in (27894);
 INSERT INTO `npc_spellclick_spells` VALUES ('27894', '60968', '0', '0', '0', '0');
 -- Make Titan Relic clickable (hack, must be done via core, when door to Chamber of Ancient Relics is destroyed)
@@ -69,10 +72,10 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (200015, 28781, 607, 3, 1, 0, 0, 1594.24, 39.16, 7.49, 0.62, 450, 0, 0, 50000, 0, 0, 0),
 (200016, 28781, 607, 3, 1, 0, 0, 1618.60, 62.26, 7.17, 3.61, 450, 0, 0, 50000, 0, 0, 0),
 -- 
-(200027, 28781, 607, 3, 1, 0, 0, 1353.28, 224.092, 35.2432, 4.35363, 600, 5, 0, 50000, 0, 0, 0),
-(200028, 28781, 607, 3, 1, 0, 0, 1347.65, 208.805, 34.2892, 4.39378, 600, 5, 0, 50000, 0, 0, 0),
-(200029, 28781, 607, 3, 1, 0, 0, 1371.2, -317.169, 34.9982, 1.93504, 600, 5, 0, 50000, 0, 0, 0),
-(200030, 28781, 607, 3, 1, 0, 0, 1365.52, -301.854, 34.0439, 1.91998, 600, 5, 0, 50000, 0, 0, 0);
+(200027, 28781, 607, 3, 1, 0, 0, 1353.28, 224.092, 35.2432, 4.35363, 600, 0, 0, 50000, 0, 0, 0),
+(200028, 28781, 607, 3, 1, 0, 0, 1347.65, 208.805, 34.2892, 4.39378, 600, 0, 0, 50000, 0, 0, 0),
+(200029, 28781, 607, 3, 1, 0, 0, 1371.2, -317.169, 34.9982, 1.93504, 600, 0, 0, 50000, 0, 0, 0),
+(200030, 28781, 607, 3, 1, 0, 0, 1365.52, -301.854, 34.0439, 1.91998, 600, 0, 0, 50000, 0, 0, 0);
 
 DELETE FROM `creature_battleground` WHERE `guid` in (200001,200002,200003,200004,200005,200006,200007,200008,200009,200010,200011,200012,200013,200014,200015,200016,200027,200028,200029,200030);
 INSERT INTO `creature_battleground` (`guid` ,`event1` ,`event2`) VALUES
@@ -335,6 +338,25 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (300034, 191575, 607, 3, 1, 880.162, -95.979, 109.835, 3.14672, 0, 0, 0.999997, -0.00256531, 25, 0, 1),
 (300035, 191575, 607, 3, 1, 880.68, -120.799, 109.835, 3.16636, 0, 0, 0.999923, -0.0123816, 25, 0, 1);
 
+DELETE FROM `gameobject` WHERE `guid` in (300036,300037,300038,300039,300040,300041,300042,300043,300044,300045,300046,300047,300048,300049,300050,300051);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
+(300036, 190753, 607, 3, 1, 1352.69, 237.328, 34.9859, 2.95982, 0, 0, 0.995873, 0.0907596, 60, 0, 1),
+(300044, 194086, 607, 3, 1, 1352.69, 237.328, 34.9859, 2.95982, 0, 0, 0.995873, 0.0907596, 60, 0, 1),
+(300037, 190753, 607, 3, 1, 1356.65, 236.624, 35.0095, 2.99124, 0, 0, 0.997176, 0.0751059, 60, 0, 1),
+(300045, 194086, 607, 3, 1, 1356.65, 236.624, 35.0095, 2.99124, 0, 0, 0.997176, 0.0751059, 60, 0, 1),
+(300038, 190753, 607, 3, 1, 1359.74, 236.177, 35.0288, 2.99517, 0, 0, 0.997321, 0.0731478, 60, 0, 1),
+(300046, 194086, 607, 3, 1, 1359.74, 236.177, 35.0288, 2.99517, 0, 0, 0.997321, 0.0731478, 60, 0, 1),
+(300039, 190753, 607, 3, 1, 1363.2, 235.804, 35.0499, 3.03836, 0, 0, 0.998668, 0.0515918, 60, 0, 1),
+(300047, 194086, 607, 3, 1, 1363.2, 235.804, 35.0499, 3.03836, 0, 0, 0.998668, 0.0515918, 60, 0, 1),
+(300040, 190753, 607, 3, 1, 1379.51, -325.782, 34.7503, 0.717493, 0, 0, 0.351101, 0.936338, 60, 0, 1),
+(300048, 194086, 607, 3, 1, 1379.51, -325.782, 34.7503, 0.717493, 0, 0, 0.351101, 0.936338, 60, 0, 1),
+(300041, 190753, 607, 3, 1, 1376.67, -327.915, 34.7709, 0.713566, 0, 0, 0.349262, 0.937025, 60, 0, 1),
+(300049, 194086, 607, 3, 1, 1376.67, -327.915, 34.7709, 0.713566, 0, 0, 0.349262, 0.937025, 60, 0, 1),
+(300042, 190753, 607, 3, 1, 1373.95, -330.271, 34.7918, 0.713566, 0, 0, 0.349262, 0.937025, 60, 0, 1),
+(300050, 194086, 607, 3, 1, 1373.95, -330.271, 34.7918, 0.713566, 0, 0, 0.349262, 0.937025, 60, 0, 1),
+(300043, 190753, 607, 3, 1, 1371.55, -332.456, 34.8104, 0.741055, 0, 0, 0.362107, 0.932136, 60, 0, 1),
+(300051, 194086, 607, 3, 1, 1371.55, -332.456, 34.8104, 0.741055, 0, 0, 0.362107, 0.932136, 60, 0, 1);
+
 
 DELETE FROM `gameobject` WHERE `guid` in (300052,300053,300054,300055,300056,300057,300058,300059,300060,300061,300062,300063,300064,300065,300066,300067,300068,300069,300070,300071,300072,300073,300074,300075,300076,300077,300078,300079,300080,300081,300082,300083,300084,300085,300086);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
@@ -371,26 +393,8 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (300067, 190753, 607, 3, 1, 1625.5, 70.9844, 7.16443, 2.37941, 0, 0, 0.92826, 0.371932, 25, 0, 1),
 (300083, 194086, 607, 3, 1, 1625.5, 70.9844, 7.16443, 2.37941, 0, 0, 0.92826, 0.371932, 25, 0, 1);
 
-DELETE FROM `gameobject` WHERE `guid` in (300036,300037,300038,300039,300040,300041,300042,300043,300044,300045,300046,300047,300048,300049,300050,300051);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
-(300036, 190753, 607, 3, 1, 1352.69, 237.328, 34.9859, 2.95982, 0, 0, 0.995873, 0.0907596, 60, 0, 1),
-(300044, 194086, 607, 3, 1, 1352.69, 237.328, 34.9859, 2.95982, 0, 0, 0.995873, 0.0907596, 60, 0, 1),
-(300037, 190753, 607, 3, 1, 1356.65, 236.624, 35.0095, 2.99124, 0, 0, 0.997176, 0.0751059, 60, 0, 1),
-(300045, 194086, 607, 3, 1, 1356.65, 236.624, 35.0095, 2.99124, 0, 0, 0.997176, 0.0751059, 60, 0, 1),
-(300038, 190753, 607, 3, 1, 1359.74, 236.177, 35.0288, 2.99517, 0, 0, 0.997321, 0.0731478, 60, 0, 1),
-(300046, 194086, 607, 3, 1, 1359.74, 236.177, 35.0288, 2.99517, 0, 0, 0.997321, 0.0731478, 60, 0, 1),
-(300039, 190753, 607, 3, 1, 1363.2, 235.804, 35.0499, 3.03836, 0, 0, 0.998668, 0.0515918, 60, 0, 1),
-(300047, 194086, 607, 3, 1, 1363.2, 235.804, 35.0499, 3.03836, 0, 0, 0.998668, 0.0515918, 60, 0, 1),
-(300040, 190753, 607, 3, 1, 1379.51, -325.782, 34.7503, 0.717493, 0, 0, 0.351101, 0.936338, 60, 0, 1),
-(300048, 194086, 607, 3, 1, 1379.51, -325.782, 34.7503, 0.717493, 0, 0, 0.351101, 0.936338, 60, 0, 1),
-(300041, 190753, 607, 3, 1, 1376.67, -327.915, 34.7709, 0.713566, 0, 0, 0.349262, 0.937025, 60, 0, 1),
-(300049, 194086, 607, 3, 1, 1376.67, -327.915, 34.7709, 0.713566, 0, 0, 0.349262, 0.937025, 60, 0, 1),
-(300042, 190753, 607, 3, 1, 1373.95, -330.271, 34.7918, 0.713566, 0, 0, 0.349262, 0.937025, 60, 0, 1),
-(300050, 194086, 607, 3, 1, 1373.95, -330.271, 34.7918, 0.713566, 0, 0, 0.349262, 0.937025, 60, 0, 1),
-(300043, 190753, 607, 3, 1, 1371.55, -332.456, 34.8104, 0.741055, 0, 0, 0.362107, 0.932136, 60, 0, 1),
-(300051, 194086, 607, 3, 1, 1371.55, -332.456, 34.8104, 0.741055, 0, 0, 0.362107, 0.932136, 60, 0, 1);
-
 DELETE FROM `gameobject` WHERE `guid` in (300084,300085,300086);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (300084, 300000, 607, 3, 1, 1803.93, -168.457, 60.549, 2.74522, 0, 0, 0.980426, 0.196889, 250000, 0, 1),
-(300085, 300000, 607, 3, 1, 1803.71, 118.601, 59.8234, 3.56313, 0, 0, 0.97787, -0.209212, 250000, 0, 1);
+(300085, 300000, 607, 3, 1, 1803.71, 118.601, 59.8234, 3.56313, 0, 0, 0.97787, -0.209212, 250000, 0, 1),
+(300086, 184719, 607, 1, 1, 1200.67, -67.87, 70.08, 6.28297, 0, 0, 0.000106724, -1, 250000, 0, 1);

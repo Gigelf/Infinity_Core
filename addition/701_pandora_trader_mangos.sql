@@ -12,10 +12,10 @@ DELETE FROM `creature` WHERE (`guid`=99321);
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `DeathState`, `MovementType`) VALUES
 (99321, 99321, 571, 1, 1, 25811, 0, 5809.08, 623.377, 647.744, 2.0217, 600, 0, 0, 22000, 0, 0, 0);
 
-#--- Итемы
+--- Итемы
 DELETE FROM `npc_vendor` WHERE (`entry`=99321);
 
-INSERT INTO `npc_vendor` VALUES (99321, 41596, 0, 0 ,3707);
+INSERT INTO `npc_vendor` VALUES (99321, 41596, 0, 0 ,2707);
 INSERT INTO `npc_vendor` VALUES (99321, 47241, 0, 0 ,1909);
 INSERT INTO `npc_vendor` VALUES (99321, 44990, 0, 0 ,2707);
 INSERT INTO `npc_vendor` VALUES (99321, 43228, 0, 0 ,2707);
