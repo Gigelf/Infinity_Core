@@ -26,7 +26,7 @@
 
 .686
 .model flat,c
-.code 
+.code
 	ALIGN 4
 	PUBLIC c __TBB_machine_fetchadd1
 __TBB_machine_fetchadd1:
@@ -34,7 +34,7 @@ __TBB_machine_fetchadd1:
 	mov eax,8[esp]
 	lock xadd [edx],al
 	ret
-.code 
+.code
 	ALIGN 4
 	PUBLIC c __TBB_machine_fetchstore1
 __TBB_machine_fetchstore1:
@@ -42,7 +42,7 @@ __TBB_machine_fetchstore1:
 	mov eax,8[esp]
 	lock xchg [edx],al
 	ret
-.code 
+.code
 	ALIGN 4
 	PUBLIC c __TBB_machine_cmpswp1
 __TBB_machine_cmpswp1:
@@ -51,7 +51,7 @@ __TBB_machine_cmpswp1:
 	mov eax,12[esp]
 	lock cmpxchg [edx],cl
 	ret
-.code 
+.code
 	ALIGN 4
 	PUBLIC c __TBB_machine_fetchadd2
 __TBB_machine_fetchadd2:
@@ -59,7 +59,7 @@ __TBB_machine_fetchadd2:
 	mov eax,8[esp]
 	lock xadd [edx],ax
 	ret
-.code 
+.code
 	ALIGN 4
 	PUBLIC c __TBB_machine_fetchstore2
 __TBB_machine_fetchstore2:
@@ -67,7 +67,7 @@ __TBB_machine_fetchstore2:
 	mov eax,8[esp]
 	lock xchg [edx],ax
 	ret
-.code 
+.code
 	ALIGN 4
 	PUBLIC c __TBB_machine_cmpswp2
 __TBB_machine_cmpswp2:
@@ -76,7 +76,7 @@ __TBB_machine_cmpswp2:
 	mov eax,12[esp]
 	lock cmpxchg [edx],cx
 	ret
-.code 
+.code
 	ALIGN 4
 	PUBLIC c __TBB_machine_fetchadd4
 __TBB_machine_fetchadd4:
@@ -84,7 +84,7 @@ __TBB_machine_fetchadd4:
 	mov eax,8[esp]
 	lock xadd [edx],eax
 	ret
-.code 
+.code
 	ALIGN 4
 	PUBLIC c __TBB_machine_fetchstore4
 __TBB_machine_fetchstore4:
@@ -92,7 +92,7 @@ __TBB_machine_fetchstore4:
 	mov eax,8[esp]
 	lock xchg [edx],eax
 	ret
-.code 
+.code
 	ALIGN 4
 	PUBLIC c __TBB_machine_cmpswp4
 __TBB_machine_cmpswp4:
@@ -101,7 +101,7 @@ __TBB_machine_cmpswp4:
 	mov eax,12[esp]
 	lock cmpxchg [edx],ecx
 	ret
-.code 
+.code
 	ALIGN 4
 	PUBLIC c __TBB_machine_fetchadd8
 __TBB_machine_fetchadd8:
@@ -120,7 +120,7 @@ __TBB_machine_fetchadd8_loop:
 	pop edi
 	pop ebx
 	ret
-.code 
+.code
 	ALIGN 4
 	PUBLIC c __TBB_machine_fetchstore8
 __TBB_machine_fetchstore8:
@@ -137,7 +137,7 @@ __TBB_machine_fetchstore8_loop:
 	pop edi
 	pop ebx
 	ret
-.code 
+.code
 	ALIGN 4
 	PUBLIC c __TBB_machine_cmpswp8
 __TBB_machine_cmpswp8:
@@ -152,7 +152,7 @@ __TBB_machine_cmpswp8:
 	pop edi
 	pop ebx
 	ret
-.code 
+.code
 	ALIGN 4
 	PUBLIC c __TBB_machine_load8
 __TBB_machine_Load8:
@@ -182,7 +182,7 @@ load_slow:
 	pop ebx
 	ret
 EXTRN __TBB_machine_store8_slow:PROC
-.code 
+.code
 	ALIGN 4
 	PUBLIC c __TBB_machine_store8
 __TBB_machine_Store8:

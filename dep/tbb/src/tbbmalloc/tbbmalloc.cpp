@@ -67,7 +67,7 @@ static void* (*original_realloc_ptr)(void*,size_t) = 0;
 #endif /* MALLOC_CHECK_RECURSION */
 
 #if __TBB_NEW_ITT_NOTIFY
-extern "C" 
+extern "C"
 #endif
 void ITT_DoOneTimeInitialization() {} // required for itt_notify.cpp to work
 

@@ -424,7 +424,7 @@ void WorldSession::SendLfgUpdateParty(LFGUpdateType updateType, LFGType type)
             queued = true;
             break;
         case LFG_UPDATETYPE_CLEAR_LOCK_LIST:
-            // join = true;  
+            // join = true;
             // TODO: Sometimes queued and extrainfo - Check ocurrences...
             queued = true;
             extrainfo = false;

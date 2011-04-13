@@ -1852,7 +1852,7 @@ bool ChatHandler::HandleJailCommand(char *args)
            }
         delete resultgm;
     }
- 
+
     Player *chr = sObjectMgr.GetPlayer(GUID);
     if (!chr)
     {

@@ -61,7 +61,7 @@ class input_buffer {
 
     typedef  Token  size_type;
 
-    //! Array of deferred tasks that cannot yet start executing. 
+    //! Array of deferred tasks that cannot yet start executing.
     task_info* array;
 
     //! Size of array
@@ -86,16 +86,16 @@ class input_buffer {
     //! Used only for out of order buffer.
     Token high_token;
 
-    //! True for ordered filter, false otherwise. 
+    //! True for ordered filter, false otherwise.
     bool is_ordered;
 
-    //! True for thread-bound filter, false otherwise. 
+    //! True for thread-bound filter, false otherwise.
     bool is_bound;
 public:
     //! Construct empty buffer.
-    input_buffer( bool is_ordered_, bool is_bound_ ) : 
+    input_buffer( bool is_ordered_, bool is_bound_ ) :
             array(NULL), array_size(0),
-            low_token(0), high_token(0), 
+            low_token(0), high_token(0),
             is_ordered(is_ordered_), is_bound(is_bound_) {
         grow(initial_buffer_size);
         __TBB_ASSERT( array, NULL );
@@ -130,7 +130,7 @@ public:
             if( token!=low_token || is_bound ) {
                 // Trying to put token that is beyond low_token.
                 // Need to wait until low_token catches up before dispatching.
-                if( token-low_token>=array_size ) 
+                if( token-low_token>=array_size )
                     grow( token-low_token+1 );
                 ITT_NOTIFY( sync_releasing, this );
                 putter.put_task_info(array[token&array_size-1]);
@@ -201,7 +201,7 @@ public:
         } else
             token = high_token++;
         __TBB_ASSERT( (tokendiff_t)(token-low_token)>=0, NULL );
-        if( token-low_token>=array_size ) 
+        if( token-low_token>=array_size )
             grow( token-low_token+1 );
         ITT_NOTIFY( sync_releasing, this );
         array[token&array_size-1] = info;
@@ -211,7 +211,7 @@ public:
 void input_buffer::grow( size_type minimum_size ) {
     size_type old_size = array_size;
     size_type new_size = old_size ? 2*old_size : initial_buffer_size;
-    while( new_size<minimum_size ) 
+    while( new_size<minimum_size )
         new_size*=2;
     task_info* new_array = cache_aligned_allocator<task_info>().allocate(new_size);
     task_info* old_array = array;
@@ -230,14 +230,14 @@ class stage_task: public task, public task_info {
 private:
     friend class tbb::pipeline;
     pipeline& my_pipeline;
-    filter* my_filter;  
+    filter* my_filter;
     //! True if this task has not yet read the input.
     bool my_at_start;
 public:
     //! Construct stage_task for first stage in a pipeline.
     /** Such a stage has not read any input yet. */
     stage_task( pipeline& pipeline ) :
-        my_pipeline(pipeline), 
+        my_pipeline(pipeline),
         my_filter(pipeline.filter_list),
         my_at_start(true)
     {
@@ -246,7 +246,7 @@ public:
     //! Construct stage_task for a subsequent stage in a pipeline.
     stage_task( pipeline& pipeline, filter* filter_, const task_info& info ) :
         task_info(info),
-        my_pipeline(pipeline), 
+        my_pipeline(pipeline),
         my_filter(filter_),
         my_at_start(false)
     {}
@@ -259,7 +259,7 @@ public:
     //! The virtual task execution method
     /*override*/ task* execute();
 #if __TBB_EXCEPTIONS
-    ~stage_task()    
+    ~stage_task()
     {
         if (my_filter && my_object && (my_filter->my_filter_mode & filter::version_mask) >= __TBB_PIPELINE_VERSION(4)) {
             __TBB_ASSERT(is_cancelled(), "Trying to finalize the task that wasn't cancelled");
@@ -271,7 +271,7 @@ public:
     //! Creates and spawns stage_task from task_info
     void spawn_stage_task(const task_info& info)
     {
-        stage_task* clone = new (allocate_additional_child_of(*parent())) 
+        stage_task* clone = new (allocate_additional_child_of(*parent()))
                                 stage_task( my_pipeline, my_filter, info );
         spawn(*clone);
     }
@@ -307,7 +307,7 @@ task* stage_task::execute() {
                         spawn( *new( allocate_additional_child_of(*parent()) ) stage_task( my_pipeline ) );
                 }
             } else {
-                my_pipeline.end_of_input = true; 
+                my_pipeline.end_of_input = true;
                 return NULL;
             }
         } else /*not is_serial*/ {
@@ -322,7 +322,7 @@ task* stage_task::execute() {
                 spawn( *new( allocate_additional_child_of(*parent()) ) stage_task( my_pipeline ) );
             my_object = (*my_filter)(my_object);
             if( !my_object ) {
-                my_pipeline.end_of_input = true; 
+                my_pipeline.end_of_input = true;
                 if( (my_filter->my_filter_mode & my_filter->version_mask) >= __TBB_PIPELINE_VERSION(5) ) {
                     if( my_pipeline.has_thread_bound_filters )
                         my_pipeline.token_counter--;
@@ -336,7 +336,7 @@ task* stage_task::execute() {
         if( my_filter->is_serial() )
             my_filter->my_input_buffer->note_done(my_token, *this);
     }
-    my_filter = my_filter->next_filter_in_pipeline; 
+    my_filter = my_filter->next_filter_in_pipeline;
     if( my_filter ) {
         // There is another filter to execute.
         // Crank up priority a notch.
@@ -351,9 +351,9 @@ task* stage_task::execute() {
                         my_filter = my_filter->next_filter_in_pipeline;
                     } while( my_filter && my_filter->is_bound() );
                     // Check if there is an item ready to process
-                    if( my_filter && my_filter->my_input_buffer->return_item(*this, !my_filter->is_serial()) ) 
+                    if( my_filter && my_filter->my_input_buffer->return_item(*this, !my_filter->is_serial()) )
                         goto process_another_stage;
-                } 
+                }
                 my_filter = NULL; // To prevent deleting my_object twice if exception occurs
                 return NULL;
             }
@@ -388,7 +388,7 @@ class pipeline_root_task: public task {
                 }
         if( do_segment_scanning ) {
             filter* current_filter = my_pipeline.filter_list->next_segment;
-            /* first non-thread-bound filter that follows thread-bound one 
+            /* first non-thread-bound filter that follows thread-bound one
             and may have valid items to process */
             filter* first_suitable_filter = current_filter;
             while( current_filter ) {
@@ -413,15 +413,15 @@ class pipeline_root_task: public task {
                         current_filter = first_suitable_filter;
                         __TBB_Yield();
                     }
-                } else { 
-                    /* The preceding pipeline segment is empty. 
+                } else {
+                    /* The preceding pipeline segment is empty.
                     Fast-forward to the next post-TBF segment. */
                     first_suitable_filter = first_suitable_filter->next_segment;
-                    current_filter = first_suitable_filter; 
+                    current_filter = first_suitable_filter;
                 }
             } /* end of while */
             return NULL;
-        } else { 
+        } else {
             if( !my_pipeline.end_of_input ) {
                 recycle_as_continuation();
                 return this;
@@ -435,7 +435,7 @@ public:
         __TBB_ASSERT( my_pipeline.filter_list, NULL );
         filter* first = my_pipeline.filter_list;
         if( (first->my_filter_mode & first->version_mask) >= __TBB_PIPELINE_VERSION(5) ) {
-            // Scanning the pipeline for segments 
+            // Scanning the pipeline for segments
             filter* head_of_previous_segment = first;
             for(  filter* subfilter=first->next_filter_in_pipeline;
                   subfilter!=NULL;
@@ -459,17 +459,17 @@ public:
 
 // The class destroys end_counter and clears all input buffers if pipeline was cancelled.
 class pipeline_cleaner: internal::no_copy {
-    pipeline& my_pipeline;  
+    pipeline& my_pipeline;
 public:
-    pipeline_cleaner(pipeline& _pipeline) : 
+    pipeline_cleaner(pipeline& _pipeline) :
         my_pipeline(_pipeline)
     {}
     ~pipeline_cleaner(){
 #if __TBB_EXCEPTIONS
         if (my_pipeline.end_counter->is_cancelled()) // Pipeline was cancelled
-            my_pipeline.clear_filters(); 
+            my_pipeline.clear_filters();
 #endif
-        my_pipeline.end_counter = NULL;            
+        my_pipeline.end_counter = NULL;
     }
 };
 
@@ -489,7 +489,7 @@ void pipeline::clear_filters() {
 }
 #endif
 
-pipeline::pipeline() : 
+pipeline::pipeline() :
     filter_list(NULL),
     filter_end(NULL),
     end_counter(NULL),
@@ -508,7 +508,7 @@ void pipeline::clear() {
     filter* next;
     for( filter* f = filter_list; f; f=next ) {
         if( internal::input_buffer* b = f->my_input_buffer ) {
-            delete b; 
+            delete b;
             f->my_input_buffer = NULL;
         }
         next=f->next_filter_in_pipeline;
@@ -525,11 +525,11 @@ void pipeline::clear() {
 
 void pipeline::add_filter( filter& filter_ ) {
 #if TBB_USE_ASSERT
-    if ( (filter_.my_filter_mode & filter::version_mask) >= __TBB_PIPELINE_VERSION(3) ) 
+    if ( (filter_.my_filter_mode & filter::version_mask) >= __TBB_PIPELINE_VERSION(3) )
         __TBB_ASSERT( filter_.prev_filter_in_pipeline==filter::not_in_pipeline(), "filter already part of pipeline?" );
     __TBB_ASSERT( filter_.next_filter_in_pipeline==filter::not_in_pipeline(), "filter already part of pipeline?" );
     __TBB_ASSERT( !end_counter, "invocation of add_filter on running pipeline" );
-#endif    
+#endif
     if ( (filter_.my_filter_mode & filter::version_mask) >= __TBB_PIPELINE_VERSION(3) ) {
         filter_.my_pipeline = this;
         filter_.prev_filter_in_pipeline = filter_end;
@@ -544,7 +544,7 @@ void pipeline::add_filter( filter& filter_ ) {
     {
         if( !filter_end )
             filter_end = reinterpret_cast<filter*>(&filter_list);
-        
+
         *reinterpret_cast<filter**>(filter_end) = &filter_;
         filter_end = reinterpret_cast<filter*>(&filter_.next_filter_in_pipeline);
         *reinterpret_cast<filter**>(filter_end) = NULL;
@@ -568,20 +568,20 @@ void pipeline::add_filter( filter& filter_ ) {
 }
 
 void pipeline::remove_filter( filter& filter_ ) {
-    if (&filter_ == filter_list) 
+    if (&filter_ == filter_list)
         filter_list = filter_.next_filter_in_pipeline;
     else {
-        __TBB_ASSERT( filter_.prev_filter_in_pipeline, "filter list broken?" ); 
+        __TBB_ASSERT( filter_.prev_filter_in_pipeline, "filter list broken?" );
         filter_.prev_filter_in_pipeline->next_filter_in_pipeline = filter_.next_filter_in_pipeline;
     }
     if (&filter_ == filter_end)
         filter_end = filter_.prev_filter_in_pipeline;
     else {
-        __TBB_ASSERT( filter_.next_filter_in_pipeline, "filter list broken?" ); 
+        __TBB_ASSERT( filter_.next_filter_in_pipeline, "filter list broken?" );
         filter_.next_filter_in_pipeline->prev_filter_in_pipeline = filter_.prev_filter_in_pipeline;
     }
     if( internal::input_buffer* b = filter_.my_input_buffer ) {
-        delete b; 
+        delete b;
         filter_.my_input_buffer = NULL;
     }
     filter_.next_filter_in_pipeline = filter_.prev_filter_in_pipeline = filter::not_in_pipeline();
@@ -600,7 +600,7 @@ void pipeline::run( size_t max_number_of_live_tokens
     if( filter_list ) {
         internal::pipeline_cleaner my_pipeline_cleaner(*this);
         end_of_input = false;
-#if __TBB_EXCEPTIONS            
+#if __TBB_EXCEPTIONS
         end_counter = new( task::allocate_root(context) ) internal::pipeline_root_task( *this );
 #else
         end_counter = new( task::allocate_root() ) internal::pipeline_root_task( *this );
@@ -608,7 +608,7 @@ void pipeline::run( size_t max_number_of_live_tokens
         input_tokens = internal::Token(max_number_of_live_tokens);
         // Start execution of tasks
         task::spawn_root_and_wait( *end_counter );
-    } 
+    }
 }
 
 #if __TBB_EXCEPTIONS
@@ -620,10 +620,10 @@ void pipeline::run( size_t max_number_of_live_tokens ) {
 
 filter::~filter() {
     if ( (my_filter_mode & version_mask) >= __TBB_PIPELINE_VERSION(3) ) {
-        if ( next_filter_in_pipeline != filter::not_in_pipeline() ) { 
+        if ( next_filter_in_pipeline != filter::not_in_pipeline() ) {
             __TBB_ASSERT( prev_filter_in_pipeline != filter::not_in_pipeline(), "probably filter list is broken" );
             my_pipeline->remove_filter(*this);
-        } else 
+        } else
             __TBB_ASSERT( prev_filter_in_pipeline == filter::not_in_pipeline(), "probably filter list is broken" );
     } else {
         __TBB_ASSERT( next_filter_in_pipeline==filter::not_in_pipeline(), "cannot destroy filter that is part of pipeline" );
@@ -641,7 +641,7 @@ thread_bound_filter::result_type thread_bound_filter::try_process_item() {
 thread_bound_filter::result_type thread_bound_filter::internal_process_item(bool is_blocking) {
     internal::task_info info;
     info.reset();
-    
+
     if( !prev_filter_in_pipeline ) {
         if( my_pipeline->end_of_input )
             return end_of_stream;
@@ -660,8 +660,8 @@ thread_bound_filter::result_type thread_bound_filter::internal_process_item(bool
             }
             my_pipeline->token_counter++; // ideally, with relaxed semantics
         } else {
-            my_pipeline->end_of_input = true; 
-            return end_of_stream; 
+            my_pipeline->end_of_input = true;
+            return end_of_stream;
         }
     } else { /* this is not an input filter */
         while( !my_input_buffer->return_item(info, /*advance=*/true) ) {

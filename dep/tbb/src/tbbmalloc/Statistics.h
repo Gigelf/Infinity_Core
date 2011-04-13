@@ -56,7 +56,7 @@ enum common_counter_type {
 };
 
 #if COLLECT_STATISTICS
-/* Statistics reporting callback registred via a static object dtor 
+/* Statistics reporting callback registred via a static object dtor
    on Posix or DLL_PROCESS_DETACH on Windows.
  */
 

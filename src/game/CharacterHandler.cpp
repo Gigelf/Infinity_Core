@@ -1300,7 +1300,7 @@ void WorldSession::HandleCharFactionOrRaceChangeOpcode(WorldPacket& recv_data)
                 break;
             default: break;
         }
-        
+
         // Reset homebind
         CharacterDatabase.PExecute("DELETE FROM `character_homebind` WHERE guid = '%u'", guid.GetCounter());
         if(team == BG_TEAM_ALLIANCE)

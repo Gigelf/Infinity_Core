@@ -398,7 +398,7 @@ enum EUnitFields
    INFINITY_AP_MELEE_2                        = 0x007C, // TYPE: INT
    INFINITY_AP_RANGED_1                       = 0x007E, // TYPE: INT
    INFINITY_AP_RANGED_2                       = 0x007F, // TYPE: INT
- 
+
    INFINITY_BLOCKRATING                       = 0x04D3, // TYPE: INT
    INFINITY_DEFRATING                         = 0x04D0, // TYPE: INT
    INFINITY_DODGERATING                       = 0x04D1, // TYPE: INT
@@ -407,7 +407,7 @@ enum EUnitFields
 
    INFINITY_MANAREGEN                         = 0x0028, // TYPE: FLOAT
 
-   INFINITY_MELEE_HITRATING                   = 0x04D4, // TYPE: INT 
+   INFINITY_MELEE_HITRATING                   = 0x04D4, // TYPE: INT
    INFINITY_MELEE_CRITRATING                  = 0x04D7, // TYPE: INT
    INFINITY_MELEE_HASTERATING                 = 0x04E0, // TYPE: INT
    INFINITY_MELEE_MAINMINDMG                  = 0x0046, // TYPE: FLOAT
@@ -423,7 +423,7 @@ enum EUnitFields
    INFINITY_RANGED_MINDMG                     = 0x0081, // TYPE: FLOAT
    INFINITY_RANGED_MAXDMG                     = 0x0082, // TYPE: FLOAT
    INFINITY_RANGED_ATTACKTIME                 = 0x003F, // TYPE: FLOAT
- 
+
    INFINITY_SPELL_HITRATING                   = 0x04D6, // TYPE: INT
    INFINITY_SPELL_CRITRATING                  = 0x04D9, // TYPE: INT
    INFINITY_SPELL_HASTERATING                 = 0x04E2, // TYPE: INT

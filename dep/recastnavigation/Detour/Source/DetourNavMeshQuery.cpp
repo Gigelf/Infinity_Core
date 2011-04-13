@@ -1300,7 +1300,7 @@ dtStatus dtNavMeshQuery::findStraightPath(const float* startPos, const float* en
 		}
 	}
 	
-	// If the point already exists, remove it and add reappend the actual end location.  
+	// If the point already exists, remove it and add reappend the actual end location.
 	if (n > 0 && dtVequal(&straightPath[(n-1)*3], closestEndPos))
 		n--;
 	
@@ -2357,8 +2357,8 @@ dtStatus dtNavMeshQuery::getPolyWallSegments(dtPolyRef ref, const dtQueryFilter*
 			}
 			else
 			{
-				const float tmin = imin/255.0f; 
-				const float tmax = imax/255.0f; 
+				const float tmin = imin/255.0f;
+				const float tmax = imax/255.0f;
 				if (n < maxSegments)
 				{
 					float* seg = &segments[n*6];

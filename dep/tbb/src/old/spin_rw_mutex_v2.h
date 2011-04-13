@@ -44,7 +44,7 @@ class spin_rw_mutex {
     //! Internal acquire write lock.
     static bool __TBB_EXPORTED_FUNC internal_acquire_writer(spin_rw_mutex *);
 
-    //! Out of line code for releasing a write lock.  
+    //! Out of line code for releasing a write lock.
     /** This code is has debug checking and instrumentation for Intel(R) Thread Checker and Intel(R) Thread Profiler. */
     static void __TBB_EXPORTED_FUNC internal_release_writer(spin_rw_mutex *);
 
@@ -54,7 +54,7 @@ class spin_rw_mutex {
     //! Internal upgrade reader to become a writer.
     static bool __TBB_EXPORTED_FUNC internal_upgrade(spin_rw_mutex *);
 
-    //! Out of line code for downgrading a writer to a reader.   
+    //! Out of line code for downgrading a writer to a reader.
     /** This code is has debug checking and instrumentation for Intel(R) Thread Checker and Intel(R) Thread Profiler. */
     static void __TBB_EXPORTED_FUNC internal_downgrade(spin_rw_mutex *);
 
@@ -102,7 +102,7 @@ public:
         //! Acquire lock on given mutex.
         void acquire( spin_rw_mutex& m, bool write = true ) {
             __TBB_ASSERT( !mutex, "holding mutex already" );
-            is_writer = write; 
+            is_writer = write;
             mutex = &m;
             if( write ) internal_acquire_writer(mutex);
             else        internal_acquire_reader(mutex);
@@ -113,20 +113,20 @@ public:
         bool upgrade_to_writer() {
             __TBB_ASSERT( mutex, "lock is not acquired" );
             __TBB_ASSERT( !is_writer, "not a reader" );
-            is_writer = true; 
+            is_writer = true;
             return internal_upgrade(mutex);
         }
 
         //! Release lock.
         void release() {
             __TBB_ASSERT( mutex, "lock is not acquired" );
-            spin_rw_mutex *m = mutex; 
+            spin_rw_mutex *m = mutex;
             mutex = NULL;
             if( is_writer ) {
 #if TBB_DO_THREADING_TOOLS||TBB_DO_ASSERT
                 internal_release_writer(m);
 #else
-                m->state = 0; 
+                m->state = 0;
 #endif /* TBB_DO_THREADING_TOOLS||TBB_DO_ASSERT */
             } else {
                 internal_release_reader(m);
@@ -151,7 +151,7 @@ public:
         bool try_acquire( spin_rw_mutex& m, bool write = true ) {
             __TBB_ASSERT( !mutex, "holding mutex already" );
             bool result;
-            is_writer = write; 
+            is_writer = write;
             result = write? internal_try_acquire_writer(&m)
                           : internal_try_acquire_reader(&m);
             if( result ) mutex = &m;

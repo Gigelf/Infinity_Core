@@ -151,7 +151,7 @@ void dtNodeQueue::trickleDown(int i, dtNode* node)
 	int child = (i*2)+1;
 	while (child < m_size)
 	{
-		if (((child+1) < m_size) && 
+		if (((child+1) < m_size) &&
 			(m_heap[child]->total > m_heap[child+1]->total))
 		{
 			child++;

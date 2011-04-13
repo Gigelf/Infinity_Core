@@ -1,8 +1,8 @@
 /**
  @file stringutils.h
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
  @author  2000-09-09
  @edited  2008-08-05
  */
@@ -19,7 +19,7 @@ namespace G3D {
 extern const char* NEWLINE;
 
 /** Separates a comma-separated line, properly escaping commas within
-    double quotes (") and super quotes ("""). This matches Microsoft Excel's 
+    double quotes (") and super quotes ("""). This matches Microsoft Excel's
     CSV output.
 
     \param stripQuotes If true, strips leading and trailing " and """

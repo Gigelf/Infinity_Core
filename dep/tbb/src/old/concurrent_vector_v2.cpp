@@ -86,9 +86,9 @@ void concurrent_vector_base::helper::extend_segment( concurrent_vector_base& v )
     while( !v.my_storage[0].array || !v.my_storage[1].array ) {
         backoff.pause();
     }
-    s[0] = v.my_storage[0]; 
-    s[1] = v.my_storage[1]; 
-    if( v.my_segment.compare_and_swap( s, v.my_storage )!=v.my_storage ) 
+    s[0] = v.my_storage[0];
+    s[1] = v.my_storage[1];
+    if( v.my_segment.compare_and_swap( s, v.my_storage )!=v.my_storage )
         NFS_Free(s);
 }
 
@@ -119,7 +119,7 @@ void concurrent_vector_base::internal_copy( const concurrent_vector_base& src, s
             size_t m = segment_size(k);
             __TBB_ASSERT( !my_segment[k].array, "concurrent operation during copy construction?" );
             my_segment[k].array = NFS_Allocate( m, element_size, NULL );
-            if( m>n-b ) m = n-b; 
+            if( m>n-b ) m = n-b;
             copy( my_segment[k].array, src.my_segment[k].array, m );
         }
     }
@@ -127,7 +127,7 @@ void concurrent_vector_base::internal_copy( const concurrent_vector_base& src, s
 
 void concurrent_vector_base::internal_assign( const concurrent_vector_base& src, size_type element_size, internal_array_op1 destroy, internal_array_op2 assign, internal_array_op2 copy ) {
     size_type n = src.my_early_size;
-    while( my_early_size>n ) { 
+    while( my_early_size>n ) {
         segment_index_t k = segment_index_of( my_early_size-1 );
         size_type b=segment_base(k);
         size_type new_end = b>=n ? b : n;
@@ -143,16 +143,16 @@ void concurrent_vector_base::internal_assign( const concurrent_vector_base& src,
         size_t m = segment_size(k);
         if( !my_segment[k].array )
             my_segment[k].array = NFS_Allocate( m, element_size, NULL );
-        if( m>n-b ) m = n-b; 
+        if( m>n-b ) m = n-b;
         size_type a = 0;
         if( dst_initialized_size>b ) {
             a = dst_initialized_size-b;
             if( a>m ) a = m;
             assign( my_segment[k].array, src.my_segment[k].array, a );
-            m -= a; 
-            a *= element_size; 
+            m -= a;
+            a *= element_size;
         }
-        if( m>0 ) 
+        if( m>0 )
             copy( (char*)my_segment[k].array+a, (char*)src.my_segment[k].array+a, m );
     }
     __TBB_ASSERT( src.my_early_size==n, "detected use of ConcurrentVector::operator= with right side that was concurrently modified" );
@@ -250,14 +250,14 @@ void concurrent_vector_base::internal_clear( internal_array_op1 destroy, bool re
             s.array = NULL;
             NFS_Free( array );
         }
-        // Clear short segment.  
+        // Clear short segment.
         my_storage[0].array = NULL;
         my_storage[1].array = NULL;
         segment_t* s = my_segment;
         if( s!=my_storage ) {
             my_segment = my_storage;
             NFS_Free( s );
-        } 
+        }
     }
 }
 

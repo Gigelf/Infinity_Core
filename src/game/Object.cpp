@@ -265,13 +265,13 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint16 updateFlags) const
                     // (ok) most seem to have this
                     unit->m_movementInfo.AddMovementFlag(MOVEFLAG_LEVITATING);
 
-                    // Add flying effect. This should be in db, having trouble with pets 
-                    // needs more testing 
-                    if(!((Creature*)unit)->HasSplineFlag(SPLINEFLAG_UNKNOWN7)) 
-                        ((Creature*)unit)->AddSplineFlag(SPLINEFLAG_UNKNOWN7); 
-             
-                    if(!((Creature*)unit)->HasSplineFlag(SPLINEFLAG_UNKNOWN5)) 
-                        ((Creature*)unit)->AddSplineFlag(SPLINEFLAG_UNKNOWN5); 
+                    // Add flying effect. This should be in db, having trouble with pets
+                    // needs more testing
+                    if(!((Creature*)unit)->HasSplineFlag(SPLINEFLAG_UNKNOWN7))
+                        ((Creature*)unit)->AddSplineFlag(SPLINEFLAG_UNKNOWN7);
+
+                    if(!((Creature*)unit)->HasSplineFlag(SPLINEFLAG_UNKNOWN5))
+                        ((Creature*)unit)->AddSplineFlag(SPLINEFLAG_UNKNOWN5);
 
 
                     if (!((Creature*)unit)->hasUnitState(UNIT_STAT_MOVING))
@@ -1520,7 +1520,7 @@ void WorldObject::UpdateGroundPositionZ(float x, float y, float &z, float maxDif
         useVmaps = !useVmaps;                                // try change vmap use
         normalizedZ = GetTerrain()->GetHeight(x, y, z, useVmaps);
         if(normalizedZ <= INVALID_HEIGHT || fabs(normalizedZ-z) > maxDiff)
-            return;                                        // Do nothing in case of another bad result 
+            return;                                        // Do nothing in case of another bad result
     }
     z = normalizedZ + 0.1f;                                // just to be sure that we are not a few pixel under the surface
 }

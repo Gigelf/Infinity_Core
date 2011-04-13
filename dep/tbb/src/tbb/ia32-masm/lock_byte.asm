@@ -27,7 +27,7 @@
 ; DO NOT EDIT - AUTOMATICALLY GENERATED FROM .s FILE
 .686
 .model flat,c
-.code 
+.code
 	ALIGN 4
 	PUBLIC c __TBB_machine_trylockbyte
 __TBB_machine_trylockbyte:

@@ -106,7 +106,7 @@ bool dynamic_link( const char* library, const dynamic_link_descriptor descriptor
     dynamic_link_handle module = LoadLibrary (library);
     SetErrorMode (prev_mode);
 #else
-    dynamic_link_handle module = dlopen( library, RTLD_LAZY ); 
+    dynamic_link_handle module = dlopen( library, RTLD_LAZY );
 #endif /* _WIN32||_WIN64 */
     if( module ) {
         if( !dynamic_link( module, descriptors, n, required ) ) {
@@ -115,7 +115,7 @@ bool dynamic_link( const char* library, const dynamic_link_descriptor descriptor
             module = NULL;
         }
     }
-    if( handle ) 
+    if( handle )
         *handle = module;
     return module!=NULL;
 }
@@ -126,7 +126,7 @@ void dynamic_unlink( dynamic_link_handle handle ) {
         FreeLibrary( handle );
 #else
         dlclose( handle );
-#endif /* _WIN32||_WIN64 */    
+#endif /* _WIN32||_WIN64 */
     }
 }
 

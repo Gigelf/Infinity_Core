@@ -52,7 +52,7 @@ namespace internal {
 
 #if defined(__TBB_DetectNumberOfWorkers)
 static inline int DetectNumberOfWorkers() {
-    return __TBB_DetectNumberOfWorkers(); 
+    return __TBB_DetectNumberOfWorkers();
 }
 
 #else
@@ -64,11 +64,11 @@ static inline int DetectNumberOfWorkers() {
     return static_cast<int>(si.dwNumberOfProcessors);
 }
 
-#elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__sun) 
+#elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__sun)
 static inline int DetectNumberOfWorkers() {
     long number_of_workers;
 
-#if (defined(__FreeBSD__) || defined(__sun)) && defined(_SC_NPROCESSORS_ONLN) 
+#if (defined(__FreeBSD__) || defined(__sun)) && defined(_SC_NPROCESSORS_ONLN)
     number_of_workers = sysconf(_SC_NPROCESSORS_ONLN);
 
 // In theory, sysconf should work everywhere.
@@ -89,7 +89,7 @@ static inline int DetectNumberOfWorkers() {
     if ( number_of_workers < 1 ) {
         number_of_workers = 1;
     }
-    
+
     return number_of_workers;
 }
 

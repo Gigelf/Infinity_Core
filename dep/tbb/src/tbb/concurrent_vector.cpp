@@ -161,7 +161,7 @@ public:
 
     inline static segment_t &acquire_segment(concurrent_vector_base_v3 &v, size_type index, size_type element_size, bool owner) {
         segment_t &s = v.my_segment[index]; // TODO: pass v.my_segment as arument
-        if( !__TBB_load_with_acquire(s.array) ) { // do not check for internal::vector_allocation_error_flag 
+        if( !__TBB_load_with_acquire(s.array) ) { // do not check for internal::vector_allocation_error_flag
             if( owner ) {
                 enable_segment( v, index, element_size );
             } else {

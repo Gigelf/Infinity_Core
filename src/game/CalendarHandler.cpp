@@ -214,7 +214,7 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket &recv_data)
 		sCalendarMgr->AddInvite(invite);
 	}
 
-	SendCalendarEvent(m_event.id, true); 
+	SendCalendarEvent(m_event.id, true);
 }
 
 void WorldSession::HandleCalendarUpdateEvent(WorldPacket &recv_data)

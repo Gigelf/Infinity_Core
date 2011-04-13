@@ -52,19 +52,19 @@ namespace internal {
     protected:
         typedef unsigned long segment_index_t;
 
-        //! Log2 of "min_segment_size".  
+        //! Log2 of "min_segment_size".
         static const int lg_min_segment_size = 4;
 
         //! Minimum size (in physical items) of a segment.
         static const int min_segment_size = segment_index_t(1)<<lg_min_segment_size;
-      
-        static segment_index_t segment_index_of( size_t index ) { 
+
+        static segment_index_t segment_index_of( size_t index ) {
             uintptr i = index|1<<(lg_min_segment_size-1);
-            uintptr j = __TBB_Log2(i); 
-            return segment_index_t(j-(lg_min_segment_size-1)); 
+            uintptr j = __TBB_Log2(i);
+            return segment_index_t(j-(lg_min_segment_size-1));
         }
 
-        static segment_index_t segment_base( segment_index_t k ) { 
+        static segment_index_t segment_base( segment_index_t k ) {
             return min_segment_size>>1<<k & -min_segment_size;
         }
 
@@ -130,8 +130,8 @@ private:
     /** Value is either the T or const T type of the container.
         @ingroup containers */
     template<typename Container, typename Value>
-    class vector_iterator 
-#if defined(_WIN64) && defined(_MSC_VER) 
+    class vector_iterator
+#if defined(_WIN64) && defined(_MSC_VER)
         // Ensure that Microsoft's internal template function _Val_type works correctly.
         : public std::iterator<std::random_access_iterator_tag,Value>
 #endif /* defined(_WIN64) && defined(_MSC_VER) */
@@ -139,13 +139,13 @@ private:
         //! concurrent_vector over which we are iterating.
         Container* my_vector;
 
-        //! Index into the vector 
+        //! Index into the vector
         size_t my_index;
 
         //! Caches my_vector-&gt;internal_subscript(my_index)
         /** NULL if cached value is not available */
         mutable Value* my_item;
-    
+
         template<typename C, typename T, typename U>
         friend bool operator==( const vector_iterator<C,T>& i, const vector_iterator<C,U>& j );
 
@@ -154,7 +154,7 @@ private:
 
         template<typename C, typename T, typename U>
         friend ptrdiff_t operator-( const vector_iterator<C,T>& i, const vector_iterator<C,U>& j );
-    
+
         template<typename C, typename U>
         friend class internal::vector_iterator;
 
@@ -163,11 +163,11 @@ private:
         friend class tbb::concurrent_vector;
 #else
 public: // workaround for MSVC
-#endif 
+#endif
 
-        vector_iterator( const Container& vector, size_t index ) : 
-            my_vector(const_cast<Container*>(&vector)), 
-            my_index(index), 
+        vector_iterator( const Container& vector, size_t index ) :
+            my_vector(const_cast<Container*>(&vector)),
+            my_index(index),
             my_item(NULL)
         {}
 
@@ -220,7 +220,7 @@ public: // workaround for MSVC
                 // Following test uses 2's-complement wizardry and fact that
                 // min_segment_size is a power of 2.
                 if( (k& k-concurrent_vector<Container>::min_segment_size)==0 ) {
-                    // k is a power of two that is at least k-min_segment_size  
+                    // k is a power of two that is at least k-min_segment_size
                     my_item= NULL;
                 } else {
                     ++my_item;
@@ -231,13 +231,13 @@ public: // workaround for MSVC
 
         //! Pre decrement
         vector_iterator& operator--() {
-            __TBB_ASSERT( my_index>0, "operator--() applied to iterator already at beginning of concurrent_vector" ); 
+            __TBB_ASSERT( my_index>0, "operator--() applied to iterator already at beginning of concurrent_vector" );
             size_t k = my_index--;
             if( my_item ) {
                 // Following test uses 2's-complement wizardry and fact that
                 // min_segment_size is a power of 2.
                 if( (k& k-concurrent_vector<Container>::min_segment_size)==0 ) {
-                    // k is a power of two that is at least k-min_segment_size  
+                    // k is a power of two that is at least k-min_segment_size
                     my_item= NULL;
                 } else {
                     --my_item;
@@ -322,7 +322,7 @@ private:
         typedef const T& const_reference;
         typedef I iterator;
         typedef ptrdiff_t difference_type;
-        generic_range_type( I begin_, I end_, size_t grainsize ) : blocked_range<I>(begin_,end_,grainsize) {} 
+        generic_range_type( I begin_, I end_, size_t grainsize ) : blocked_range<I>(begin_,end_,grainsize) {}
         generic_range_type( generic_range_type& r, split ) : blocked_range<I>(r,split()) {}
     };
 
@@ -338,7 +338,7 @@ public:
     //! Copy a vector.
     concurrent_vector( const concurrent_vector& vector ) {internal_copy(vector,sizeof(T),&copy_array);}
 
-    //! Assignment 
+    //! Assignment
     concurrent_vector& operator=( const concurrent_vector& vector ) {
         if( this!=&vector )
             internal_assign(vector,sizeof(T),&destroy_array,&assign_array,&copy_array);
@@ -363,7 +363,7 @@ public:
             internal_grow_to_at_least( n, sizeof(T), &initialize_array );
     };
 
-    //! Push item 
+    //! Push item
     size_type push_back( const_reference item ) {
         size_type k;
         new( internal_push_back(sizeof(T),k) ) T(item);
@@ -388,7 +388,7 @@ public:
     typedef internal::vector_iterator<concurrent_vector,T> iterator;
     typedef internal::vector_iterator<concurrent_vector,const T> const_iterator;
 
-#if !defined(_MSC_VER) || _CPPLIB_VER>=300 
+#if !defined(_MSC_VER) || _CPPLIB_VER>=300
     // Assume ISO standard definition of std::reverse_iterator
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
@@ -422,7 +422,7 @@ public:
     size_type capacity() const {return internal_capacity();}
 
     //! Allocate enough space to grow to size n without having to allocate more memory later.
-    /** Like most of the methods provided for STL compatibility, this method is *not* thread safe. 
+    /** Like most of the methods provided for STL compatibility, this method is *not* thread safe.
         The capacity afterwards may be bigger than the requested reservation. */
     void reserve( size_type n ) {
         if( n )
@@ -451,7 +451,7 @@ public:
 
     //! Not thread safe
     /** Does not change capacity. */
-    void clear() {internal_clear(&destroy_array,/*reclaim_storage=*/false);}       
+    void clear() {internal_clear(&destroy_array,/*reclaim_storage=*/false);}
 private:
     //! Get reference to element at given index.
     T& internal_subscript( size_type index ) const;

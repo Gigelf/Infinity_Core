@@ -58,7 +58,7 @@ namespace tbb {
     //! Unicode character type. Always wchar_t on Windows.
     /** We do not use typedefs from Windows TCHAR family to keep consistence of TBB coding style. **/
     typedef wchar_t tchar;
-    //! Standard Windows macro to markup the string literals. 
+    //! Standard Windows macro to markup the string literals.
     #define _T(string_literal) L ## string_literal
 #if !__TBB_NEW_ITT_NOTIFY
     #define tstrlen wcslen
@@ -76,11 +76,11 @@ namespace tbb {
 #if DO_ITT_NOTIFY
 namespace tbb {
     //! Display names of internal synchronization types
-    extern const tchar 
+    extern const tchar
             *SyncType_GlobalLock,
             *SyncType_Scheduler;
     //! Display names of internal synchronization components/scenarios
-    extern const tchar 
+    extern const tchar
             *SyncObj_SchedulerInitialization,
             *SyncObj_SchedulersList,
             *SyncObj_TaskStealingLoop,
@@ -93,7 +93,7 @@ namespace tbb {
             ;
 
     namespace internal {
-        void __TBB_EXPORTED_FUNC itt_set_sync_name_v3( void* obj, const tchar* name); 
+        void __TBB_EXPORTED_FUNC itt_set_sync_name_v3( void* obj, const tchar* name);
 
     } // namespace internal
 
@@ -126,7 +126,7 @@ namespace tbb {
 //! Identifies performance and correctness tools, which TBB sends special notifications to.
 /** Enumerators must be ORable bit values.
 
-    Initializing global tool indicator with TO_BE_INITIALIZED is required 
+    Initializing global tool indicator with TO_BE_INITIALIZED is required
     to avoid bypassing early notification calls made through targeted macros until
     initialization is performed from somewhere else.
 
@@ -141,7 +141,7 @@ enum target_tool {
 
 namespace internal {
 
-//! Types of the tool notification functions (and corresponding proxy handlers). 
+//! Types of the tool notification functions (and corresponding proxy handlers).
 typedef void (*PointerToITT_Handler)(volatile void*);
 typedef int  (*PointerToITT_thr_name_set)(const tchar*, int);
 typedef void (*PointerToITT_thread_set_name)(const tchar*);
@@ -161,7 +161,7 @@ extern PointerToITT_sync_rename ITT_Handler_sync_rename;
 
 extern target_tool current_tool;
 
-} // namespace internal 
+} // namespace internal
 
 } // namespace tbb
 

@@ -25,42 +25,42 @@
 ; the GNU General Public License.
 
 ; DO NOT EDIT - AUTOMATICALLY GENERATED FROM .s FILE
-.code 
+.code
 	ALIGN 8
 	PUBLIC __TBB_machine_fetchadd1
 __TBB_machine_fetchadd1:
 	mov rax,rdx
 	lock xadd [rcx],al
 	ret
-.code 
+.code
 	ALIGN 8
 	PUBLIC __TBB_machine_fetchstore1
 __TBB_machine_fetchstore1:
 	mov rax,rdx
 	lock xchg [rcx],al
 	ret
-.code 
+.code
 	ALIGN 8
 	PUBLIC __TBB_machine_cmpswp1
 __TBB_machine_cmpswp1:
 	mov rax,r8
 	lock cmpxchg [rcx],dl
 	ret
-.code 
+.code
 	ALIGN 8
 	PUBLIC __TBB_machine_fetchadd2
 __TBB_machine_fetchadd2:
 	mov rax,rdx
 	lock xadd [rcx],ax
 	ret
-.code 
+.code
 	ALIGN 8
 	PUBLIC __TBB_machine_fetchstore2
 __TBB_machine_fetchstore2:
 	mov rax,rdx
 	lock xchg [rcx],ax
 	ret
-.code 
+.code
 	ALIGN 8
 	PUBLIC __TBB_machine_cmpswp2
 __TBB_machine_cmpswp2:

@@ -57,7 +57,7 @@ void Box::deserialize(class BinaryInput& b) {
 	}
 
     _center = _center / 8;
-    
+
     // Reconstruct other state from the corners
     _axis[0] = _corner[5] - _corner[4];
     _axis[1] = _corner[7] - _corner[4];
@@ -70,7 +70,7 @@ void Box::deserialize(class BinaryInput& b) {
 
     _volume = _extent.x * _extent.y * _extent.z;
 
-    _area = 2 * 
+    _area = 2 *
         (_extent.x * _extent.y +
          _extent.y * _extent.z +
          _extent.z * _extent.x);
@@ -117,7 +117,7 @@ void Box::init(
 
     debugAssert(! isNaN(_extent.x));
 
-    _area = 2 * 
+    _area = 2 *
         (_extent.x * _extent.y +
          _extent.y * _extent.z +
          _extent.z * _extent.x);
@@ -319,7 +319,7 @@ bool Box::contains(
     Vector3 osPoint = M.inverse() * (point - _corner[0]);
 
     return
-        (osPoint.x >= 0) && 
+        (osPoint.x >= 0) &&
         (osPoint.y >= 0) &&
         (osPoint.z >= 0) &&
         (osPoint.x <= 1) &&

@@ -735,9 +735,9 @@ void Player::UpdateArmorPenetration()
     }
 }
 
-void Player::ApplyHealthRegenBonus(int32 amount, bool apply) 
-{ 
-   m_baseHealthRegen+= apply ? amount : -amount; 
+void Player::ApplyHealthRegenBonus(int32 amount, bool apply)
+{
+   m_baseHealthRegen+= apply ? amount : -amount;
 }
 
 void Player::ApplyManaRegenBonus(int32 amount, bool apply)

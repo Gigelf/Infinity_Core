@@ -4714,7 +4714,7 @@ void Player::BuildPlayerRepop()
     if(GetCorpse())
     {
         sLog.outError("BuildPlayerRepop: player %s(%d) already has a corpse", GetName(), GetGUIDLow());
-        sLog.outError("Removing player %s(%d) corpse from DB", GetName(), GetGUIDLow()); 
+        sLog.outError("Removing player %s(%d) corpse from DB", GetName(), GetGUIDLow());
         CharacterDatabase.PExecute("DELETE FROM corpse WHERE player = '%d'",GetGUIDLow());
     }
 
@@ -7667,8 +7667,8 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto, uint8 slot, bool appl
             case ITEM_MOD_SPELL_POWER:
                 ApplySpellPowerBonus(int32(val), apply);
                 break;
-            case ITEM_MOD_HEALTH_REGEN: 
-                ApplyHealthRegenBonus(int32(val), apply); 
+            case ITEM_MOD_HEALTH_REGEN:
+                ApplyHealthRegenBonus(int32(val), apply);
                 break;
             case ITEM_MOD_SPELL_PENETRATION:
                 ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, -int32(val), apply);
@@ -9259,7 +9259,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 data << uint32(4320) << uint32(1); // 13
                 data << uint32(4323) << uint32(1); // 14
                 data << uint32(4324) << uint32(1); // 15
-                data << uint32(4325) << uint32(1); // 16 
+                data << uint32(4325) << uint32(1); // 16
                 data << uint32(4317) << uint32(1); // 17
 
                 data << uint32(4301) << uint32(1); // 18

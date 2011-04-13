@@ -1742,7 +1742,7 @@ void GameObject::DamageTaken(Unit* pDoneBy, uint32 damage)
             RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
             SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
             SetUInt32Value(GAMEOBJECT_DISPLAYID, m_goInfo->destructibleBuilding.destroyedDisplayId);
-            
+
             if (pWho)
             {
                 if (BattleGround *bg = pWho->GetBattleGround())
@@ -1767,7 +1767,7 @@ void GameObject::DamageTaken(Unit* pDoneBy, uint32 damage)
             else
                 m_health = 0;
 
-            if (pWho)       
+            if (pWho)
                 if (BattleGround *bg = pWho->GetBattleGround())
                     bg->EventPlayerDamageGO(pWho, this, m_goInfo->destructibleBuilding.damagedEvent);
          }

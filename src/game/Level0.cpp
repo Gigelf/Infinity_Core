@@ -128,9 +128,9 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
     PSendSysMessage(LANG_UPTIME, str.c_str());
     SendSysMessage("Welcome to TheFallen_Server");
     SendSysMessage("EnJoY YouR DeaTh");
-    SendSysMessage("GIT: http://github.com/fallenangelX"); 
-    SendSysMessage("Please feel free to post bugs and Fixes on GiT "); 
-    SendSysMessage("A heavily modified MaNGOS core & SD2 System"); 
+    SendSysMessage("GIT: http://github.com/fallenangelX");
+    SendSysMessage("Please feel free to post bugs and Fixes on GiT ");
+    SendSysMessage("A heavily modified MaNGOS core & SD2 System");
 
 
     return true;

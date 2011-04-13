@@ -251,7 +251,7 @@ int dtNavMesh::findConnectingPolys(const float* va, const float* vb,
 	float amin[2], amax[2];
 	calcSlabEndPoints(va,vb, amin,amax, side);
 
-	// Remove links pointing to 'side' and compact the links array. 
+	// Remove links pointing to 'side' and compact the links array.
 	float bmin[2], bmax[2];
 	unsigned short m = DT_EXT_LINK | (unsigned short)side;
 	int n = 0;
@@ -403,7 +403,7 @@ void dtNavMesh::connectExtOffMeshLinks(dtMeshTile* tile, dtMeshTile* target, int
 		float nearestPt[3];
 		dtPolyRef ref = findNearestPolyInTile(tile, p, ext, nearestPt);
 		if (!ref) continue;
-		// findNearestPoly may return too optimistic results, further check to make sure. 
+		// findNearestPoly may return too optimistic results, further check to make sure.
 		if (dtSqr(nearestPt[0]-p[0])+dtSqr(nearestPt[2]-p[2]) > dtSqr(targetCon->rad))
 			continue;
 		// Make sure the location is on current mesh.
@@ -508,7 +508,7 @@ void dtNavMesh::connectIntOffMeshLinks(dtMeshTile* tile)
 				float nearestPt[3];
 				dtPolyRef ref = findNearestPolyInTile(tile, p, ext, nearestPt);
 				if (!ref) continue;
-				// findNearestPoly may return too optimistic results, further check to make sure. 
+				// findNearestPoly may return too optimistic results, further check to make sure.
 				if (dtSqr(nearestPt[0]-p[0])+dtSqr(nearestPt[2]-p[2]) > dtSqr(con->rad))
 					continue;
 				// Make sure the location is on current mesh.
@@ -530,7 +530,7 @@ void dtNavMesh::connectIntOffMeshLinks(dtMeshTile* tile)
 				}
 
 				// Start end-point is always connect back to off-mesh connection,
-				// Destination end-point only if it is bidirectional link. 
+				// Destination end-point only if it is bidirectional link.
 				if (j == 0 || (j == 1 && (con->flags & DT_OFFMESH_CON_BIDIR)))
 				{
 					// Link target poly to off-mesh connection.

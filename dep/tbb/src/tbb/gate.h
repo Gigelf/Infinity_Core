@@ -43,7 +43,7 @@ namespace internal {
 class Gate {
 public:
     typedef intptr_t state_t;
-   
+
     //! Get current state of gate
     state_t get_state() const {
         return state;
@@ -88,13 +88,13 @@ retry:
             state_t s = state.compare_and_swap( value, old_state );
             if( s==old_state ) {
                 // compare_and_swap succeeded
-                if( value!=0 )   
+                if( value!=0 )
                     futex_wakeup_all( &state );  // Update was successful and new state is not SNAPSHOT_EMPTY
             } else {
                 // compare_and_swap failed.  But for != case, failure may be spurious for our purposes if
                 // the value there is nonetheless not equal to value.  This is a fairly rare event, so
                 // there is no need for backoff.  In event of such a failure, we must retry.
-                if( flip && s!=value ) 
+                if( flip && s!=value )
                     goto retry;
             }
         }

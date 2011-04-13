@@ -1,8 +1,8 @@
 /**
- @file Ray.cpp 
- 
+ @file Ray.cpp
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
  @created 2002-07-12
  @edited  2004-03-19
  */

@@ -39,7 +39,7 @@ namespace tbb {
 
 template<typename T> // a template can work with private spin_rw_mutex::state_t
 static inline T CAS(volatile T &addr, T newv, T oldv) {
-    // ICC (9.1 and 10.1 tried) unable to do implicit conversion 
+    // ICC (9.1 and 10.1 tried) unable to do implicit conversion
     // from "volatile T*" to "volatile void*", so explicit cast added.
     return T(__TBB_CompareAndSwapW((volatile void *)&addr, (intptr_t)newv, (intptr_t)oldv));
 }
@@ -65,14 +65,14 @@ bool spin_rw_mutex_v3::internal_acquire_writer()
 }
 
 //! Release writer lock on the given mutex
-void spin_rw_mutex_v3::internal_release_writer() 
+void spin_rw_mutex_v3::internal_release_writer()
 {
     ITT_NOTIFY(sync_releasing, this);
     __TBB_AtomicAND( &state, READERS );
 }
 
 //! Acquire read lock on given mutex.
-void spin_rw_mutex_v3::internal_acquire_reader() 
+void spin_rw_mutex_v3::internal_acquire_reader()
 {
     ITT_NOTIFY(sync_prepare, this);
     internal::atomic_backoff backoff;
@@ -80,7 +80,7 @@ void spin_rw_mutex_v3::internal_acquire_reader()
         state_t s = const_cast<volatile state_t&>(state); // ensure reloading
         if( !(s & (WRITER|WRITER_PENDING)) ) { // no writer or write requests
             state_t t = (state_t)__TBB_FetchAndAddW( &state, (intptr_t) ONE_READER );
-            if( !( t&WRITER )) 
+            if( !( t&WRITER ))
                 break; // successfully stored increased number of readers
             // writer got there first, undo the increment
             __TBB_FetchAndAddW( &state, -(intptr_t)ONE_READER );
@@ -94,7 +94,7 @@ void spin_rw_mutex_v3::internal_acquire_reader()
 
 //! Upgrade reader to become a writer.
 /** Returns true if the upgrade happened without re-acquiring the lock and false if opposite */
-bool spin_rw_mutex_v3::internal_upgrade() 
+bool spin_rw_mutex_v3::internal_upgrade()
 {
     state_t s = state;
     __TBB_ASSERT( s & READERS, "invalid state before upgrade: no readers " );
@@ -109,7 +109,7 @@ bool spin_rw_mutex_v3::internal_upgrade()
             // the state should be 0...0111, i.e. 1 reader and waiting writer;
             // both new readers and writers are blocked
             while( (state & READERS) != ONE_READER ) // more than 1 reader
-                backoff.pause(); 
+                backoff.pause();
             __TBB_ASSERT((state&(WRITER_PENDING|WRITER))==(WRITER_PENDING|WRITER),"invalid state when upgrading to writer");
 
             __TBB_FetchAndAddW( &state,  - (intptr_t)(ONE_READER+WRITER_PENDING));

@@ -125,8 +125,8 @@ void BattleGroundBE::HandleAreaTrigger(Player *Source, uint32 Trigger)
         case 4539:                                          // buff trigger?
             //buff_guid = m_BgObjects[BG_BE_OBJECT_BUFF_2];
             break;
-        case 4944:                                          // Falling down  
-            Source->TeleportTo(GetMapId(), Source->GetPositionX(), Source->GetPositionY(), (Source->GetTerrain()->GetHeight(Source->GetPositionX(), Source->GetPositionY(), MAX_HEIGHT) + 3), Source->GetOrientation());  
+        case 4944:                                          // Falling down
+            Source->TeleportTo(GetMapId(), Source->GetPositionX(), Source->GetPositionY(), (Source->GetTerrain()->GetHeight(Source->GetPositionX(), Source->GetPositionY(), MAX_HEIGHT) + 3), Source->GetOrientation());
             break;
         default:
             sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);

@@ -38,7 +38,7 @@ class LinkedListElement
         LinkedListElement()  { iNext = NULL; iPrev = NULL; }
         ~LinkedListElement() { delink(); }
 
-        bool hasNext() const  { return (iNext != NULL && iNext->iNext != NULL); } 
+        bool hasNext() const  { return (iNext != NULL && iNext->iNext != NULL); }
         bool hasPrev() const  { return (iPrev != NULL && iPrev->iPrev != NULL); }
         bool isInList() const { return (iNext != NULL && iPrev != NULL); }
 

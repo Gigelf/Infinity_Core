@@ -1,12 +1,12 @@
 /**
  @file Vector3.cpp
- 
+
  3D vector class
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
  @cite Portions based on Dave Eberly's Magic Software Library at http://www.magic-software.com
- 
+
  @created 2001-06-02
  @edited  2009-11-27
  */
@@ -27,7 +27,7 @@
 #include "G3D/Vector4int8.h"
 #include "G3D/Vector3int32.h"
 #include "G3D/Any.h"
- 
+
 namespace G3D {
 
 Vector3::Vector3(const Any& any) {
@@ -78,7 +78,7 @@ const Vector3& Vector3::minFinite(){ static const Vector3 v(-FLT_MAX, -FLT_MAX, 
 const Vector3& Vector3::maxFinite(){ static const Vector3 v(FLT_MAX, FLT_MAX, FLT_MAX); return v; }
 
 Vector3::Axis Vector3::primaryAxis() const {
-    
+
     Axis a = X_AXIS;
 
     double nx = abs(x);
@@ -208,7 +208,7 @@ Vector3 Vector3::reflectAbout(const Vector3& normal) const {
 
 
 Vector3 Vector3::cosHemiRandom(const Vector3& normal, Random& r) {
-    debugAssertM(G3D::fuzzyEq(normal.length(), 1.0f), 
+    debugAssertM(G3D::fuzzyEq(normal.length(), 1.0f),
                  "cosHemiRandom requires its argument to have unit length");
 
     float x, y, z;
@@ -220,7 +220,7 @@ Vector3 Vector3::cosHemiRandom(const Vector3& normal, Random& r) {
     Vector3 X, Y;
     normal.getTangents(X, Y);
 
-    return 
+    return
         x * X +
         y * Y +
         z * Z;
@@ -228,7 +228,7 @@ Vector3 Vector3::cosHemiRandom(const Vector3& normal, Random& r) {
 
 
 Vector3 Vector3::cosPowHemiRandom(const Vector3& normal, const float k, Random& r) {
-    debugAssertM(G3D::fuzzyEq(normal.length(), 1.0f), 
+    debugAssertM(G3D::fuzzyEq(normal.length(), 1.0f),
                  "cosPowHemiRandom requires its argument to have unit length");
 
     float x, y, z;
@@ -240,7 +240,7 @@ Vector3 Vector3::cosPowHemiRandom(const Vector3& normal, const float k, Random& 
     Vector3 X, Y;
     normal.getTangents(X, Y);
 
-    return 
+    return
         x * X +
         y * Y +
         z * Z;

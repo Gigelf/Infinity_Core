@@ -68,21 +68,21 @@ LifoQueue::LifoQueue( ) : top(NULL)
 }
 
 void LifoQueue::push( void **ptr )
-{   
+{
     MallocMutex::scoped_lock scoped_cs(lock);
     *ptr = top;
     top = ptr;
 }
 
 void * LifoQueue::pop( )
-{   
+{
     void **result=NULL;
     {
         MallocMutex::scoped_lock scoped_cs(lock);
         if (!top) goto done;
         result = (void **) top;
         top = *result;
-    } 
+    }
     *result = NULL;
 done:
     return result;

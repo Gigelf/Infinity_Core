@@ -50,7 +50,7 @@ OPEN_INTERNAL_NAMESPACE
 //! Type definition for a pointer to a void somefunc(void)
 typedef void (*pointer_to_handler)();
 
-// Double cast through the void* from func_ptr in DLD macro is necessary to 
+// Double cast through the void* from func_ptr in DLD macro is necessary to
 // prevent warnings from some compilers (g++ 4.1)
 #if __TBB_WEAK_SYMBOLS
 
@@ -78,20 +78,20 @@ struct dynamic_link_descriptor {
 
 #if _WIN32||_WIN64
 typedef HMODULE dynamic_link_handle;
-#else 
+#else
 typedef void* dynamic_link_handle;
 #endif /* _WIN32||_WIN64 */
 
 //! Fill in dynamically linked handlers.
 /** 'n' is the length of the array descriptors[].
-    'required' is the number of the initial entries in the array descriptors[] 
-    that have to be found in order for the call to succeed. If the library and 
-    all the required handlers are found, then the corresponding handler pointers 
-    are set, and the return value is true.  Otherwise the original array of 
+    'required' is the number of the initial entries in the array descriptors[]
+    that have to be found in order for the call to succeed. If the library and
+    all the required handlers are found, then the corresponding handler pointers
+    are set, and the return value is true.  Otherwise the original array of
     descriptors is left untouched and the return value is false. **/
-bool dynamic_link( const char* libraryname, 
-                   const dynamic_link_descriptor descriptors[], 
-                   size_t n, 
+bool dynamic_link( const char* libraryname,
+                   const dynamic_link_descriptor descriptors[],
+                   size_t n,
                    size_t required = ~(size_t)0,
                    dynamic_link_handle* handle = 0 );
 

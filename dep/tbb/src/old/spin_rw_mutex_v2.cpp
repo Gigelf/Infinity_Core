@@ -70,7 +70,7 @@ bool spin_rw_mutex::internal_acquire_writer(spin_rw_mutex *mutex)
 void spin_rw_mutex::internal_release_writer(spin_rw_mutex *mutex) {
     __TBB_ASSERT( (mutex->state & BUSY)==WRITER, "invalid state of a write lock" );
     ITT_NOTIFY(sync_releasing, mutex);
-    mutex->state = 0; 
+    mutex->state = 0;
 }
 
 //! Acquire lock on given mutex.

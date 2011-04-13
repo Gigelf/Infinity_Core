@@ -26,7 +26,7 @@
     the GNU General Public License.
 */
 
-// Source file for miscellaneous entities that are infrequently referenced by 
+// Source file for miscellaneous entities that are infrequently referenced by
 // an executing program.
 
 #include "tbb/tbb_stddef.h"
@@ -62,11 +62,11 @@ void handle_perror( int error_code, const char* what ) {
     size_t n = buf+sizeof(buf)-end;
     strncpy( end, strerror( error_code ), n );
     // Ensure that buffer ends in terminator.
-    buf[sizeof(buf)-1] = 0; 
+    buf[sizeof(buf)-1] = 0;
     throw runtime_error(buf);
 }
 
-void throw_bad_last_alloc_exception_v4() 
+void throw_bad_last_alloc_exception_v4()
 {
     throw bad_last_alloc();
 }
@@ -91,7 +91,7 @@ void PrintVersion() {
 }
 
 void PrintExtraVersionInfo( const char* category, const char* description ) {
-    if( PrintVersionFlag ) 
+    if( PrintVersionFlag )
         fprintf(stderr, "%s: %s\t%s\n", "TBB", category, description );
 }
 
@@ -101,7 +101,7 @@ void PrintRMLVersionInfo( void* arg, const char* server_info )
 }
 
 } // namespace internal
- 
+
 extern "C" int TBB_runtime_interface_version() {
     return TBB_INTERFACE_VERSION;
 }
@@ -124,8 +124,8 @@ extern "C" void __TBB_machine_store8_slow_perf_warning( volatile void *ptr ) {
     const unsigned n = 4;
     static tbb::atomic<void*> cache[n];
     static tbb::atomic<unsigned> k;
-    for( unsigned i=0; i<n; ++i ) 
-        if( ptr==cache[i] ) 
+    for( unsigned i=0; i<n; ++i )
+        if( ptr==cache[i] )
             goto done;
     cache[(k++)%n] = const_cast<void*>(ptr);
     tbb::internal::runtime_warning( "atomic store on misaligned 8-byte location %p is slow", ptr );
@@ -136,7 +136,7 @@ done:;
 extern "C" void __TBB_machine_store8_slow( volatile void *ptr, int64_t value ) {
     for( tbb::internal::atomic_backoff b;; b.pause() ) {
         int64_t tmp = *(int64_t*)ptr;
-        if( __TBB_machine_cmpswp8(ptr,value,tmp)==tmp ) 
+        if( __TBB_machine_cmpswp8(ptr,value,tmp)==tmp )
             break;
     }
 }

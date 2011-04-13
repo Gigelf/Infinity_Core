@@ -34,7 +34,7 @@ namespace tbb {
 void recursive_mutex::scoped_lock::internal_acquire( recursive_mutex& m ) {
 #if _WIN32||_WIN64
     switch( m.state ) {
-      case INITIALIZED: 
+      case INITIALIZED:
         // since we cannot look into the internal of the CriticalSection object
         // we won't know how many times the lock has been acquired, and thus
         // we won't know when we may safely set the state back to INITIALIZED
@@ -42,10 +42,10 @@ void recursive_mutex::scoped_lock::internal_acquire( recursive_mutex& m ) {
         // the state for recursive_mutex
         EnterCriticalSection( &m.impl );
         break;
-      case DESTROYED: 
-        __TBB_ASSERT(false,"recursive_mutex::scoped_lock: mutex already destroyed"); 
+      case DESTROYED:
+        __TBB_ASSERT(false,"recursive_mutex::scoped_lock: mutex already destroyed");
         break;
-      default: 
+      default:
         __TBB_ASSERT(false,"recursive_mutex::scoped_lock: illegal mutex state");
         break;
     }
@@ -58,15 +58,15 @@ void recursive_mutex::scoped_lock::internal_acquire( recursive_mutex& m ) {
 
 void recursive_mutex::scoped_lock::internal_release() {
     __TBB_ASSERT( my_mutex, "recursive_mutex::scoped_lock: not holding a mutex" );
-#if _WIN32||_WIN64    
+#if _WIN32||_WIN64
     switch( my_mutex->state ) {
-      case INITIALIZED: 
+      case INITIALIZED:
         LeaveCriticalSection( &my_mutex->impl );
         break;
-      case DESTROYED: 
-        __TBB_ASSERT(false,"recursive_mutex::scoped_lock: mutex already destroyed"); 
+      case DESTROYED:
+        __TBB_ASSERT(false,"recursive_mutex::scoped_lock: mutex already destroyed");
         break;
-      default: 
+      default:
         __TBB_ASSERT(false,"recursive_mutex::scoped_lock: illegal mutex state");
         break;
     }
@@ -80,12 +80,12 @@ void recursive_mutex::scoped_lock::internal_release() {
 bool recursive_mutex::scoped_lock::internal_try_acquire( recursive_mutex& m ) {
 #if _WIN32||_WIN64
     switch( m.state ) {
-      case INITIALIZED: 
+      case INITIALIZED:
         break;
-      case DESTROYED: 
-        __TBB_ASSERT(false,"recursive_mutex::scoped_lock: mutex already destroyed"); 
+      case DESTROYED:
+        __TBB_ASSERT(false,"recursive_mutex::scoped_lock: mutex already destroyed");
         break;
-      default: 
+      default:
         __TBB_ASSERT(false,"recursive_mutex::scoped_lock: illegal mutex state");
         break;
     }
@@ -116,7 +116,7 @@ void recursive_mutex::internal_construct() {
     if( error_code )
         tbb::internal::handle_perror(error_code,"recursive_mutex: pthread_mutex_init failed");
     pthread_mutexattr_destroy( &mtx_attr );
-#endif /* _WIN32||_WIN64*/    
+#endif /* _WIN32||_WIN64*/
     ITT_SYNC_CREATE(&impl, _T("tbb::recursive_mutex"), _T(""));
 }
 
@@ -126,16 +126,16 @@ void recursive_mutex::internal_destroy() {
       case INITIALIZED:
         DeleteCriticalSection(&impl);
         break;
-      case DESTROYED: 
+      case DESTROYED:
         __TBB_ASSERT(false,"recursive_mutex: already destroyed");
         break;
-      default: 
+      default:
          __TBB_ASSERT(false,"recursive_mutex: illegal state for destruction");
          break;
     }
     state = DESTROYED;
 #else
-    int error_code = pthread_mutex_destroy(&impl); 
+    int error_code = pthread_mutex_destroy(&impl);
     __TBB_ASSERT_EX(!error_code,"recursive_mutex: pthread_mutex_destroy failed");
 #endif /* _WIN32||_WIN64 */
 }

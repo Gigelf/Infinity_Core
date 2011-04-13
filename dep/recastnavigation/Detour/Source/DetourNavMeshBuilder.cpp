@@ -220,7 +220,7 @@ static unsigned char classifyOffMeshPoint(const float* pt, const float* bmin, co
 	static const unsigned char XM = 1<<2;
 	static const unsigned char ZM = 1<<3;	
 
-	unsigned char outcode = 0; 
+	unsigned char outcode = 0;
 	outcode |= (pt[0] >= bmax[0]) ? XP : 0;
 	outcode |= (pt[2] >= bmax[2]) ? ZP : 0;
 	outcode |= (pt[0] < bmin[0])  ? XM : 0;
@@ -351,7 +351,7 @@ bool dtCreateNavMeshData(dtNavMeshCreateParams* params, unsigned char** outData,
 	const int dataSize = headerSize + vertsSize + polysSize + linksSize +
 						 detailMeshesSize + detailVertsSize + detailTrisSize +
 						 bvTreeSize + offMeshConsSize;
-						 
+						
 	unsigned char* data = (unsigned char*)dtAlloc(sizeof(unsigned char)*dataSize, DT_ALLOC_PERM);
 	if (!data)
 	{

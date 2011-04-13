@@ -36,7 +36,7 @@ namespace rml {
 
 #define MAKE_SERVER(x) DLD(__TBB_make_rml_server,x)
 #define GET_INFO(x) DLD(__TBB_call_with_my_server_info,x)
-#define SERVER tbb_server 
+#define SERVER tbb_server
 #define CLIENT tbb_client
 #define FACTORY tbb_factory
 #include "rml_factory.h"

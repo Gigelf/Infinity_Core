@@ -134,10 +134,10 @@ static const dynamic_link_descriptor ITT_HandlerTable[] = {
 # endif
 };
 
-static const int ITT_HandlerTable_size = 
+static const int ITT_HandlerTable_size =
     sizeof(ITT_HandlerTable)/sizeof(dynamic_link_descriptor);
 
-// LIBITTNOTIFY_NAME is the name of the ITT notification library 
+// LIBITTNOTIFY_NAME is the name of the ITT notification library
 # if _WIN32||_WIN64
 #  define LIBITTNOTIFY_NAME "libittnotify.dll"
 # elif __linux__
@@ -147,7 +147,7 @@ static const int ITT_HandlerTable_size =
 # endif
 
 //! Performs tools support initialization.
-/** Is called by DoOneTimeInitializations and ITT_DoOneTimeInitialization in 
+/** Is called by DoOneTimeInitializations and ITT_DoOneTimeInitialization in
     a protected (one-time) manner. Not to be invoked directly. **/
 bool InitializeITT() {
     bool result = false;
@@ -179,9 +179,9 @@ bool InitializeITT() {
 /** Defined in task.cpp. Makes a protected do-once call to InitializeITT(). **/
 void ITT_DoOneTimeInitialization();
 
-/** The following dummy_xxx functions are proxies that correspond to tool notification 
+/** The following dummy_xxx functions are proxies that correspond to tool notification
     APIs and are used to initialize corresponding pointers to the tool notifications
-    (ITT_Handler_xxx). When the first call to ITT_Handler_xxx takes place before 
+    (ITT_Handler_xxx). When the first call to ITT_Handler_xxx takes place before
     the whole library initialization (done by DoOneTimeInitializations) happened,
     the proxy handler performs initialization of the tools support. After this
     ITT_Handler_xxx will be set to either tool notification pointer or NULL. **/
@@ -266,7 +266,7 @@ char __ITT_Handler_trailing_padding[NFS_MaxLineSize] = {0};
 target_tool current_tool = TO_BE_INITIALIZED;
 
 #endif /* DO_ITT_NOTIFY */
-} // namespace internal 
+} // namespace internal
 
 } // namespace tbb
 

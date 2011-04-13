@@ -755,7 +755,7 @@ void Creature::DoFleeToGetAssistance()
         SetNoSearchAssistance(true);
         UpdateSpeed(MOVE_RUN, false);
 
-        // Interrupt spells cause of flee movement  
+        // Interrupt spells cause of flee movement
         InterruptNonMeleeSpells(false);
 
         if(!pCreature)
@@ -1489,16 +1489,16 @@ void Creature::SetDeathState(DeathState s)
         if (Pet* pet = GetPet())
             pet->Unsummon(PET_SAVE_AS_DELETED, this);
 
-       // exclusion for falling down 
-        switch (GetCreatureInfo()->Entry) 
-        { 
-            case 32930:         // Kologarn 10 
-            case 33909:         // Kologarn 25 
-                break; 
-            default: 
-            // return, since we promote to CORPSE_FALLING. CORPSE_FALLING is promoted to CORPSE at next update. 
-            if (CanFly() && FallGround()) 
-                return; 
+       // exclusion for falling down
+        switch (GetCreatureInfo()->Entry)
+        {
+            case 32930:         // Kologarn 10
+            case 33909:         // Kologarn 25
+                break;
+            default:
+            // return, since we promote to CORPSE_FALLING. CORPSE_FALLING is promoted to CORPSE at next update.
+            if (CanFly() && FallGround())
+                return;
         }
 
         Unit::SetDeathState(CORPSE);

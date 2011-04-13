@@ -1590,13 +1590,13 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage *damageInfo, bool durabilityLoss)
     for (uint32 i = 0; i < 3; ++i)
     {
         if (spellProto->Effect[i] == SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL || spellProto->Effect[i] == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE || spellProto->Effect[i] == SPELL_EFFECT_WEAPON_DAMAGE || spellProto->Effect[i] == SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
-        {    
+        {
             hasWeaponDmgEffect = true;
             break;
         }
     }
 
-    if (!(damageInfo->HitInfo & HITINFO_MISS) && hasWeaponDmgEffect) 
+    if (!(damageInfo->HitInfo & HITINFO_MISS) && hasWeaponDmgEffect)
     {
         WeaponAttackType attType = GetWeaponAttackType(spellProto);
         // on weapon hit casts
@@ -2501,7 +2501,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit *pCaster, SpellSchoolMask schoolM
                     if (absorbableDamage > 0)
                         RemainingDamage -= absorbableDamage * currentAbsorb / 100;
                     continue;
-                }      
+                }
                 break;
             }
             default:
@@ -2814,7 +2814,7 @@ void Unit::CalculateHealAbsorb(const uint32 heal, uint32 *absorb)
 
 void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool extra )
 {
-    if((hasUnitState(UNIT_STAT_CAN_NOT_REACT) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) && 
+    if((hasUnitState(UNIT_STAT_CAN_NOT_REACT) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) &&
         (!this->GetVehicle() || this->GetVehicle()->GetVehicleId() != 223))
         return;
 
@@ -3405,7 +3405,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     modHitChance+=GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT, schoolMask);
     // Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
     modHitChance+= pVictim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, schoolMask);
-    
+
     // Cloak of Shadows - should be ignored by Chaos Bolt
     // handling of CoS aura is wrong? should be resist, not miss
     if (spell->SpellFamilyName == SPELLFAMILY_WARLOCK && spell->SpellIconID == 3178)
@@ -4381,11 +4381,11 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder *holder)
         return false;
     }
 
-    // Strength of the Pack must affect only Sanctum Sentries and exclude caster too (Auriaya encounter, Ulduar) 
-    if (holder->GetId() == 64381 && (this->GetEntry() != 34014 || this->GetGUID() == holder->GetCasterGUID())) 
-    { 
-        delete holder; 
-        return false; 
+    // Strength of the Pack must affect only Sanctum Sentries and exclude caster too (Auriaya encounter, Ulduar)
+    if (holder->GetId() == 64381 && (this->GetEntry() != 34014 || this->GetGUID() == holder->GetCasterGUID()))
+    {
+        delete holder;
+        return false;
     }
 
     // passive and persistent auras can stack with themselves any number of times
@@ -4422,8 +4422,8 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder *holder)
                             // m_auraname can be modified to SPELL_AURA_NONE for area auras, use original
                             AuraType aurNameReal = AuraType(aurSpellInfo->EffectApplyAuraName[i]);
 
-                            // Strength of the Pack must stuck from different casters (Auriaya encounter, Ulduar) 
-                           if (foundHolder->GetId() == 64381) 
+                            // Strength of the Pack must stuck from different casters (Auriaya encounter, Ulduar)
+                           if (foundHolder->GetId() == 64381)
                               continue;
 
                             if (aurNameReal == SPELL_AURA_PERIODIC_DAMAGE && aur->GetAuraDuration() > 0)
@@ -4474,10 +4474,10 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder *holder)
                     case SPELL_AURA_MOD_MELEE_HASTE:  // for Icy Touch
                     case SPELL_AURA_MOD_RANGED_HASTE: // for Icy Touch
                     case SPELL_AURA_MOD_DAMAGE_TAKEN: // for Hemorrhage
-                    case SPELL_AURA_MOD_HIT_CHANCE:   // for Scorpid Sting 
+                    case SPELL_AURA_MOD_HIT_CHANCE:   // for Scorpid Sting
                     case SPELL_AURA_MOD_SPELL_HIT_CHANCE: // for Scorpid Sting
                     case SPELL_AURA_MOD_DECREASE_SPEED: // for Mind Flay
-                        break; 
+                        break;
                     case SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE: // Deadly Poison exception
                         if (aurSpellInfo->Dispel != DISPEL_POISON)             // TODO: stacking rules for all poisons
                         {
@@ -7114,7 +7114,7 @@ uint32 Unit::SpellDamageBonusDone(Unit *pVictim, SpellEntry const *spellProto, u
                 for(Unit::AuraList::const_iterator i = dummyAuras.begin(); i != dummyAuras.end(); ++i)
                 {
                     if ((found && (*i)->GetSpellProto()->EffectMiscValue[(*i)->GetEffIndex()] == 7244) || //Glacier Rot
-                        (isIcyTouch && (*i)->GetSpellProto()->SpellIconID == 2721))                       //Improved Icy Touch 
+                        (isIcyTouch && (*i)->GetSpellProto()->SpellIconID == 2721))                       //Improved Icy Touch
                     {
                         DoneTotalMod *= ((*i)->GetModifier()->m_amount+100.0f) / 100.0f;
                     }
@@ -7426,20 +7426,20 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                             }
                         }
                         break;
-                        // Improved Faerie Fire 
-                        if(pVictim->HasAura(770) || pVictim->HasAura(16857)) 
-                        { 
-                            AuraList const& ImprovedAura = GetAurasByType(SPELL_AURA_DUMMY); 
-                            for(AuraList::const_iterator iter = ImprovedAura.begin(); iter != ImprovedAura.end(); ++iter) 
-                            { 
-                                if((*iter)->GetEffIndex() == 0 && (*iter)->GetSpellProto()->SpellIconID == 109 && (*iter)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID) 
-                                { 
-                                    crit_chance += (*iter)->GetModifier()->m_amount; 
-                                    break; 
-                                } 
-                            } 
-                        } 
-                        break; 
+                        // Improved Faerie Fire
+                        if(pVictim->HasAura(770) || pVictim->HasAura(16857))
+                        {
+                            AuraList const& ImprovedAura = GetAurasByType(SPELL_AURA_DUMMY);
+                            for(AuraList::const_iterator iter = ImprovedAura.begin(); iter != ImprovedAura.end(); ++iter)
+                            {
+                                if((*iter)->GetEffIndex() == 0 && (*iter)->GetSpellProto()->SpellIconID == 109 && (*iter)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID)
+                                {
+                                    crit_chance += (*iter)->GetModifier()->m_amount;
+                                    break;
+                                }
+                            }
+                        }
+                        break;
                     case SPELLFAMILY_PALADIN:
                         // Sacred Shield
                         if (spellProto->SpellFamilyFlags & UI64LIT(0x0000000040000000))
@@ -7855,7 +7855,7 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo)
             {
                 if((*iter)->GetId() == 46924 && mechanic == MECHANIC_DISARM) // Hack to remove Bladestorm disarm immunity
                     continue;
-            
+
                 return true;
             }
     }
@@ -7913,7 +7913,7 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
             if ((spellInfo->EffectMechanic[index] & (*i)->GetMiscValue() ||
                 spellInfo->Mechanic & (*i)->GetMiscValue()) || ((*i)->GetId() == 46924 && // Bladestorm Immunity
                 spellInfo->EffectMechanic[index] & IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK || ((1 << (spellInfo->Mechanic - 1)) & IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK)))
-               
+
                 {
                 // Additional Bladestorm Immunity check (not immuned to disarm / bleed)
                 if ((*i)->GetId() == 46924 && (spellInfo->Mechanic == MECHANIC_DISARM || spellInfo->Mechanic == MECHANIC_BLEED || spellInfo->Mechanic == MECHANIC_INFECTED))
@@ -9466,7 +9466,7 @@ bool Unit::SelectHostileTarget()
         {
             SetInFront(target);
             ((Creature*)this)->AI()->AttackStart(target);
-            
+
             // check if currently selected target is reachable
             // NOTE: path alrteady generated from AttackStart()
             if(!GetMotionMaster()->operator->()->IsReachable())
@@ -9486,13 +9486,13 @@ bool Unit::SelectHostileTarget()
                     // next iteration we will select next possible target
                     m_HostileRefManager.deleteReference(target);
                     m_ThreatManager.modifyThreatPercent(target, -101);
-                    
+
                     _removeAttacker(target);
                 }
 
                 return false;
             }
-       
+
         }
         return true;
     }
@@ -11934,7 +11934,7 @@ void Unit::ExitVehicle()
         return;
 
     m_pVehicle->RemovePassenger(this);
-    
+
     if((GetTypeId() == TYPEID_PLAYER) && (((Player*)this)->GetQuestStatus(12779) == QUEST_STATUS_INCOMPLETE) && (m_pVehicle->GetVehicleId() == 156))
         ((Player*)this)->CastSpell(((Player*)this), 74470, false);
 
@@ -12000,7 +12000,7 @@ void Unit::KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpee
     {
         float dh = verticalSpeed*verticalSpeed / (2*19.23f); // maximum parabola height
         float time = (verticalSpeed) ? sqrtf(dh/(0.124976 * verticalSpeed)) : 0.0f;  //full move time in seconds
- 
+
         float dis = time * horizontalSpeed;
 
         float ox, oy, oz;
@@ -12215,9 +12215,9 @@ SpellAuraHolder* Unit::GetSpellAuraHolder (uint32 spellid, uint64 casterGUID)
     return NULL;
 }
 
-void Unit::RemoveUnitFromHostileRefManager(Unit* p_unit) 
-{ 
-   getHostileRefManager().deleteReference(p_unit); 
+void Unit::RemoveUnitFromHostileRefManager(Unit* p_unit)
+{
+   getHostileRefManager().deleteReference(p_unit);
 }
 
 void Unit::_AddAura(uint32 spellID, uint32 duration)
@@ -12354,7 +12354,7 @@ public:
         {
             MaNGOS::PlayerRelocationNotifier notify((Player&)m_owner);
             Cell::VisitAllObjects(&m_owner,notify,radius);
-        } 
+        }
         else //if(m_owner.GetTypeId() == TYPEID_UNIT)
         {
             MaNGOS::CreatureRelocationNotifier notify((Creature&)m_owner);

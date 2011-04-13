@@ -58,7 +58,7 @@ enum state_t_flags {
 
 const unsigned char RELEASED = 0;
 const unsigned char ACQUIRED = 1;
- 
+
 template<typename T>
 inline atomic<T>& as_atomic( T& t ) {
     return *(atomic<T>*)&t;
@@ -145,7 +145,7 @@ typedef tricky_atomic_pointer<queuing_rw_mutex::scoped_lock> tricky_pointer;
 static const tricky_pointer::word FLAG = 0x1;
 
 inline
-uintptr get_flag( queuing_rw_mutex::scoped_lock* ptr ) { 
+uintptr get_flag( queuing_rw_mutex::scoped_lock* ptr ) {
     return uintptr(tricky_pointer(ptr)&FLAG);
 }
 

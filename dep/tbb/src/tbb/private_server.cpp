@@ -48,7 +48,7 @@ class private_worker: no_copy {
           |
           V
         plugged
-      */ 
+      */
     enum state_t {
         //! *this is initialized
         st_init,
@@ -60,12 +60,12 @@ class private_worker: no_copy {
         st_plugged
     };
     atomic<state_t> my_state;
-    
+
     //! Associated server
-    private_server& my_server; 
+    private_server& my_server;
 
     //! Associated client
-    tbb_client& my_client; 
+    tbb_client& my_client;
 
     //! index used for avoiding the 64K aliasing problem
     const size_t my_index;
@@ -80,7 +80,7 @@ class private_worker: no_copy {
 
     friend class private_server;
 
-    //! Actions executed by the associated thread 
+    //! Actions executed by the associated thread
     void run();
 
     //! Called by a thread (usually not the associated thread) to commence termination.
@@ -89,7 +89,7 @@ class private_worker: no_copy {
     static __RML_DECL_THREAD_ROUTINE thread_routine( void* arg );
 
 protected:
-    private_worker( private_server& server, tbb_client& client, const size_t i ) : 
+    private_worker( private_server& server, tbb_client& client, const size_t i ) :
         my_server(server),
         my_client(client),
         my_index(i)
@@ -122,7 +122,7 @@ class private_server: public tbb_server, no_copy {
 
     //! Number of jobs that could use their associated thread minus number of active threads.
     /** If negative, indicates oversubscription.
-        If positive, indicates that more threads should run. 
+        If positive, indicates that more threads should run.
         Can be lowered asynchronously, but must be raised only while holding my_asleep_list_mutex,
         because raising it impacts the invariant for sleeping threads. */
     atomic<int> my_slack;
@@ -154,13 +154,13 @@ class private_server: public tbb_server, no_copy {
     void wake_some( int additional_slack );
 
     virtual ~private_server();
-    
+
     void remove_server_ref() {
         if( --my_ref_count==0 ) {
             my_client.acknowledge_close_connection();
             this->~private_server();
             tbb::cache_aligned_allocator<private_server>().deallocate( this, 1 );
-        } 
+        }
     }
 
     friend class private_worker;
@@ -169,10 +169,10 @@ public:
 
     /*override*/ version_type version() const {
         return 0;
-    } 
+    }
 
     /*override*/ void request_close_connection() {
-        for( size_t i=0; i<my_n_thread; ++i ) 
+        for( size_t i=0; i<my_n_thread; ++i )
             my_thread_array[i].start_shutdown();
         remove_server_ref();
     }
@@ -205,7 +205,7 @@ __RML_DECL_THREAD_ROUTINE private_worker::thread_routine( void* arg ) {
 #endif
 
 void private_worker::start_shutdown() {
-    state_t s; 
+    state_t s;
     // Transition from st_init or st_normal to st_plugged or st_quit
     do {
         s = my_state;
@@ -216,7 +216,7 @@ void private_worker::start_shutdown() {
         // Note that the notify() here occurs without maintaining invariants for my_slack.
         // It does not matter, because my_state==st_quit overrides checking of my_slack.
         my_thread_monitor.notify();
-    } 
+    }
 }
 
 void private_worker::run() {
@@ -251,10 +251,10 @@ void private_worker::run() {
 //------------------------------------------------------------------------
 // Methods of private_server
 //------------------------------------------------------------------------
-private_server::private_server( tbb_client& client ) : 
-    my_client(client), 
+private_server::private_server( tbb_client& client ) :
+    my_client(client),
     my_n_thread(client.max_job_count()),
-    my_thread_array(NULL) 
+    my_thread_array(NULL)
 {
     my_ref_count = my_n_thread+1;
     my_slack = 0;
@@ -267,14 +267,14 @@ private_server::private_server( tbb_client& client ) :
     memset( my_thread_array, 0, sizeof(private_worker)*my_n_thread );
     // FIXME - use recursive chain reaction to launch the threads.
     for( size_t i=0; i<my_n_thread; ++i ) {
-        private_worker* t = new( &my_thread_array[i] ) padded_private_worker( *this, client, i ); 
+        private_worker* t = new( &my_thread_array[i] ) padded_private_worker( *this, client, i );
         thread_monitor::launch( private_worker::thread_routine, t, stack_size );
-    } 
+    }
 }
 
 private_server::~private_server() {
     __TBB_ASSERT( my_net_slack_requests==0, NULL );
-    for( size_t i=my_n_thread; i--; ) 
+    for( size_t i=my_n_thread; i--; )
         my_thread_array[i].~padded_private_worker();
     tbb::cache_aligned_allocator<padded_private_worker>().deallocate( my_thread_array, my_n_thread );
     tbb::internal::poison_pointer( my_thread_array );
@@ -321,7 +321,7 @@ void private_server::wake_some( int additional_slack ) {
         }
     }
 done:
-    while( w>wakee ) 
+    while( w>wakee )
         (*--w)->my_thread_monitor.notify();
 }
 
@@ -340,7 +340,7 @@ void private_server::adjust_job_count_estimate( int delta ) {
 tbb_server* make_private_server( tbb_client& client ) {
     return new( tbb::cache_aligned_allocator<private_server>().allocate(1) ) private_server(client);
 }
-        
+
 } // namespace rml
 } // namespace internal
 } // namespace tbb

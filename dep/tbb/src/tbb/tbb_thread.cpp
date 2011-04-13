@@ -53,16 +53,16 @@ void free_closure_v3( void *ptr )
     deallocate_via_handler_v3( ptr );
 }
 
-#if _WIN32||_WIN64 
+#if _WIN32||_WIN64
 #if defined(__EXCEPTIONS) || defined(_CPPUNWIND)
 // The above preprocessor symbols are defined by compilers when exception handling is enabled.
 
-void handle_win_error( int error_code ) 
+void handle_win_error( int error_code )
 {
     LPTSTR msg_buf;
 
     FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+        FORMAT_MESSAGE_ALLOCATE_BUFFER |
         FORMAT_MESSAGE_FROM_SYSTEM |
         FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL,
@@ -80,7 +80,7 @@ void handle_win_error( int error_code )
 void tbb_thread_v3::join()
 {
     __TBB_ASSERT( joinable(), "thread should be joinable when join called" );
-#if _WIN32||_WIN64 
+#if _WIN32||_WIN64
     DWORD status = WaitForSingleObject( my_handle, INFINITE );
     if ( status == WAIT_FAILED )
         handle_win_error( GetLastError() );
@@ -92,7 +92,7 @@ void tbb_thread_v3::join()
     int status = pthread_join( my_handle, NULL );
     if( status )
         handle_perror( status, "pthread_join" );
-#endif // _WIN32||_WIN64 
+#endif // _WIN32||_WIN64
     my_handle = 0;
 }
 
@@ -127,7 +127,7 @@ void tbb_thread_v3::internal_start( __TBB_NATIVE_THREAD_ROUTINE_PTR(start_routin
     // The return type of _beginthreadex is "uintptr_t" on new MS compilers,
     // and 'unsigned long' on old MS compilers.  Our uintptr works for both.
     uintptr status = _beginthreadex( NULL, ThreadStackSize, start_routine,
-                                     closure, 0, &thread_id ); 
+                                     closure, 0, &thread_id );
     if( status==0 )
         handle_perror(errno,"__beginthreadex");
     else {
@@ -164,7 +164,7 @@ tbb_thread_v3::id thread_get_id_v3() {
     return tbb_thread_v3::id( pthread_self() );
 #endif // _WIN32||_WIN64
 }
-    
+
 void move_v3( tbb_thread_v3& t1, tbb_thread_v3& t2 )
 {
     if (t1.joinable())
