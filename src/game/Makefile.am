@@ -81,6 +81,8 @@ libmangosgame_a_SOURCES = \
 	BattleGroundMgr.h \
 	Calendar.cpp \
 	Calendar.h \
+	CalendarMgr.cpp \
+	CalendarMgr.h \
 	CalendarHandler.cpp \
 	Camera.cpp \
 	Camera.h \

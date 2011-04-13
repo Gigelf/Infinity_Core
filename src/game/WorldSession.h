@@ -249,7 +249,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendNameQueryOpcode(Player* p);
         void SendNameQueryOpcodeFromDB(ObjectGuid guid);
         static void SendNameQueryOpcodeFromDBCallBack(QueryResult *result, uint32 accountId);
-		void SendFakeNameForAHBotQueryOPcode();
+        void SendFakeNameForAHBotQueryOPcode();
 
         void SendTrainerList(ObjectGuid guid);
         void SendTrainerList(ObjectGuid guid, const std::string& strTitle );
@@ -806,9 +806,9 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleCalendarEventModeratorStatus(WorldPacket& recv_data);
         void HandleCalendarComplain(WorldPacket& recv_data);
         void HandleCalendarGetNumPending(WorldPacket& recv_data);
-		void SendCalendarEvent(uint64 eventId, bool added = false);
-		void SendCalendarEventInviteAlert(uint64 eventId, uint64 inviteId);
-		void SendCalendarEventRemovedAlert(uint64 eventId);
+        void SendCalendarEvent(uint64 eventId, bool added = false);
+        void SendCalendarEventInviteAlert(uint64 eventId, uint64 inviteId);
+        void SendCalendarEventRemovedAlert(uint64 eventId);
 
         void HandleSpellClick(WorldPacket& recv_data);
         void HandleMirrorImageDataRequest( WorldPacket & recv_data );

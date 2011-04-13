@@ -48,7 +48,7 @@ struct my_option
   uchar      **value;                   /* The variable value */
   uchar      **u_max_value;             /* The user def. max variable value */
   struct st_typelib *typelib;           /* Pointer to possible values */
-  ulong     var_type;
+  ulong      var_type;
   enum get_opt_arg_type arg_type;
   longlong   def_value;                 /* Default value */
   longlong   min_value;                 /* Min allowed value */
@@ -66,7 +66,7 @@ extern my_bool my_getopt_print_errors;
 extern my_bool my_getopt_skip_unknown;
 extern my_error_reporter my_getopt_error_reporter;
 
-extern int handle_options (int *argc, char ***argv, 
+extern int handle_options (int *argc, char ***argv,
 			   const struct my_option *longopts, my_get_one_option);
 extern void my_cleanup_options(const struct my_option *options);
 extern void my_print_help(const struct my_option *options);

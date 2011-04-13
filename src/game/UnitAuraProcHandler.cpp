@@ -971,14 +971,14 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                     if (triggeredByAura->GetStackAmount() > 1 && !triggeredByAura->GetHolder()->ModStackAmount(-1))
                         return SPELL_AURA_PROC_CANT_TRIGGER;
                 }
-                // Petrified Bark 
-                case 62337: 
-                { 
-                    triggered_spell_id = 62379; 
-                    basepoints[0] = damage; 
-                    // this == pVictim, why? :/ temp. workaround 
-                    target = SelectRandomUnfriendlyTarget(getVictim()); 
-                    break; 
+                // Petrified Bark
+                case 62337:
+                {
+                    triggered_spell_id = 62379;
+                    basepoints[0] = damage;
+                    // this == pVictim, why? :/ temp. workaround
+                    target = SelectRandomUnfriendlyTarget(getVictim());
+                    break;
                 }
                 // Glyph of Life Tap
                 case 63320:
@@ -1001,11 +1001,11 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                     if (basepoints[0] < 0)
                         return SPELL_AURA_PROC_FAILED;
                     break;
-                // Glyph of Shadowflame 
-                case 63310: 
-                { 
-                    triggered_spell_id = 63311; 
-                    break; 
+                // Glyph of Shadowflame
+                case 63310:
+                {
+                    triggered_spell_id = 63311;
+                    break;
                 }
                 // Item - Shadowmourne Legendary
                 case 71903:
@@ -1043,7 +1043,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                 {
                     if(GetTypeId() != TYPEID_PLAYER)
                         return SPELL_AURA_PROC_FAILED;
-                    
+
                     if(HasAura(71491) || HasAura(71484) || HasAura(71492) || HasAura(71486) || HasAura(71485))
                         return SPELL_AURA_PROC_FAILED;
 
@@ -1056,19 +1056,19 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                             triggered_spell_id = RandomSpell[ irand(0, sizeof(RandomSpell)/sizeof(uint32) - 1) ];
                             break;
                         }
-                        case CLASS_DRUID:                   
+                        case CLASS_DRUID:
                         {
                             uint32 RandomSpell[]={71492,71485,71484};
                             triggered_spell_id = RandomSpell[ irand(0, sizeof(RandomSpell)/sizeof(uint32) - 1) ];
                             break;
                         }
-                        case CLASS_ROGUE:    
+                        case CLASS_ROGUE:
                         {
                             uint32 RandomSpell[]={71492,71485,71486};
                             triggered_spell_id = RandomSpell[ irand(0, sizeof(RandomSpell)/sizeof(uint32) - 1) ];
                             break;
                         }
-                        case CLASS_WARRIOR:                 
+                        case CLASS_WARRIOR:
                         {
                             uint32 RandomSpell[]={71492,71484,71491};
                             triggered_spell_id = RandomSpell[ irand(0, sizeof(RandomSpell)/sizeof(uint32) - 1) ];
@@ -1108,7 +1108,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                 {
                     if(GetTypeId() != TYPEID_PLAYER)
                         return SPELL_AURA_PROC_FAILED;
-						
+
                     if(HasAura(71559) || HasAura(71561) || HasAura(71560) || HasAura(71556) || HasAura(71558))
                         return SPELL_AURA_PROC_FAILED;
 
@@ -1121,19 +1121,19 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                             triggered_spell_id = RandomSpell[ irand(0, sizeof(RandomSpell)/sizeof(uint32) - 1) ];
                             break;
                         }
-                        case CLASS_DRUID:                   
+                        case CLASS_DRUID:
                         {
                             uint32 RandomSpell[]={71560,71556,71561};
                             triggered_spell_id = RandomSpell[ irand(0, sizeof(RandomSpell)/sizeof(uint32) - 1) ];
                             break;
                         }
-                        case CLASS_ROGUE:    
+                        case CLASS_ROGUE:
                         {
                             uint32 RandomSpell[]={71560,71556,71558,};
                             triggered_spell_id = RandomSpell[ irand(0, sizeof(RandomSpell)/sizeof(uint32) - 1) ];
                             break;
                         }
-                        case CLASS_WARRIOR:                 
+                        case CLASS_WARRIOR:
                         {
                             uint32 RandomSpell[]={71560,71561,71559,};
                             triggered_spell_id = RandomSpell[ irand(0, sizeof(RandomSpell)/sizeof(uint32) - 1) ];
@@ -1309,7 +1309,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                                         return SPELL_AURA_PROC_FAILED;
                                 }
                             }
-                        } 
+                        }
                     }
                     return SPELL_AURA_PROC_FAILED;
                 }
@@ -1366,15 +1366,15 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                         return SPELL_AURA_PROC_FAILED;
 
                     if (!pVictim || !pVictim->isAlive())
-                        return SPELL_AURA_PROC_FAILED;	
+                        return SPELL_AURA_PROC_FAILED;
 
-                     basepoints[0] = damage * 15 / 100;	
+                     basepoints[0] = damage * 15 / 100;
 
                     if (Aura* aura = pVictim->GetAura(64413, EFFECT_INDEX_0))
                         basepoints[0] += aura->GetModifier()->m_amount;
 
                     if (basepoints[0] > 20000)
-                        basepoints[0] = 20000;	
+                        basepoints[0] = 20000;
 
                     triggered_spell_id = 64413;
                     break;
@@ -1744,7 +1744,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                 {
                     if (GetTypeId() != TYPEID_PLAYER)
                         return SPELL_AURA_PROC_FAILED;
-                    
+
                     // Circle of Healing
                     ((Player*)this)->RemoveSpellCategoryCooldown(1204, true);
 
@@ -2201,7 +2201,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
 
                     // PPM per victim
                     float ppmJoL = 15.0f; // must be hard-coded + 100% proc chance in DB
-                    WeaponAttackType attType = BASE_ATTACK; // TODO: attack type based? 
+                    WeaponAttackType attType = BASE_ATTACK; // TODO: attack type based?
                     uint32 WeaponSpeed = pVictim->GetAttackTime(attType);
                     float chanceForVictim = pVictim->GetPPMProcChance(WeaponSpeed, ppmJoL);
                     if (!roll_chance_f(chanceForVictim))
@@ -2462,7 +2462,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
 
                     triggered_spell_id = 71166;
                     break;
-                }  
+                }
                 // Item - Paladin T10 Retribution 2P Bonus
                 case 70765:
                 {
@@ -3505,7 +3505,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, uint32 d
                     trigger_spell_id = 64569;
                     basepoints[0] = triggerAmount;
                     break;
-                } 
+                }
                 case 67702:                                 // Death's Choice, Item - Coliseum 25 Normal Melee Trinket
                 {
                     float stat = 0.0f;
@@ -3994,6 +3994,20 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, uint32 d
                         return SPELL_AURA_PROC_FAILED;
                 }
             }
+            // Bloodworms
+           else if (auraSpellInfo->Id == 49543)
+           {
+               if (GetTypeId() != TYPEID_PLAYER)
+                   return SPELL_AURA_PROC_FAILED;
+
+               // HACK: Remove cooldown of proc spell, for some reason it has a 300s cd
+               ((Player*)this)->RemoveSpellCooldown(trigger_spell_id);
+
+               // HACK: Random basepoints. Probably the basepoints of
+               // SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE have to be randomized on every proc
+               basepoints[0] = urand(2, 4);
+               break;
+            }
             // Glyph of Death's Embrace
             else if (auraSpellInfo->Id == 58677)
             {
@@ -4033,11 +4047,11 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, uint32 d
                 basepoints[0] = triggerAmount * damage / 100;
                 trigger_spell_id = 50475;
             }
-            // Glyph of Death's Embrace 
-            else if (auraSpellInfo->Id == 58677) 
-            { 
-                if (procSpell->Id != 47633) 
-                    return SPELL_AURA_PROC_FAILED; 
+            // Glyph of Death's Embrace
+            else if (auraSpellInfo->Id == 58677)
+            {
+                if (procSpell->Id != 47633)
+                    return SPELL_AURA_PROC_FAILED;
             }
             break;
         }
@@ -4154,7 +4168,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, uint32 d
             if (Aura * dummy = GetDummyAura(70832))
             {
               if (SpellAuraHolder *aurHolder = GetSpellAuraHolder(53817))
-                if ((aurHolder->GetStackAmount() == aurHolder->GetSpellProto()->StackAmount) && roll_chance_i(dummy->GetBasePoints()))               
+                if ((aurHolder->GetStackAmount() == aurHolder->GetSpellProto()->StackAmount) && roll_chance_i(dummy->GetBasePoints()))
                     CastSpell(this,70831,true,castItem,triggeredByAura);
             }
 
@@ -4689,7 +4703,7 @@ SpellAuraProcResult Unit::HandlePeriodicDummyAuraProc(Unit* /*pVictim*/, uint32 
                             for(uint32 j = 0; j < MAX_RUNES; ++j)
                             {
                                 // convert only valid runes
-                                if (RuneType(i) != plr->GetCurrentRune(j) && 
+                                if (RuneType(i) != plr->GetCurrentRune(j) &&
                                     RuneType(i) != plr->GetBaseRune(j))
                                     continue;
 

@@ -31,7 +31,7 @@
 #endif
 
 /* need by my_vsnprintf */
-#include <stdarg.h> 
+#include <stdarg.h>
 
 #ifdef _AIX
 #undef HAVE_BCMP
@@ -238,7 +238,7 @@ size_t my_gcvt(double x, my_gcvt_arg_type type, int width, char *to,
   MAX_DECPT_FOR_F_FORMAT zeros for cases when |x|<1 and the 'f' format is used).
 */
 #define MY_GCVT_MAX_FIELD_WIDTH (DBL_DIG + 4 + max(5, MAX_DECPT_FOR_F_FORMAT))
-  
+
 
 extern char *llstr(longlong value,char *buff);
 extern char *ullstr(longlong value,char *buff);

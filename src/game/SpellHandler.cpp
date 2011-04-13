@@ -709,25 +709,25 @@ void WorldSession::HandleMirrorImageDataRequest( WorldPacket & recv_data )
 
 void WorldSession::HandleUpdateProjectilePosition(WorldPacket& recvPacket)
 {
-	DEBUG_LOG("CMSG_UPDATE_PROJECTILE_POSITION");
+    DEBUG_LOG("CMSG_UPDATE_PROJECTILE_POSITION");
 
     uint64 casterGuid;
     uint32 spellId;
     uint8  castCount;
     float m_targetX, m_targetY, m_targetZ; // Position of missile hit
 
-	casterGuid = recvPacket.readPackGUID();
+    casterGuid = recvPacket.readPackGUID();
     recvPacket >> spellId;
     recvPacket >> castCount;
-	recvPacket >> m_targetX;
+    recvPacket >> m_targetX;
     recvPacket >> m_targetY;
-	recvPacket >> m_targetZ;
+    recvPacket >> m_targetZ;
 
-	WorldPacket data(SMSG_SET_PROJECTILE_POSITION, 21);
-	data << uint64(casterGuid);
-	data << uint8(castCount);
-	data << float(m_targetX);
-	data << float(m_targetY);
-	data << float(m_targetZ);
-	SendPacket(&data);
+    WorldPacket data(SMSG_SET_PROJECTILE_POSITION, 21);
+    data << uint64(casterGuid);
+    data << uint8(castCount);
+    data << float(m_targetX);
+    data << float(m_targetY);
+    data << float(m_targetZ);
+    SendPacket(&data);
 }

@@ -156,7 +156,7 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
     else
        if (guid!=auctionbot.GetAHBObjectGuid().GetRawValue())
 		   SendNameQueryOpcodeFromDB(guid);
-	   else
+       else
 		   SendFakeNameForAHBotQueryOPcode();
 }
 

@@ -54,7 +54,7 @@ typedef struct st_wt_thd {
     data structures), and we'll get it for free. A caller needs to
     ensure that a blocker won't release a resource before a blocked
     thread starts waiting, which is usually done with a mutex.
-    
+
     If the above assumption is wrong, we'll need to add a mutex here.
   */
   DYNAMIC_ARRAY   my_resources;

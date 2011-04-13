@@ -2096,7 +2096,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     // Dragonmaw Illusion (multi-family check)
                     if (spellId_1 == 40216 && spellId_2 == 42016)
                         return false;
-                    
+
                     // Drums of the Wild and Gift of the Wild
                     if( spellInfo_1->Id == 72588 && spellInfo_2->SpellFamilyFlags & UI64LIT(0x40000))
                         return true;
@@ -2403,7 +2403,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             // Dragonmaw Illusion (multi-family check)
             if (spellId_1 == 42016 && spellId_2 == 40216 )
                 return false;
-            
+
             // Gift of the Wild and Drums of the Wild
             if( spellInfo_1->SpellFamilyFlags & UI64LIT(0x40000) && spellInfo_2->Id == 72588)
                 return true;

@@ -84,8 +84,8 @@ extern MY_UNI_CTYPE my_uni_ctype[256];
 #define MY_CS_UNICODE	128    /* is a charset is full unicode   */
 #define MY_CS_READY	256    /* if a charset is initialized    */
 #define MY_CS_AVAILABLE	512    /* If either compiled-in or loaded*/
-#define MY_CS_CSSORT	1024   /* if case sensitive sort order   */	
-#define MY_CS_HIDDEN	2048   /* don't display in SHOW          */	
+#define MY_CS_CSSORT	1024   /* if case sensitive sort order   */
+#define MY_CS_HIDDEN	2048   /* don't display in SHOW          */
 #define MY_CS_PUREASCII 4096   /* if a charset is pure ascii     */
 #define MY_CS_NONASCII  8192   /* if not ASCII-compatible        */
 #define MY_CHARSET_UNDEFINED 0
@@ -144,14 +144,14 @@ typedef struct
 
 enum my_lex_states
 {
-  MY_LEX_START, MY_LEX_CHAR, MY_LEX_IDENT, 
+  MY_LEX_START, MY_LEX_CHAR, MY_LEX_IDENT,
   MY_LEX_IDENT_SEP, MY_LEX_IDENT_START,
   MY_LEX_REAL, MY_LEX_HEX_NUMBER, MY_LEX_BIN_NUMBER,
   MY_LEX_CMP_OP, MY_LEX_LONG_CMP_OP, MY_LEX_STRING, MY_LEX_COMMENT, MY_LEX_END,
   MY_LEX_OPERATOR_OR_IDENT, MY_LEX_NUMBER_IDENT, MY_LEX_INT_OR_REAL,
-  MY_LEX_REAL_OR_POINT, MY_LEX_BOOL, MY_LEX_EOL, MY_LEX_ESCAPE, 
-  MY_LEX_LONG_COMMENT, MY_LEX_END_LONG_COMMENT, MY_LEX_SEMICOLON, 
-  MY_LEX_SET_VAR, MY_LEX_USER_END, MY_LEX_HOSTNAME, MY_LEX_SKIP, 
+  MY_LEX_REAL_OR_POINT, MY_LEX_BOOL, MY_LEX_EOL, MY_LEX_ESCAPE,
+  MY_LEX_LONG_COMMENT, MY_LEX_END_LONG_COMMENT, MY_LEX_SEMICOLON,
+  MY_LEX_SET_VAR, MY_LEX_USER_END, MY_LEX_HOSTNAME, MY_LEX_SKIP,
   MY_LEX_USER_VARIABLE_DELIMITER, MY_LEX_SYSTEM_VAR,
   MY_LEX_IDENT_OR_KEYWORD,
   MY_LEX_IDENT_OR_HEX, MY_LEX_IDENT_OR_BIN, MY_LEX_IDENT_OR_NCHAR,
@@ -177,7 +177,7 @@ typedef struct my_collation_handler_st
   size_t    (*strnxfrmlen)(struct charset_info_st *, size_t);
   my_bool (*like_range)(struct charset_info_st *,
 			const char *s, size_t s_length,
-			pchar w_prefix, pchar w_one, pchar w_many, 
+			pchar w_prefix, pchar w_one, pchar w_many,
 			size_t res_length,
 			char *min_str, char *max_str,
 			size_t *min_len, size_t *max_len);
@@ -187,15 +187,15 @@ typedef struct my_collation_handler_st
                      int escape,int w_one, int w_many);
 
   int  (*strcasecmp)(struct charset_info_st *, const char *, const char *);
-  
+
   uint (*instr)(struct charset_info_st *,
                 const char *b, size_t b_length,
                 const char *s, size_t s_length,
                 my_match_t *match, uint nmatch);
-  
+
   /* Hash calculation */
   void (*hash_sort)(struct charset_info_st *cs, const uchar *key, size_t len,
-		    ulong *nr1, ulong *nr2); 
+		    ulong *nr1, ulong *nr2);
   my_bool (*propagate)(struct charset_info_st *cs, const uchar *str, size_t len);
 } MY_COLLATION_HANDLER;
 
@@ -228,7 +228,7 @@ typedef struct my_charset_handler_st
                              size_t nchars, int *error);
   size_t  (*lengthsp)(struct charset_info_st *, const char *ptr, size_t length);
   size_t  (*numcells)(struct charset_info_st *, const char *b, const char *e);
-  
+
   /* Unicode conversion */
   my_charset_conv_mb_wc mb_wc;
   my_charset_conv_wc_mb wc_mb;
@@ -236,7 +236,7 @@ typedef struct my_charset_handler_st
   /* CTYPE scanner */
   int (*ctype)(struct charset_info_st *cs, int *ctype,
                const uchar *s, const uchar *e);
-  
+
   /* Functions for case and sort conversion */
   size_t  (*caseup_str)(struct charset_info_st *, char *);
   size_t  (*casedn_str)(struct charset_info_st *, char *);
@@ -252,9 +252,9 @@ typedef struct my_charset_handler_st
                           int radix, long int val);
   size_t (*longlong10_to_str)(struct charset_info_st *, char *to, size_t n,
                               int radix, longlong val);
-  
+
   void (*fill)(struct charset_info_st *, char *to, size_t len, int fill);
-  
+
   /* String-to-number conversion routines */
   long        (*strntol)(struct charset_info_st *, const char *s, size_t l,
 			 int base, char **e, int *err);
@@ -313,10 +313,10 @@ typedef struct charset_info_st
   my_bool   escape_with_backslash_is_dangerous;
   uchar     levels_for_compare;
   uchar     levels_for_order;
-  
+
   MY_CHARSET_HANDLER *cset;
   MY_COLLATION_HANDLER *coll;
-  
+
 } CHARSET_INFO;
 #define ILLEGAL_CHARSET_INFO_NUMBER (~0U)
 
@@ -382,7 +382,7 @@ extern int  my_strnncollsp_simple(CHARSET_INFO *, const uchar *, size_t,
 
 extern void my_hash_sort_simple(CHARSET_INFO *cs,
 				const uchar *key, size_t len,
-				ulong *nr1, ulong *nr2); 
+				ulong *nr1, ulong *nr2);
 
 extern size_t my_lengthsp_8bit(CHARSET_INFO *cs, const char *ptr, size_t length);
 
@@ -431,13 +431,13 @@ size_t my_longlong10_to_str_8bit(CHARSET_INFO *, char *to, size_t l, int radix,
 
 longlong my_strtoll10_8bit(CHARSET_INFO *cs,
                            const char *nptr, char **endptr, int *error);
-longlong my_strtoll10_ucs2(CHARSET_INFO *cs, 
+longlong my_strtoll10_ucs2(CHARSET_INFO *cs,
                            const char *nptr, char **endptr, int *error);
 
 ulonglong my_strntoull10rnd_8bit(CHARSET_INFO *cs,
                                  const char *str, size_t length, int
                                  unsigned_fl, char **endptr, int *error);
-ulonglong my_strntoull10rnd_ucs2(CHARSET_INFO *cs, 
+ulonglong my_strntoull10rnd_ucs2(CHARSET_INFO *cs,
                                  const char *str, size_t length,
                                  int unsigned_fl, char **endptr, int *error);
 

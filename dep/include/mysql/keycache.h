@@ -46,7 +46,7 @@ typedef int (*KEYCACHE_POST_WRITE_CALLBACK)(void *arg, const uchar *buffert,
 /*
   The key cache structure
   It also contains read-only statistics parameters.
-*/   
+*/
 
 typedef struct st_key_cache
 {

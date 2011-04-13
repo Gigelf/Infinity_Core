@@ -17,7 +17,7 @@
 
 #define BIG_TABLES
 
-/* 
+/*
   Minimal version of Windows we should be able to run on.
   Currently Windows 2000
 */
@@ -41,25 +41,25 @@
 
 #define HAVE_SMEM 1
 
-#if defined(_WIN64) || defined(WIN64) 
-#define SYSTEM_TYPE	"Win64" 
-#elif defined(_WIN32) || defined(WIN32) 
-#define SYSTEM_TYPE	"Win32" 
+#if defined(_WIN64) || defined(WIN64)
+#define SYSTEM_TYPE	"Win64"
+#elif defined(_WIN32) || defined(WIN32)
+#define SYSTEM_TYPE	"Win32"
 #else
 #define SYSTEM_TYPE	"Windows"
 #endif
 
-#if defined(_M_IA64) 
-#define MACHINE_TYPE	"ia64" 
-#elif defined(_M_IX86) 
-#define MACHINE_TYPE	"ia32" 
-#elif defined(_M_ALPHA) 
-#define MACHINE_TYPE	"axp" 
+#if defined(_M_IA64)
+#define MACHINE_TYPE	"ia64"
+#elif defined(_M_IX86)
+#define MACHINE_TYPE	"ia32"
+#elif defined(_M_ALPHA)
+#define MACHINE_TYPE	"axp"
 #else
 #define MACHINE_TYPE	"unknown"	/* Define to machine type name */
-#endif 
- 
-#if !(defined(_WIN64) || defined(WIN64)) 
+#endif
+
+#if !(defined(_WIN64) || defined(WIN64))
 #ifndef _WIN32
 #define _WIN32				/* Compatible with old source */
 #endif
@@ -104,14 +104,14 @@
 #define IPV6_V6ONLY 27
 #endif
 
-/* 
+/*
    Constants used by chmod. Note, that group/others is ignored
    - because unsupported by Windows due to different access control model.
 */
-#define S_IRWXU S_IREAD|S_IWRITE 
+#define S_IRWXU S_IREAD|S_IWRITE
 #define S_IRWXG 0
 #define S_IRWXO 0
-typedef int mode_t; 
+typedef int mode_t;
 
 #ifdef __BORLANDC__
 #define FILE_BINARY	O_BINARY	/* my_fopen in binary mode */

@@ -112,15 +112,15 @@
 
 /*
   The macros below are used to allow build of Universal/fat binaries of
-  MySQL and MySQL applications under darwin. 
+  MySQL and MySQL applications under darwin.
 */
 #if defined(__APPLE__) && defined(__MACH__)
-#  undef SIZEOF_CHARP 
-#  undef SIZEOF_SHORT 
-#  undef SIZEOF_INT 
-#  undef SIZEOF_LONG 
-#  undef SIZEOF_LONG_LONG 
-#  undef SIZEOF_OFF_T 
+#  undef SIZEOF_CHARP
+#  undef SIZEOF_SHORT
+#  undef SIZEOF_INT
+#  undef SIZEOF_LONG
+#  undef SIZEOF_LONG_LONG
+#  undef SIZEOF_OFF_T
 #  undef WORDS_BIGENDIAN
 #  define SIZEOF_SHORT 2
 #  define SIZEOF_INT 4
@@ -721,7 +721,7 @@ C_MODE_END
 #define FN_ROOTDIR	"/"
 #endif
 
-/* 
+/*
   MY_FILE_MIN is  Windows speciality and is used to quickly detect
   the mismatch of CRT and mysys file IO usage on Windows at runtime.
   CRT file descriptors can be in the range 0-2047, whereas descriptors returned
@@ -739,16 +739,16 @@ C_MODE_END
 #define MY_FILE_MIN  0
 #endif
 
-/* 
+/*
   MY_NFILE is the default size of my_file_info array.
 
   It is larger on Windows, because it all file handles are stored in my_file_info
-  Default size is 16384 and this should be enough for most cases.If it is not 
+  Default size is 16384 and this should be enough for most cases.If it is not
   enough, --max-open-files with larger value can be used.
 
   For Posix , my_file_info array is only used to store filenames for
   error reporting and its size is not a limitation for number of open files.
-*/ 
+*/
 #ifdef _WIN32
 #define MY_NFILE (16384 + MY_FILE_MIN)
 #else
@@ -1011,9 +1011,9 @@ typedef unsigned long uint32;
 typedef unsigned long	ulong;		  /* Short for unsigned long */
 #endif
 #ifndef longlong_defined
-/* 
-  Using [unsigned] long long is preferable as [u]longlong because we use 
-  [unsigned] long long unconditionally in many places, 
+/*
+  Using [unsigned] long long is preferable as [u]longlong because we use
+  [unsigned] long long unconditionally in many places,
   for example in constants with [U]LL suffix.
 */
 #if defined(HAVE_LONG_LONG) && SIZEOF_LONG_LONG == 8
@@ -1175,7 +1175,7 @@ typedef int		myf;	/* Type of MyFlags in my_funcs */
 #else
 /*
    ATTENTION !
-   
+
     Please, note, uint3korr reads 4 bytes (not 3) !
     It means, that you have to provide enough allocated space !
 */
@@ -1600,7 +1600,7 @@ static inline double rint(double x)
 }
 #endif /* HAVE_RINT */
 
-/* 
+/*
   MYSQL_PLUGIN_IMPORT macro is used to export mysqld data
   (i.e variables) for usage in storage engine loadable plugins.
   Outside of Windows, it is dummy.
