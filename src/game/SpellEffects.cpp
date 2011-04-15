@@ -7074,6 +7074,24 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->HandleEmoteCommand(EMOTE_STATE_DANCE);
                     return;
                 }
+                case 43770:                                 //Grappling Hook 
+                { 
+                    if(Creature * pSack = m_caster->GetClosestCreatureWithEntry(m_caster, 24439, 30)) 
+                    { 
+                        if(m_caster->GetDistance2d(pSack) > 5) 
+                            return; 
+ 
+                        m_caster->CastSpell(pSack, 43789, false); 
+ 
+                        pSack->ForcedDespawn(500); 
+ 
+                        if (m_caster->GetCharmerOrOwner()) 
+                            if (m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER) 
+                                ((Player*)m_caster->GetCharmerOrOwner())->KilledMonsterCredit(24439); 
+ 
+                    } 
+                    return; 
+                }
                 case 20589:                                 // Escape artist
                 {
                     if (!unitTarget)

@@ -573,6 +573,10 @@ void LoadDBCStores(const std::string& dataPath)
     sfix4->EffectTriggerSpell[EFFECT_INDEX_0] = 57988;
     sfix4->EffectTriggerSpell[EFFECT_INDEX_1] = 0;
 
+    // Grappling Hook 
+    SpellEntry *sfix14 = const_cast<SpellEntry*>(sSpellStore.LookupEntry(43770)); 
+    sfix14->EffectImplicitTargetA[EFFECT_INDEX_0] = TARGET_SELF;
+
     for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
     {
         SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
