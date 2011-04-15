@@ -1126,8 +1126,7 @@ void Object::MarkForClientUpdate()
 
 WorldObject::WorldObject()
     : m_isActiveObject(false), m_currMap(NULL), m_mapId(0), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL),
-    m_groupLootTimer(0), m_groupLootId(0), m_lootGroupRecipientId(0), m_name(""),
-    m_positionX(0.0f), m_positionY(0.0f), m_positionZ(0.0f), m_orientation(0.0f)
+    m_groupLootTimer(0), m_groupLootId(0), m_lootGroupRecipientId(0), m_name("")
 {
 }
 
@@ -1144,10 +1143,10 @@ void WorldObject::_Create(ObjectGuid guid, uint32 phaseMask)
 
 void WorldObject::Relocate(float x, float y, float z, float orientation)
 {
-    m_positionX = x;
-    m_positionY = y;
-    m_positionZ = z;
-    m_orientation = orientation;
+    m_position.x = x;
+    m_position.y = y;
+    m_position.z = z;
+    m_position.o = orientation;
 
     if(isType(TYPEMASK_UNIT))
         ((Unit*)this)->m_movementInfo.ChangePosition(x, y, z, orientation);
@@ -1155,9 +1154,9 @@ void WorldObject::Relocate(float x, float y, float z, float orientation)
 
 void WorldObject::Relocate(float x, float y, float z)
 {
-    m_positionX = x;
-    m_positionY = y;
-    m_positionZ = z;
+    m_position.x = x;
+    m_position.y = y;
+    m_position.z = z;
 
     if(isType(TYPEMASK_UNIT))
         ((Unit*)this)->m_movementInfo.ChangePosition(x, y, z, GetOrientation());
@@ -1165,7 +1164,7 @@ void WorldObject::Relocate(float x, float y, float z)
 
 void WorldObject::SetOrientation(float orientation)
 {
-    m_orientation = orientation;
+    m_position.o = orientation;
 
     if(isType(TYPEMASK_UNIT))
         ((Unit*)this)->m_movementInfo.ChangeOrientation(orientation);
@@ -1173,17 +1172,17 @@ void WorldObject::SetOrientation(float orientation)
 
 uint32 WorldObject::GetZoneId() const
 {
-    return GetTerrain()->GetZoneId(m_positionX, m_positionY, m_positionZ);
+    return GetTerrain()->GetZoneId(m_position.x, m_position.y, m_position.z);
 }
 
 uint32 WorldObject::GetAreaId() const
 {
-    return GetTerrain()->GetAreaId(m_positionX, m_positionY, m_positionZ);
+    return GetTerrain()->GetAreaId(m_position.x, m_position.y, m_position.z);
 }
 
 void WorldObject::GetZoneAndAreaId(uint32& zoneid, uint32& areaid) const
 {
-    GetTerrain()->GetZoneAndAreaId(zoneid, areaid, m_positionX, m_positionY, m_positionZ);
+    GetTerrain()->GetZoneAndAreaId(zoneid, areaid, m_position.x, m_position.y, m_position.z);
 }
 
 InstanceData* WorldObject::GetInstanceData() const
@@ -1414,7 +1413,7 @@ float WorldObject::GetAngle( const float x, const float y ) const
 bool WorldObject::HasInArc(const float arcangle, const float x, const float y) const
 {
     // always have self in arc
-    if(x == m_positionX && y == m_positionY)
+    if(x == m_position.x && y == m_position.y)
         return true;
 
     float arc = arcangle;
@@ -1426,7 +1425,7 @@ bool WorldObject::HasInArc(const float arcangle, const float x, const float y) c
         arc +=  2.0f * M_PI_F;
 
     float angle = GetAngle( x, y );
-    angle -= m_orientation;
+    angle -= m_position.o;
 
     // move angle to range -pi ... +pi
     while( angle > M_PI_F)
@@ -1451,7 +1450,7 @@ bool WorldObject::HasInArc(const float arcangle, const WorldObject* obj) const
     arc = MapManager::NormalizeOrientation(arc);
 
     float angle = GetAngle( obj );
-    angle -= m_orientation;
+    angle -= m_position.o;
 
     // move angle to range -pi ... +pi
     angle = MapManager::NormalizeOrientation(angle);
@@ -1591,7 +1590,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
 
 bool WorldObject::IsPositionValid() const
 {
-    return MaNGOS::IsValidMapCoord(m_positionX,m_positionY,m_positionZ,m_orientation);
+    return MaNGOS::IsValidMapCoord(m_position.x,m_position.y,m_position.z,m_position.o);
 }
 
 bool WorldObject::IsAtGroundLevel(float x, float y, float z) const
