@@ -1018,36 +1018,35 @@ struct GtRegenMPPerSptEntry
     float    ratio;
 };
 
-/*struct HolidayDescriptionsEntry
+struct HolidayDescriptionsEntry
 {
-    uint32 ID;                                              // 0        m_ID this is NOT holiday id
-    //char*     name[16]                                    // 1-16     m_name_lang
-                                                            // 17 string flags
-};*/
+    uint32 ID;												// 0, this is NOT holiday id
+    char* name[16];                                         // 1-16 m_name_lang
+    uint32 flags;                                           // 17 name flags
+};
 
-/* no used
 struct HolidayNamesEntry
 {
-    uint32 ID;                                              // 0        m_ID this is NOT holiday id
-    //char*     name[16]                                    // 1-16     m_name_lang
-                                                            // 17 string flags
+    uint32 ID;                                              // 0, this is NOT holiday id
+    char* name[16];                                         // 1-16 m_name_lang
+    uint32 flags;                                           // 17 name flags
 };
-*/
+
 
 struct HolidaysEntry
 {
-    uint32 ID;                                              // 0        m_ID
-    //uint32 duration[10];                                  // 1-10     m_duration
-    //uint32 date[26];                                      // 11-36    m_date (dates in unix time starting at January, 1, 2000)
-    //uint32 region;                                        // 37       m_region (wow region)
-    //uint32 looping;                                       // 38       m_looping
-    //uint32 calendarFlags[10];                             // 39-48    m_calendarFlags
-    //uint32 holidayNameId;                                 // 49       m_holidayNameID (HolidayNames.dbc)
-    //uint32 holidayDescriptionId;                          // 50       m_holidayDescriptionID (HolidayDescriptions.dbc)
-    //char *textureFilename;                                // 51       m_textureFilename
-    //uint32 priority;                                      // 52       m_priority
-    //uint32 calendarFilterType;                            // 53       m_calendarFilterType (-1,0,1 or 2)
-    //uint32 flags;                                         // 54       m_flags
+    uint32 ID;                                            // 0        m_ID
+    uint32 unk1[10];                                      // 1-10     m_duration
+    uint32 Dates[26];                                     // 11-36, dates in unix time starting at January, 1, 2000
+    uint32 unk37;                                         // 37       m_region (wow region)
+    uint32 unk38;                                         // 38       m_looping
+    uint32 unk39[10];                                     // 39-48    m_calendarFlags
+    uint32 holidayNameId;                                 // 49       m_holidayNameID (HolidayNames.dbc)
+    uint32 holidayDescriptionId;                          // 50       m_holidayDescriptionID (HolidayDescriptions.dbc)
+    char *texture;                                        // 51       m_textureFilename
+    uint32 unk52;                                         // 52       m_priority
+    uint32 RepeatingMethod;                               // 53       m_calendarFilterType (-1,0,1 or 2)
+    uint32 unk54;                                         // 54       m_flags
 };
 
 struct ItemEntry
