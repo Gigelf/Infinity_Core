@@ -1724,6 +1724,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 65121:                                 // Searing Light hero
                 case 63024:                                 // XT002's Gravitiy Bomb
                 case 64234:                                 // XT002's Gravitiy Bomb (h)
+                case 63545:                                 // Icicle Hodir(trigger spell from 62227)
                 case 61916:                                 // Lightning Whirl (10 man)
                 case 63482:                                 // Lightning Whirl (25 man)
                 case 55479:                                 // Force Obedience (Naxxramas - Razovius encounter)
@@ -1748,6 +1749,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 66153:                                 // -> Twin Valkyr encounter, 10 and 25 mode)
                     unMaxTargets = 1;
                     break;
+                case 62476:                                 // Icicle (Hodir 10man)
                 case 28542:                                 // Life Drain
                 case 66013:                                 // Penetrating Cold (10 man)
                 case 68509:                                 // Penetrating Cold (10 man heroic)
@@ -1761,6 +1763,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 51904:                                 // Limiting the count of Summoned Ghouls
                 case 63981:                                 // StoneGrip H
                 case 54522:
+                case 62477:                                 // Icicle (Hodir 25man)
                 case 61693:                                 // Arcane Storm (Malygos) (N)
                     unMaxTargets = 3;
                     break;
@@ -3196,11 +3199,21 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
             break;
         }
+        case TARGET_UNK_92: 
+        { 
+            if (Unit *unitTarget = m_targets.getUnitTarget()) 
+                targetUnitMap.push_back(unitTarget); 
+            else 
+            { 
+                if (Unit *creator = m_caster->GetMap()->GetUnit(m_caster->GetCreatorGuid())) 
+                    targetUnitMap.push_back(creator); 
+            } 
+            break; 
+        }
         default:
             //sLog.outError( "SPELL: Unknown implicit target (%u) for spell ID %u", targetMode, m_spellInfo->Id );
             break;
     }
-
     if (unMaxTargets && targetUnitMap.size() > unMaxTargets)
     {
         // make sure one unit is always removed per iteration
