@@ -1,4 +1,4 @@
-DELETE FROM `mangos_string` WHERE `entry` in (11000, 11001, 11002, 11003, 11004, 11005, 11006, 11007, 11008);
+DELETE FROM `mangos_string` WHERE `entry` in (80000, 80001, 80002, 80003, 80004, 80005, 80006, 80007, 80008);
 INSERT INTO `mangos_string` VALUES
 (80000,'Guild has no HQ.',NULL,'La guilde n\'a pas de quartier général',NULL,NULL,NULL,NULL,NULL,NULL),
 (80001,'You are not in a guild.',NULL,'Vous ne faite pas partie d\'une guilde.',NULL,NULL,NULL,NULL,NULL,NULL),

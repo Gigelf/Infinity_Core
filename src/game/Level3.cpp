@@ -7421,7 +7421,7 @@ bool ChatHandler::HandleMmapTestArea(char* args)
     return true;
 }
 
-bool ChatHandler::HandleAddHQCommand(const char * args)
+bool ChatHandler::HandleAddHQCommand(char * args)
 {
 
     Player* pl = m_session->GetPlayer();
@@ -7481,7 +7481,7 @@ bool ChatHandler::HandleAddHQCommand(const char * args)
     
 }
 
-bool ChatHandler::HandleDelHQCommand(const char * args)
+bool ChatHandler::HandleDelHQCommand(char * args)
 {
 
     Player* pl = m_session->GetPlayer();
@@ -7524,7 +7524,7 @@ bool ChatHandler::HandleDelHQCommand(const char * args)
     
 }
 
-bool ChatHandler::HandleAddATpCommand(const char * args)
+bool ChatHandler::HandleAddATpCommand(char * args)
 {
     if(!*args)
         return false;
@@ -7562,7 +7562,7 @@ bool ChatHandler::HandleAddATpCommand(const char * args)
     return true;
 }
 
-bool ChatHandler::HandleAddHTpCommand(const char * args)
+bool ChatHandler::HandleAddHTpCommand(char * args)
 {
     if(!*args)
         return false;
@@ -7600,7 +7600,7 @@ bool ChatHandler::HandleAddHTpCommand(const char * args)
     return true;
 }
 
-bool ChatHandler::HandleDelTpCommand(const char * args)
+bool ChatHandler::HandleDelTpCommand(char * args)
 {
     if(!*args)
         return false;

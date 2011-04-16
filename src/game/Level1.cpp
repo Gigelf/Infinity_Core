@@ -2643,13 +2643,13 @@ bool ChatHandler::HandleIRCpmCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleHQCommand(const char * args)
+bool ChatHandler::HandleHQCommand(char * args)
 {
     Player* _player = m_session->GetPlayer();
     uint32 GuildID = 0;
 	uint32 player_area;
 	
-    if(_player->isInFlight())
+    if(_player->IsTaxiFlying())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         return true;
@@ -2705,7 +2705,7 @@ bool ChatHandler::HandleHQCommand(const char * args)
     return true;
 }
 
-bool ChatHandler::HandleTpCommand(const char * args)
+bool ChatHandler::HandleTpCommand(char * args)
 {
     if(!*args)
         return false;
@@ -2714,7 +2714,7 @@ bool ChatHandler::HandleTpCommand(const char * args)
     Player* _player = m_session->GetPlayer();
 	uint32 player_area;
 
-    if(_player->isInFlight())
+    if(_player->IsTaxiFlying())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         return true;
@@ -2735,7 +2735,7 @@ bool ChatHandler::HandleTpCommand(const char * args)
 		return true;
 	}
 	
-    char* cId = extractKeyFromLink((char*)args,"tp");    // string or [name] Shift-click form |color|tp:name|h[name]|h|r
+    char* cId = ExtractKeyFromLink(&args,"tp");    // string or [name] Shift-click form |color|tp:name|h[name]|h|r
     if(!cId)
         return false;
 
@@ -2776,7 +2776,7 @@ bool ChatHandler::HandleTpCommand(const char * args)
     return true;
 }
 
-bool ChatHandler::HandleLookupTpCommand(const char * args)
+bool ChatHandler::HandleLookupTpCommand(char * args)
 {
     if(!*args)
     {
