@@ -96,21 +96,21 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &/*recv_data*/)
 		if (HolidaysEntry const* holiday = sHolidaysStore.LookupEntry(i))
 		{
 			data << holiday->ID;
-			data << holiday->unk37;
-			data << holiday->unk38;
-			data << holiday->unk52;
-			data << holiday->RepeatingMethod;
+			data << holiday->unk37;     // Holidays.dbc region
+			data << holiday->unk38;     // Holidays.dbc looping
+			data << holiday->unk52;     // Holidays.dbc priority
+			data << holiday->RepeatingMethod;    // Holidays.dbc calendarFilterType
 
 			for(uint32 j = 0; j < 26; j++)
-				data << holiday->Dates[j];
+				data << holiday->Dates[j];       
 
 			for(uint32 j = 0; j < 10; j++)
-				data << holiday->unk1[j];
+				data << holiday->unk1[j];        //duration
 
 			for(uint32 j = 0; j < 10; j++)
-				data << holiday->unk39[j];
+				data << holiday->unk39[j];       //calendarflags
 
-			data << holiday->texture;
+			data << holiday->texture;            //textureFilename
 		}
 	}
 

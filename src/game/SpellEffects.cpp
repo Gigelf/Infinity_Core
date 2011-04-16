@@ -2709,6 +2709,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                     return;
                 }
+                case 63545:                                 // Icicle Hodir Spell 
+                { 
+                    if (!unitTarget) 
+                        return; 
+                    Spell* temp =  m_caster->FindCurrentSpellBySpellId(61968); 
+                    if (!temp) 
+                        m_caster->CastSpell(unitTarget, 62234, true); 
+                    return; 
+                }
                 case 64385:                                 // Spinning (from Unusual Compass)
                 {
                     m_caster->SetFacingTo(frand(0, M_PI_F*2), true);
@@ -7073,6 +7082,30 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     unitTarget->HandleEmoteCommand(EMOTE_STATE_DANCE);
                     return;
+                }
+                case 43770:                                 //Grappling Hook 
+                { 
+                    if(Creature * pSack = m_caster->GetClosestCreatureWithEntry(m_caster, 24439, 30)) 
+                    { 
+                        if(m_caster->GetDistance2d(pSack) > 5) 
+                            return; 
+ 
+                        m_caster->CastSpell(pSack, 43789, false); 
+ 
+                        pSack->ForcedDespawn(500); 
+ 
+                        if (m_caster->GetCharmerOrOwner()) 
+                            if (m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER) 
+                                ((Player*)m_caster->GetCharmerOrOwner())->KilledMonsterCredit(24439); 
+ 
+                    } 
+                    return; 
+                }
+                case 48810: 
+                { 
+                    if(unitTarget) 
+                        unitTarget->CastSpell(unitTarget, 48809, true); 
+                    return; 
                 }
                 case 20589:                                 // Escape artist
                 {

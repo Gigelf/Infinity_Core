@@ -8490,6 +8490,11 @@ void Aura::PeriodicDummyTick()
                     if (target->GetTypeId() != TYPEID_PLAYER)
                         return;
 
+                    Unit * caster = GetCaster(); 
+                    if (!caster) 
+                        return; 
+
+
                     // aura stack increase every 3 (data in m_miscvalue) seconds and decrease every 1s
                     // Reset reapply counter at move and decrease stack amount by 1
                     if (((Player*)target)->isMoving())
@@ -8510,7 +8515,7 @@ void Aura::PeriodicDummyTick()
                         return;
                     }
                     target->CastSpell(target, 62039, true);
-                    target->CastSpell(target, 62188, true);
+                    target->CastSpell(target, 62188, true, 0, 0, caster->GetObjectGuid());
 
                     // recast every ~3 seconds
                     m_modifier.m_miscvalue = 3;
@@ -10900,7 +10905,7 @@ void Aura::HandleAuraSetVehicle(bool apply, bool real)
         if (target->GetVehicleKit())
             target->RemoveVehicleKit();
 
-    WorldPacket data(SMSG_PLAYER_VEHICLE_DATA, target->GetPackGUID().size()+4);
+    WorldPacket data(SMSG_SET_VEHICLE_REC_ID, target->GetPackGUID().size()+4);
     data.appendPackGUID(target->GetGUID());
     data << uint32(apply ? vehicleId : 0);
     target->SendMessageToSet(&data, true);
