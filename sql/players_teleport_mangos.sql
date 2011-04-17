@@ -6,8 +6,8 @@ INSERT INTO `mangos_string` VALUES
 (80003,'Guild teleport updated.',NULL,'Point de téléportation de la guile mis à jour.',NULL,NULL,NULL,NULL,NULL,NULL),
 (80004,'Guild has no teleport.',NULL,'La guilde n\'a pas de point de téléportation.',NULL,NULL,NULL,NULL,NULL,NULL),
 (80005,'Teleport forbidden from this area.',NULL,'Téléportation interdite depuis cette zone.',NULL,NULL,NULL,NULL,NULL,NULL),
-(80006,'Teleport location updated.',NULL,'Point de téléportation mis à jour.',NULL,NULL,NULL,NULL,NULL,NULL);
-(80007,'There are no teleport locations matching your request.',NULL,'Il n\'y a pas de point de téléportation correspondant à votre requête.',NULL,NULL,NULL,NULL,NULL,NULL);
+(80006,'Teleport location updated.',NULL,'Point de téléportation mis à jour.',NULL,NULL,NULL,NULL,NULL,NULL),
+(80007,'There are no teleport locations matching your request.',NULL,'Il n\'y a pas de point de téléportation correspondant à votre requête.',NULL,NULL,NULL,NULL,NULL,NULL),
 (80008,'Teleport location NOT deleted: database error.',NULL,'Point de téléportation non supprimé: erreur bdd',NULL,NULL,NULL,NULL,NULL,NULL);
 
 
