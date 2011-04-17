@@ -620,7 +620,7 @@ void AreaAura::Update(uint32 diff)
             Unit* owner = caster->GetCharmerOrOwner();
             if (!owner)
                 owner = caster;
-            std::list<Unit *> targets;
+            Spell::UnitList targets;
 
             switch(m_areaAuraType)
             {
@@ -748,7 +748,7 @@ void AreaAura::Update(uint32 diff)
                 }
             }
 
-            for(std::list<Unit *>::iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
+            for(Spell::UnitList::iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
             {
                 // flag for seelction is need apply aura to current iteration target
                 bool apply = true;
@@ -901,7 +901,10 @@ void PersistentAreaAura::Update(uint32 diff)
         if (dynObj)
         {
             if (!GetTarget()->IsWithinDistInMap(dynObj, dynObj->GetRadius()))
+            {
                 remove = true;
+                dynObj->RemoveAffected(GetTarget());        // let later reapply if target return to range
+            }
         }
         else
             remove = true;
@@ -8537,13 +8540,15 @@ void Aura::PeriodicDummyTick()
                     target->CastSpell(target, triggerSpells[GetAuraTicks() % 8], true);
                     return;
                 }
+                // FIX ME: Whole spell and bossfight need review
                 case 66118:                                 // Leeching Swarm 10 man
                 case 68646:
                 {
                     int32 damage = (m_modifier.m_amount * target->GetHealth()) / 100;
                     if (damage < 250)
                         damage = 250;
-                    int32 heal = damage * 68 / 100;
+                    /*int32 heal = damage * 68 / 100;*/
+                    int32 heal = damage;
                     target->CastCustomSpell(target, 66240, &damage, NULL, NULL, true, NULL, this);
                     if (Unit* caster = GetCaster())
                         target->CastCustomSpell(caster, 66125, &heal, NULL, NULL, true, NULL, this);
@@ -8567,7 +8572,8 @@ void Aura::PeriodicDummyTick()
                     int32 damage = (m_modifier.m_amount * target->GetHealth()) / 100;
                     if (damage < 250)
                         damage = 250;
-                    int32 heal = damage * 155 / 100;
+                    /*int32 heal = damage * 155 / 100;*/
+                    int32 heal = damage;
                     target->CastCustomSpell(target, 66240, &damage, NULL, NULL, true, NULL, this);
                     if (Unit* caster = GetCaster())
                         target->CastCustomSpell(caster, 66125, &heal, NULL, NULL, true, NULL, this);
@@ -8696,7 +8702,7 @@ void Aura::PeriodicDummyTick()
                     if (target->hasUnitState(UNIT_STAT_STUNNED) || target->isFeared())
                         return;
 
-                    std::list<Unit*> targets;
+                    Spell::UnitList targets;
                     {
                         // eff_radius ==0
                         float radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spell->rangeIndex));
@@ -8709,7 +8715,7 @@ void Aura::PeriodicDummyTick()
                     if(targets.empty())
                         return;
 
-                    std::list<Unit*>::const_iterator itr = targets.begin();
+                    Spell::UnitList::const_iterator itr = targets.begin();
                     std::advance(itr, rand()%targets.size());
                     Unit* victim = *itr;
 
