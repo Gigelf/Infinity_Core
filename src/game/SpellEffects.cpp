@@ -8214,12 +8214,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         m_caster->CastSpell(unitTarget, 52125, false);
                     break;
                 }
-                case 48810:
-                {
-                    if(unitTarget)
-                        unitTarget->CastSpell(unitTarget, 48809, true);
-                    return;
-                }
                 case 48724:                                 // Q: The Denouncement
                 case 48726:
                 case 48728:
