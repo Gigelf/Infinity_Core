@@ -96,21 +96,21 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &/*recv_data*/)
 		if (HolidaysEntry const* holiday = sHolidaysStore.LookupEntry(i))
 		{
 			data << holiday->ID;
-			data << holiday->unk37;     // Holidays.dbc region
-			data << holiday->unk38;     // Holidays.dbc looping
-			data << holiday->unk52;     // Holidays.dbc priority
-			data << holiday->RepeatingMethod;    // Holidays.dbc calendarFilterType
+			data << holiday->region;				// Holidays.dbc region
+			data << holiday->looping;				// Holidays.dbc looping
+			data << holiday->priority;				// Holidays.dbc priority
+			data << holiday->calendarFilterType;	// Holidays.dbc calendarFilterType
 
 			for(uint32 j = 0; j < 26; j++)
-				data << holiday->Dates[j];       
+				data << holiday->Dates[j];
 
 			for(uint32 j = 0; j < 10; j++)
-				data << holiday->unk1[j];        //duration
+				data << holiday->duration[j];		//duration
 
 			for(uint32 j = 0; j < 10; j++)
-				data << holiday->unk39[j];       //calendarflags
+				data << holiday->calendarFlags[j];	//calendarflags
 
-			data << holiday->texture;            //textureFilename
+			data << holiday->texture;				//textureFilename
 		}
 	}
 
@@ -149,41 +149,24 @@ void WorldSession::HandleCalendarArenaTeam(WorldPacket &recv_data)
 void WorldSession::HandleCalendarAddEvent(WorldPacket &recv_data)
 {
     DEBUG_LOG("WORLD: CMSG_CALENDAR_ADD_EVENT");
-	std::string title;
-	std::string description;
-	uint8 type;
-	uint8 Repeat_Option;
 	uint32 maxInvites;
-	uint32 dungeonId;
-	uint32 eventPackedTime;
-	uint32 lockoutPackedTime;
-	uint32 flags;
-
-	recv_data >> title;
-	recv_data >> description;
-	recv_data >> type;
-	recv_data >> Repeat_Option;
-	recv_data >> maxInvites;
-	recv_data >> dungeonId;
-	recv_data >> eventPackedTime;
-	recv_data >> lockoutPackedTime;
-	recv_data >> flags;
 
 	CalendarEvent m_event;
 	m_event.id = sCalendarMgr->GetNextEventID();
-	m_event.name = title;
-	m_event.description = description;
-	m_event.type = type;
-	m_event.Repeat_Option = Repeat_Option;
-	m_event.dungeonID = dungeonId;
-	m_event.flags = flags;
-	m_event.time = eventPackedTime;
-	m_event.lockoutTime = lockoutPackedTime;
+	recv_data >> m_event.name;
+	recv_data >> m_event.description;
+	recv_data >> m_event.type;
+	recv_data >> m_event.Repeat_Option;
+	recv_data >> maxInvites;
+	recv_data >> m_event.dungeonID;
+	recv_data >> m_event.time;
+	recv_data >> m_event.lockoutTime;
+	recv_data >> m_event.flags;
 	m_event.creator_guid = GetPlayer()->GetGUID();
 
    sCalendarMgr->AddEvent(m_event);
 
-	if (((flags >> 6) & 1))
+	if (((m_event.flags >> 6) & 1))
 		return;
 
 	uint32 inviteCount;
@@ -203,7 +186,7 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket &recv_data)
 		guid = recv_data.readPackGUID();
 		recv_data >> status;
 		recv_data >> rank;
-		invite.event = m_event.id;
+		invite.eventID = m_event.id;
 		invite.creator_guid = GetPlayer()->GetGUID();
 		invite.target_guid = guid;
 		invite.status = status;
@@ -401,12 +384,15 @@ void WorldSession::SendCalendarEvent(uint64 eventId, bool added)
 		}
 	}
 	SendPacket(&data);
+	//Needed to force update
+	WorldPacket* const packet = new WorldPacket(CMSG_CALENDAR_GET_CALENDAR);
+	GetPlayer()->GetSession()->QueuePacket(packet);
 }
 
 void WorldSession::SendCalendarEventInviteAlert(uint64 eventId, uint64 inviteId)
 {
 	sLog.outDebug("SMSG_CALENDAR_EVENT_INVITE_ALERT");
-	WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_ALERT, 0); //no idea about size
+	WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_ALERT);		//no idea about size
 
 	CalendarEvent *m_event = sCalendarMgr->GetEvent(eventId);
 	CalendarInvite *invite = sCalendarMgr->GetInvite(inviteId);

@@ -37,7 +37,7 @@ void CalendarMgr::AppendInvitesToCalendarPacketForPlayer(WorldPacket &data, Play
        CalendarInvite invite = itr->second;
 	   if (invite.target_guid == pPlayer->GetGUID())
        {
-           data << uint64(invite.event);                // Event ID
+           data << uint64(invite.eventID);              // Event ID
            data << uint64(invite.id);					// Invite ID
            data << uint8(invite.status);				// status
 		   data << uint8(invite.mod_Type);				// Mod Type

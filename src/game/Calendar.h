@@ -54,13 +54,12 @@ struct CalendarEvent
    uint32 lockoutTime;
    uint32 time;
    uint32 flags;
-   uint32 guildID;
 };
 
 struct CalendarInvite
 {
    uint64 id;
-   uint64 event;
+   uint64 eventID;
    uint8 status;
    uint8 rank;
    uint8 mod_Type;
@@ -74,5 +73,20 @@ struct CalendarInvite
 
 typedef UNORDERED_MAP<uint64, CalendarInvite> CalendarInviteMap;
 typedef UNORDERED_MAP<uint64, CalendarEvent> CalendarEventMap;
+
+class Calendar
+{
+public:
+	Calendar();
+	~Calendar();
+
+	void Initialize();
+	void SaveEvents();
+	void SaveInvites();
+
+private:
+	void GetEvents();
+	void GetInvites();
+};
 
 #endif

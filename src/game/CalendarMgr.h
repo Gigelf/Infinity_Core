@@ -38,7 +38,7 @@ public:
 			return &itr->second;
 		return NULL;
 	}
-	
+
 	void AddInvite(CalendarInvite invite) { _inviteMap[invite.id] = invite; }
 	void RemoveInvite(uint64 inviteID) { _inviteMap.erase(inviteID); }
 
@@ -49,7 +49,7 @@ public:
 			return &itr->second;
 		return NULL;
    }
-	
+
 	void AddEvent(CalendarEvent event) { _eventMap[event.id] = event; }
 	void RemoveEvent(uint64 eventID) { _eventMap.erase(eventID); }
 
