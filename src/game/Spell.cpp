@@ -501,6 +501,49 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             FillAreaTargets(targetUnitMap,m_targets.m_destX, m_targets.m_destY,radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
             break;
         }
+        case 65919: case 67858: case 67859: case 67860: //Anub'arak Cast Check Ice Spell 
+        { 
+            m_caster->CastSpell(m_caster, 66181, true); 
+            m_targets.setDestination(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ()); 
+            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], targetUnitMap); 
+            break; 
+        }
+        case 67470: // Pursuing Spikes (Check Aura and Summon Spikes) (Trial Of The Crusader - Anub'arak) 
+        { 
+            UnitList tmpUnitMap; 
+            bool m_bOneTargetHaveAura = false; 
+ 
+            FillAreaTargets(tmpUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE); 
+            if (!tmpUnitMap.empty()) 
+            { 
+                for (UnitList::const_iterator itr = tmpUnitMap.begin(); itr != tmpUnitMap.end(); ++itr) 
+                { 
+                    if ((*itr)->HasAura(67574)) 
+                    { 
+                        m_bOneTargetHaveAura = true; 
+                        break; 
+                    } 
+                    else 
+                    { 
+                        if ((*itr)->GetTypeId() == TYPEID_PLAYER) 
+                            targetUnitMap.push_back(*itr); 
+                    } 
+                } 
+                if (!m_bOneTargetHaveAura && !targetUnitMap.empty()) 
+                { 
+                    uint32 t = 0; 
+                    std::list<Unit*>::iterator iter = targetUnitMap.begin(); 
+                    while(iter!= targetUnitMap.end() && (*iter)->IsWithinDist(m_caster, radius)) 
+                        ++t, ++iter; 
+ 
+                    iter = targetUnitMap.begin(); 
+                    std::advance(iter, rand() % t); 
+                    if (*iter) 
+                        (*iter)->CastSpell((*iter), 67574, true); 
+                } 
+            } 
+            break; 
+        }
         case 68921: case 69049: // Soulstorm (Forge of Souls - Bronjahm)
         {
             FillAreaTargets(targetUnitMap,m_targets.m_destX, m_targets.m_destY,radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
@@ -1747,6 +1790,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 72442:                                 // Boiling Blood (10H)
                 case 66152:                                 // Bullet Foced Cast (Trial of the Crusader, ->
                 case 66153:                                 // -> Twin Valkyr encounter, 10 and 25 mode)
+                case 66339:                                 // Summon Scarab (Trial of the Crusader, Anub'arak encounter)
                     unMaxTargets = 1;
                     break;
                 case 62476:                                 // Icicle (Hodir 10man)
@@ -1754,6 +1798,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 66013:                                 // Penetrating Cold (10 man)
                 case 68509:                                 // Penetrating Cold (10 man heroic)
                 case 69278:                                 // Gas spore - 10
+                case 66332:                                 // Nerubian Burrower (Trial of the Crusader, -> 
+                case 67755:                                 // -> Anub'arak encounter, 10 and 10 heroic)
                     unMaxTargets = 2;
                     break;
                 case 28796:                                 // Poison Bolt Volley
@@ -1767,6 +1813,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 61693:                                 // Arcane Storm (Malygos) (N)
                     unMaxTargets = 3;
                     break;
+                case 67756:                                 // Nerubian Burrower (Trial of the Crusader, -> 
+                case 67757:                                 // -> Anub'arak encounter, 25 and 25 heroic) 
                 case 71221:                                 // Gas spore - 25
                     unMaxTargets = 4;
                     break;
@@ -1828,6 +1876,19 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 73710:                                 // Defile 25H
                     if (Unit* realCaster = GetAffectiveCaster())
                         radius = realCaster->GetFloatValue(OBJECT_FIELD_SCALE_X) * 6;
+                   break;
+                case 66881:                                 // Slime Pool (Acidmaw & Dreadscale encounter)
+                case 67638:                                 // (Trial of the Crusader, all difficulties)
+                case 67639:                                 // ----- // -----
+                case 67640:                                 // ----- // -----
+                    if (m_caster->HasAura(66882))
+                    {
+                        if (Aura* pAura = m_caster->GetAura(66882, EFFECT_INDEX_0))
+                            radius = 0.5*(60-(pAura->GetAuraDuration()/IN_MILLISECONDS));
+                    }
+                    break;
+                case 67732:                                 // Destroy all Frost Patches (Trial of the Crusader, Anub'arak)
+                    radius = 9.0f;
                     break;
             }
             break;
