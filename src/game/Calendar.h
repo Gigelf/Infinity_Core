@@ -27,7 +27,7 @@ enum CalendarEventType
 	CALENDARTYPE_DUNGEON,
 	CALENDARTYPE_PVP,
 	CALENDARTYPE_MEETING,
-	CALENDARTYPE_OTHER,
+	CALENDARTYPE_OTHER
 };
 
 enum CalendarInviteStatus
@@ -39,7 +39,47 @@ enum CalendarInviteStatus
 	CALENDARSTATUS_OUT,
 	CALENDARSTATUS_STANDBY,
 	CALENDARSTATUS_SIGNEDUP,
-	CALENDARSTATUS_NOT_SIGNEDUP,
+	CALENDARSTATUS_NOT_SIGNEDUP
+};
+
+enum CalendarEventFlags
+{
+	CalendarEventFlags_Player = 0x001,
+	CalendarEventFlags_System = 0x004,
+	CalendarEventFlags_Holiday = 0x008,
+	CalendarEventFlags_Locked = 0x10,
+	CalendarEventFlags_AutoApprove = 0x20,
+	CalendarEventFlags_GuildAnnouncement = 0x040,
+	CalendarEventFlags_RaidLockout = 0x080,
+	CalendarEventFlags_RaidReset = 0x200,
+	CalendarEventFlags_GuildEvent = 0x400
+};
+
+enum CalendarInviteType
+{
+	CalendarInviteType_Normal = 0,
+	CalendarInviteType_Signup = 1
+};
+
+enum CalendarModType
+{
+	CalendarModType_Participant = 0,
+	CalendarModType_Moderator = 1,
+	CalendarModType_Creator = 2
+};
+
+enum CalendarEventModFlags
+{
+	CalendarEventModFlags_Moderator = 0x2,
+	CalendarEventModFlags_Creator = 0x4
+};
+
+enum CalendarRepeatOption
+{
+	CalendarRepeatOption_Never = 0,
+	CalendarRepeatOption_Weekly = 1,
+	CalendarRepeatOption_BiWeekly = 2,
+	CalendarRepeatOption_Monthly = 3
 };
 
 struct CalendarEvent
