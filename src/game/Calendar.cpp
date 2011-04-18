@@ -100,10 +100,28 @@ void Calendar::GetInvites()
 
 void Calendar::SaveEvents()
 {
+	CharacterDatabase.Execute("TRUNCATE calendar_events");
 
+	CalendarEventMap _eventMap;
+	for (CalendarEventMap::iterator itr = _eventMap.begin(); itr != _eventMap.end(); ++itr)
+	{
+		CalendarEvent m_event = itr->second;
+		CharacterDatabase.PExecute("INSERT INTO calendar_events VALUES ('%u','%u','%s','%s','%u','%u','%u','%u','%u','%u')",
+			m_event.id, m_event.creator_guid, m_event.name.c_str(), m_event.description.c_str(), m_event.type, m_event.Repeat_Option,
+			m_event.dungeonID, m_event.lockoutTime, m_event.time, m_event.flags);
+	}
 }
 
 void Calendar::SaveInvites()
 {
+	CharacterDatabase.Execute("TRUNCATE calendar_invites");
 
+	CalendarInviteMap _inviteMap;
+	for (CalendarInviteMap::iterator itr = _inviteMap.begin(); itr != _inviteMap.end(); ++itr)
+	{
+		CalendarInvite invite = itr->second;
+		CharacterDatabase.PExecute("INSERT INTO calendar_invites VALUES ('%u','%u','%u','%u','%u','%u','%u','%s','%u','%u','%u')",
+			invite.id, invite.eventID, invite.status, invite.rank, invite.mod_Type, invite.invite_Type, invite.unk3, invite.text.c_str(),
+			invite.creator_guid, invite.time, invite.target_guid);
+	}
 }

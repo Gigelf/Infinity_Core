@@ -25,6 +25,7 @@
 #include "World.h"
 #include "MapPersistentStateMgr.h"
 #include "CalendarMgr.h"
+#include "Calendar.h"
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket &/*recv_data*/)
 {
@@ -283,6 +284,9 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket &recv_data)
     recv_data >> eventId;
     recv_data >> inviteId;
     recv_data >> status;
+
+	CalendarInvite *invite = sCalendarMgr->GetInvite(inviteId);
+	invite->status = status;
 }
 
 void WorldSession::HandleCalendarEventRemoveInvite(WorldPacket &recv_data)
@@ -297,6 +301,8 @@ void WorldSession::HandleCalendarEventRemoveInvite(WorldPacket &recv_data)
     recv_data >> RemoveInviteID;
     recv_data >> RemoverGuid;
     recv_data >> eventID;
+
+	sCalendarMgr->RemoveInvite(RemoveInviteID);
 }
 
 void WorldSession::HandleCalendarEventStatus(WorldPacket &recv_data)
@@ -371,17 +377,27 @@ void WorldSession::SendCalendarEvent(uint64 eventId, bool added)
 
 	if (false) // invites exist
 	{
-		data << uint32(0);                                  // invite count
-		for (uint8 i = 0; i < 0; ++i)
+		size_t p_counter = data.wpos();
+		uint32 counter = 0;
+		data << uint32(counter);								// invite count
+		CalendarInviteMap _inviteMap;
+		for (CalendarInviteMap::iterator itr = _inviteMap.begin(); itr != _inviteMap.end(); ++itr)
 		{
-			data.appendPackGUID(0);                         // invite player guid
-			data << uint8(0);                               // level
-			data << uint8(0);                               // status
-			data << uint8(0);                               // rank
-			data << uint8(0);                               // unk
-			data << uint64(0);                              // invite ID
-			data << uint32(0);                              // last Updated
+			CalendarInvite invite = itr->second;
+			if (invite.eventID == eventId)
+			{
+				data.appendPackGUID(invite.target_guid);		// invite Player guid
+				Player *pPlayer =  GetPlayer()->GetMap()->GetPlayer((ObjectGuid)invite.target_guid);
+				data << uint8(pPlayer->getLevel());				// level
+				data << uint8(invite.status);					// status
+				data << uint8(invite.rank);						// rank
+				data << uint8(invite.unk3);						// unk
+				data << uint64(invite.id);						// invite ID
+				data << uint32(0);                              // last Updated
+				counter++;
+			}
 		}
+		data.put<uint32>(p_counter, counter);					// update number of invites
 	}
 	SendPacket(&data);
 	//Needed to force update
