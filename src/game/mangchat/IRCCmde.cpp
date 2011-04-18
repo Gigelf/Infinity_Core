@@ -1944,7 +1944,7 @@ void IRCCmd::GM_Ticket(_CDATA *CD)
         limitr = atoi(_PARAMS[1].c_str());
     if (_PARAMS[0] == "list")
     {
-        QueryResult *result = CharacterDatabase.PQuery("SELECT guid, DATE_FORMAT(ticket_lastchange, '%s') FROM character_ticket ORDER BY ticket_id ASC LIMIT 0, %d", DateTime.c_str(), limitr);
+        QueryResult *result = CharacterDatabase.PQuery("SELECT guid, DATE_FORMAT(ticket_lastchange, '%s') FROM character_ticket WHERE closed = '0' ORDER BY ticket_id ASC LIMIT 0, %d", DateTime.c_str(), limitr);
         if (result)
         {
             Field *fields = result->Fetch();
@@ -1969,7 +1969,7 @@ void IRCCmd::GM_Ticket(_CDATA *CD)
     {
         std::string CharName = _PARAMS[1].c_str();
         uint64 guid = sObjectMgr.GetPlayerGUIDByName(CharName);
-        QueryResult *result = CharacterDatabase.PQuery("SELECT guid, ticket_text, DATE_FORMAT(ticket_lastchange, '%s'), response_text FROM character_ticket WHERE guid=%u",DateTime.c_str(), guid);
+        QueryResult *result = CharacterDatabase.PQuery("SELECT guid, ticket_text, DATE_FORMAT(ticket_lastchange, '%s'), response_text FROM character_ticket WHERE closed='0' AND guid=%u",DateTime.c_str(), guid);
         if (result)
         {
             Field *fields = result->Fetch();
@@ -2035,7 +2035,7 @@ void IRCCmd::GM_Ticket(_CDATA *CD)
         }
         if (_PARAMS[1] == "all")
         {
-            sTicketMgr.DeleteAll();
+            sTicketMgr.CloseAll();
             std::string tptime = MakeMsg("\x2 All Tickets Deleted!\x3\x31\x30 ");
             Send_IRCA(ChanOrPM(CD), tptime, true, CD->TYPE);
             return;
@@ -2048,7 +2048,7 @@ void IRCCmd::GM_Ticket(_CDATA *CD)
             Send_IRCA(CD->USER, "\0034[ERROR] : Ticket not found." ,true, "ERROR");
             return;
         }
-        sTicketMgr.Delete(guid);
+        sTicketMgr.Close(guid);
         if (Player* pl = sObjectMgr.GetPlayer(guid))
             pl->GetSession()->SendGMTicketGetTicket(0x0A, 0);
         std::string tptime = MakeMsg("\x2 Ticket [%s] Deleted\x3\x31\x30 ", CharName.c_str());

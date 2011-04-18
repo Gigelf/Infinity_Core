@@ -32,6 +32,7 @@ struct ItemPrototype;
 struct AuctionEntry;
 struct AuctionHouseEntry;
 struct DeclinedName;
+struct LFGReward;
 
 class ObjectGuid;
 class Creature;
@@ -47,6 +48,7 @@ class CharacterHandler;
 class GMTicket;
 class MovementInfo;
 class WorldSession;
+class Quest;
 
 struct OpcodeHandler;
 
@@ -419,7 +421,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleGMTicketCreateOpcode(WorldPacket& recvPacket);
         void HandleGMTicketSystemStatusOpcode(WorldPacket& recvPacket);
 
-        void HandleGMTicketDeleteTicketOpcode(WorldPacket& recvPacket);
+        void HandleGMTicketCloseTicketOpcode(WorldPacket& recvPacket);
         void HandleGMTicketUpdateTextOpcode(WorldPacket& recvPacket);
 
         void HandleGMSurveySubmitOpcode(WorldPacket& recvPacket);
@@ -847,6 +849,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendLfgUpdateParty(LFGUpdateType updateType, LFGType type);
         void SendLfgUpdateSearch(bool update);
         void SendLfgJoinResult(LFGJoinResult checkResult, uint8 checkValue = 0, bool withLockMap = false);
+        void SendLfgPlayerReward(LFGDungeonEntry const* dungeon, const LFGReward* reward, const Quest* qRew, bool isSecond = false);
         // LFR
         void HandleLfrSearchOpcode(WorldPacket& recv_data);
         void HandleLfrLeaveOpcode(WorldPacket& recv_data);
