@@ -1595,32 +1595,32 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     ((Creature*)unitTarget)->ForcedDespawn(10000);
                     return;
                 }
-                case 39844:                         //Q:Fires Over Skettis 
-                { 
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER) 
-                        return; 
- 
-                    // Iterate for all creatures around cast place 
- 
-                    std::list<GameObject*> gobList; 
-                    { 
-                        MaNGOS::GameObjectInRangeCheck go_check(m_caster, m_targets.m_srcX, m_targets.m_srcY, m_targets.m_srcZ, 5.0f); // 5 yards check 
-                        MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectInRangeCheck> go_search(gobList, go_check); 
-                        Cell::VisitAllObjects(m_caster, go_search, 5.0f); 
-                    } 
- 
-                    if (!gobList.empty()) 
-                    { 
-                        for(std::list<GameObject*>::iterator itr = gobList.begin(); itr != gobList.end(); ++itr) 
-                        { 
-                            if( (*itr)->GetEntry() == 185549 ) 
-                            { 
-                                (*itr)->SetLootState(GO_READY); 
-                                ((Player*)m_caster)->KilledMonsterCredit(22991); 
-                            } 
-                        } 
-                    } 
-                    return; 
+                case 39844:                         //Q:Fires Over Skettis
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    // Iterate for all creatures around cast place
+
+                    std::list<GameObject*> gobList;
+                    {
+                        MaNGOS::GameObjectInRangeCheck go_check(m_caster, m_targets.m_srcX, m_targets.m_srcY, m_targets.m_srcZ, 5.0f); // 5 yards check
+                        MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectInRangeCheck> go_search(gobList, go_check);
+                        Cell::VisitAllObjects(m_caster, go_search, 5.0f);
+                    }
+
+                    if (!gobList.empty())
+                    {
+                        for(std::list<GameObject*>::iterator itr = gobList.begin(); itr != gobList.end(); ++itr)
+                        {
+                            if( (*itr)->GetEntry() == 185549 )
+                            {
+                                (*itr)->SetLootState(GO_READY);
+                                ((Player*)m_caster)->KilledMonsterCredit(22991);
+                            }
+                        }
+                    }
+                    return;
                 }
                 case 39992:                                 // High Warlord Naj'entus: Needle Spine Targeting
                 {
@@ -2709,14 +2709,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                     return;
                 }
-                case 63545:                                 // Icicle Hodir Spell 
-                { 
-                    if (!unitTarget) 
-                        return; 
-                    Spell* temp =  m_caster->FindCurrentSpellBySpellId(61968); 
-                    if (!temp) 
-                        m_caster->CastSpell(unitTarget, 62234, true); 
-                    return; 
+                case 63545:                                 // Icicle Hodir Spell
+                {
+                    if (!unitTarget)
+                        return;
+                    Spell* temp =  m_caster->FindCurrentSpellBySpellId(61968);
+                    if (!temp)
+                        m_caster->CastSpell(unitTarget, 62234, true);
+                    return;
                 }
                 case 64385:                                 // Spinning (from Unusual Compass)
                 {
@@ -2737,33 +2737,33 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, spell_id, true);
                     return;
                 }
-                case 66181:                                 //Anub'arak Find Never Cold and Cast Ice Spikes 
-                { 
-                    if (!unitTarget) 
-                        return; 
- 
-                    m_caster->RemoveAurasDueToSpell(65920); //Remove Aura Spike 01 
-                    m_caster->RemoveAurasDueToSpell(65922); //Remove Aura Spike 02 
-                    m_caster->RemoveAurasDueToSpell(65923); //Remove Aura Spike 03 
-                    m_caster->CastSpell(m_caster, 67732, true); //cast Ice Spike 
-                    Unit* pVictim = m_caster->getVictim(); 
-                    if (pVictim && pVictim->HasAura(67574)) //Remove Target Aura 
-                        pVictim->RemoveAurasDueToSpell(67574);  
- 
-                    if (unitTarget->GetTypeId() != TYPEID_PLAYER) 
-                        ((Creature*)unitTarget)->ForcedDespawn(700); 
- 
-                    float x, y, z; 
-                    m_caster->GetClosePoint(x, y, z,m_caster->GetObjectBoundingRadius(), 10.0f, urand(0, 6.43f)); 
-                    m_caster->NearTeleportTo(x, y, z, m_caster->GetOrientation()); 
-                    m_caster->CastSpell(m_caster, 65920, true); //Cast Aura Spike 01 
-                    return; 
-                } 
-                case 67322: //Burrower Cast (Toc10) 
-                { 
-                    if (!m_caster->HasAura(66193) && !m_caster->HasAura(67855) && !m_caster->HasAura(67856) && !m_caster->HasAura(67857)) 
-                        m_caster->CastSpell(m_caster, 68394, false); //Cast Burrower 
-                    return; 
+                case 66181:                                 //Anub'arak Find Never Cold and Cast Ice Spikes
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->RemoveAurasDueToSpell(65920); //Remove Aura Spike 01
+                    m_caster->RemoveAurasDueToSpell(65922); //Remove Aura Spike 02
+                    m_caster->RemoveAurasDueToSpell(65923); //Remove Aura Spike 03
+                    m_caster->CastSpell(m_caster, 67732, true); //cast Ice Spike
+                    Unit* pVictim = m_caster->getVictim();
+                    if (pVictim && pVictim->HasAura(67574)) //Remove Target Aura
+                        pVictim->RemoveAurasDueToSpell(67574);
+
+                    if (unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        ((Creature*)unitTarget)->ForcedDespawn(700);
+
+                    float x, y, z;
+                    m_caster->GetClosePoint(x, y, z,m_caster->GetObjectBoundingRadius(), 10.0f, urand(0, 6.43f));
+                    m_caster->NearTeleportTo(x, y, z, m_caster->GetOrientation());
+                    m_caster->CastSpell(m_caster, 65920, true); //Cast Aura Spike 01
+                    return;
+                }
+                case 67322: //Burrower Cast (Toc10)
+                {
+                    if (!m_caster->HasAura(66193) && !m_caster->HasAura(67855) && !m_caster->HasAura(67856) && !m_caster->HasAura(67857))
+                        m_caster->CastSpell(m_caster, 68394, false); //Cast Burrower
+                    return;
                 }
                 case 66390:                                 // Read Last Rites
                 {
@@ -7116,29 +7116,29 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->HandleEmoteCommand(EMOTE_STATE_DANCE);
                     return;
                 }
-                case 43770:                                 //Grappling Hook 
-                { 
-                    if(Creature * pSack = m_caster->GetClosestCreatureWithEntry(m_caster, 24439, 30)) 
-                    { 
-                        if(m_caster->GetDistance2d(pSack) > 5) 
-                            return; 
- 
-                        m_caster->CastSpell(pSack, 43789, false); 
- 
-                        pSack->ForcedDespawn(500); 
- 
-                        if (m_caster->GetCharmerOrOwner()) 
-                            if (m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER) 
-                                ((Player*)m_caster->GetCharmerOrOwner())->KilledMonsterCredit(24439); 
- 
-                    } 
-                    return; 
+                case 43770:                                 //Grappling Hook
+                {
+                    if(Creature * pSack = m_caster->GetClosestCreatureWithEntry(m_caster, 24439, 30))
+                    {
+                        if(m_caster->GetDistance2d(pSack) > 5)
+                            return;
+
+                        m_caster->CastSpell(pSack, 43789, false);
+
+                        pSack->ForcedDespawn(500);
+
+                        if (m_caster->GetCharmerOrOwner())
+                            if (m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
+                                ((Player*)m_caster->GetCharmerOrOwner())->KilledMonsterCredit(24439);
+
+                    }
+                    return;
                 }
-                case 48810: 
-                { 
-                    if(unitTarget) 
-                        unitTarget->CastSpell(unitTarget, 48809, true); 
-                    return; 
+                case 48810:
+                {
+                    if(unitTarget)
+                        unitTarget->CastSpell(unitTarget, 48809, true);
+                    return;
                 }
                 case 20589:                                 // Escape artist
                 {

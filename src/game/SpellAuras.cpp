@@ -2243,17 +2243,17 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             ((Player*)target)->removeSpell(63680);
                         return;
-                    case 65921:                             // Anub'arak Spikes (TotC10) 
-                        // expected to tick with 0.5 sec period (tick part see in Aura::PeriodicTick) 
-                        m_isPeriodic = true; 
-                        m_modifier.periodictime = 500; 
-                        m_periodicTimer = m_modifier.periodictime; 
-                        return; 
-                    case 67574:                             // Anub'arak Aggro Spike (TotC10) 
-                        // expected to tick with 0.5 sec period (tick part see in Aura::PeriodicTick) 
-                        m_isPeriodic = true; 
-                        m_modifier.periodictime = 500; 
-                        m_periodicTimer = m_modifier.periodictime; 
+                    case 65921:                             // Anub'arak Spikes (TotC10)
+                        // expected to tick with 0.5 sec period (tick part see in Aura::PeriodicTick)
+                        m_isPeriodic = true;
+                        m_modifier.periodictime = 500;
+                        m_periodicTimer = m_modifier.periodictime;
+                        return;
+                    case 67574:                             // Anub'arak Aggro Spike (TotC10)
+                        // expected to tick with 0.5 sec period (tick part see in Aura::PeriodicTick)
+                        m_isPeriodic = true;
+                        m_modifier.periodictime = 500;
+                        m_periodicTimer = m_modifier.periodictime;
                         return;
                     case 68645:
                         // Rocket Pack
@@ -5544,43 +5544,43 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                 }
 
                 return;
-             case 65920:                                     //Anub'arak remove spike trigger 
-                if (m_removeMode == AURA_REMOVE_BY_EXPIRE) 
-                { 
-                    Unit* pCaster = GetCaster(); 
-                    if (pCaster && pCaster->GetTypeId() != TYPEID_PLAYER) 
-                    { 
-                        Unit* pVictim = pCaster->getVictim(); 
-                        if (pVictim && pVictim->HasAura(67574)) 
-                            pVictim->RemoveAurasDueToSpell(67574); 
-                        pCaster->CastSpell(pCaster, 65922, true); 
-                    } 
-                } 
-                return; 
-            case 65922: 
-                if (m_removeMode == AURA_REMOVE_BY_EXPIRE) 
-                { 
-                    Unit* pCaster = GetCaster(); 
-                    if (pCaster && pCaster->GetTypeId() != TYPEID_PLAYER) 
-                    { 
-                        Unit* pVictim = pCaster->getVictim(); 
-                        if (pVictim && pVictim->HasAura(67574)) 
-                            pVictim->RemoveAurasDueToSpell(67574); 
-                        pCaster->CastSpell(pCaster, 65923, true); 
-                    } 
-                } 
-                return; 
-            case 65923: 
-                if (m_removeMode == AURA_REMOVE_BY_EXPIRE) 
-                { 
-                    Unit* pCaster = GetCaster(); 
-                    if (pCaster && pCaster->GetTypeId() != TYPEID_PLAYER) 
-                    { 
-                        Unit* pVictim = pCaster->getVictim(); 
-                        if (pVictim && pVictim->HasAura(67574)) 
-                            pVictim->RemoveAurasDueToSpell(67574); 
-                    } 
-                } 
+             case 65920:                                     //Anub'arak remove spike trigger
+                if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
+                {
+                    Unit* pCaster = GetCaster();
+                    if (pCaster && pCaster->GetTypeId() != TYPEID_PLAYER)
+                    {
+                        Unit* pVictim = pCaster->getVictim();
+                        if (pVictim && pVictim->HasAura(67574))
+                            pVictim->RemoveAurasDueToSpell(67574);
+                        pCaster->CastSpell(pCaster, 65922, true);
+                    }
+                }
+                return;
+            case 65922:
+                if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
+                {
+                    Unit* pCaster = GetCaster();
+                    if (pCaster && pCaster->GetTypeId() != TYPEID_PLAYER)
+                    {
+                        Unit* pVictim = pCaster->getVictim();
+                        if (pVictim && pVictim->HasAura(67574))
+                            pVictim->RemoveAurasDueToSpell(67574);
+                        pCaster->CastSpell(pCaster, 65923, true);
+                    }
+                }
+                return;
+            case 65923:
+                if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
+                {
+                    Unit* pCaster = GetCaster();
+                    if (pCaster && pCaster->GetTypeId() != TYPEID_PLAYER)
+                    {
+                        Unit* pVictim = pCaster->getVictim();
+                        if (pVictim && pVictim->HasAura(67574))
+                            pVictim->RemoveAurasDueToSpell(67574);
+                    }
+                }
                 return;
              case 66083:                                     // Lightning Arrows (Trial of the Champion encounter)
                  if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
@@ -8542,9 +8542,9 @@ void Aura::PeriodicDummyTick()
                     if (target->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    Unit * caster = GetCaster(); 
-                    if (!caster) 
-                        return; 
+                    Unit * caster = GetCaster();
+                    if (!caster)
+                        return;
 
 
                     // aura stack increase every 3 (data in m_miscvalue) seconds and decrease every 1s
@@ -8615,44 +8615,44 @@ void Aura::PeriodicDummyTick()
                     }
                     return;
                 }
-                case 65921:                                // Trial Of Crusader (Spike Aura - Anub'arak) 
-                { 
-                    uint32 Tick = GetAuraTicks(); 
-                    if (Tick == 1) 
-                    { 
-                        target->CastSpell(target, 66339, true);  //anub Summon Scarab Aura 
-                        target->CastSpell(target, 65981, false); //Submerged 
-                    } 
+                case 65921:                                // Trial Of Crusader (Spike Aura - Anub'arak)
+                {
+                    uint32 Tick = GetAuraTicks();
+                    if (Tick == 1)
+                    {
+                        target->CastSpell(target, 66339, true);  //anub Summon Scarab Aura
+                        target->CastSpell(target, 65981, false); //Submerged
+                    }
                     if (Tick == 6)
                         target->CastSpell(target, 66169, true); //Summon Spike
-                    if (Tick % 130 == 0) 
-                    { 
-                        target->RemoveAurasDueToSpell(65981); 
-                        target->RemoveAurasDueToSpell(65921); 
-                        target->RemoveAurasDueToSpell(66339); 
-                        target->CastSpell(target, 65982, true); // Birth 
-                    } 
-                    else 
-                    { 
-                        if (Tick > 5) 
-                        { 
-                            target->CastSpell(target, 67470, true); //Check Aura Spell 
-                            target->CastSpell(target, 66170, true); //Anub Teleport 
-                        } 
-                    } 
-                    return; 
-                } 
-                case 67574:                                // Trial Of Crusader (Spike Aggro Aura - Anub'arak) 
-                { 
-                    if (!target->GetMap()->Instanceable()) 
-                        return; 
- 
-                    if (InstanceData* data = target->GetInstanceData()) 
-                    { 
-                        if (Creature* pSpike = target->GetMap()->GetCreature(data->GetData64(34660))) 
-                            pSpike->AI()->AttackStart(target); 
-                    } 
-                     return; 
+                    if (Tick % 130 == 0)
+                    {
+                        target->RemoveAurasDueToSpell(65981);
+                        target->RemoveAurasDueToSpell(65921);
+                        target->RemoveAurasDueToSpell(66339);
+                        target->CastSpell(target, 65982, true); // Birth
+                    }
+                    else
+                    {
+                        if (Tick > 5)
+                        {
+                            target->CastSpell(target, 67470, true); //Check Aura Spell
+                            target->CastSpell(target, 66170, true); //Anub Teleport
+                        }
+                    }
+                    return;
+                }
+                case 67574:                                // Trial Of Crusader (Spike Aggro Aura - Anub'arak)
+                {
+                    if (!target->GetMap()->Instanceable())
+                        return;
+
+                    if (InstanceData* data = target->GetInstanceData())
+                    {
+                        if (Creature* pSpike = target->GetMap()->GetCreature(data->GetData64(34660)))
+                            pSpike->AI()->AttackStart(target);
+                    }
+                     return;
                 }
                 case 67630:                                 // Leeching Swarm 25 man
                 case 68647:
