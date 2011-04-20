@@ -29,7 +29,7 @@
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket &/*recv_data*/)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_GET_CALENDAR");
+    sLog.outError("WORLD: CMSG_CALENDAR_GET_CALENDAR");
 
     time_t cur_time = time(NULL);
 
@@ -121,7 +121,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &/*recv_data*/)
 
 void WorldSession::HandleCalendarGetEvent(WorldPacket &recv_data)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_GET_EVENT");
+    sLog.outError("WORLD: CMSG_CALENDAR_GET_EVENT");
 	uint64 eventId;
 	recv_data >> eventId;
 	if (!eventId)
@@ -131,7 +131,7 @@ void WorldSession::HandleCalendarGetEvent(WorldPacket &recv_data)
 
 void WorldSession::HandleCalendarGuildFilter(WorldPacket &recv_data)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_GUILD_FILTER");
+    sLog.outError("WORLD: CMSG_CALENDAR_GUILD_FILTER");
 	uint32 minLevel;
 	uint32 maxLevel;
 	uint32 minRank;
@@ -142,14 +142,14 @@ void WorldSession::HandleCalendarGuildFilter(WorldPacket &recv_data)
 
 void WorldSession::HandleCalendarArenaTeam(WorldPacket &recv_data)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_ARENA_TEAM");
+    sLog.outError("WORLD: CMSG_CALENDAR_ARENA_TEAM");
     uint32 unk1;
 	recv_data >> unk1;
 }
 
 void WorldSession::HandleCalendarAddEvent(WorldPacket &recv_data)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_ADD_EVENT");
+    sLog.outError("WORLD: CMSG_CALENDAR_ADD_EVENT");
 	uint32 maxInvites;
 
 	CalendarEvent m_event;
@@ -203,7 +203,7 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket &recv_data)
 
 void WorldSession::HandleCalendarUpdateEvent(WorldPacket &recv_data)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_UPDATE_EVENT");
+    sLog.outError("WORLD: CMSG_CALENDAR_UPDATE_EVENT");
 	uint64 eventID;
 	uint64 inviteID;
 	std::string title;
@@ -231,7 +231,7 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket &recv_data)
 
 void WorldSession::HandleCalendarRemoveEvent(WorldPacket &recv_data)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_REMOVE_EVENT");
+    sLog.outError("WORLD: CMSG_CALENDAR_REMOVE_EVENT");
 	uint64 eventId;
 	uint64 creatorGuid;
 	uint32 unk1;
@@ -245,7 +245,7 @@ void WorldSession::HandleCalendarRemoveEvent(WorldPacket &recv_data)
 
 void WorldSession::HandleCalendarCopyEvent(WorldPacket &recv_data)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_COPY_EVENT");
+    sLog.outError("WORLD: CMSG_CALENDAR_COPY_EVENT");
 	uint64 eventID;
 	uint64 creatorGuid;
 	uint32 Time;
@@ -257,7 +257,7 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket &recv_data)
 
 void WorldSession::HandleCalendarEventInvite(WorldPacket &recv_data)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_EVENT_INVITE");
+    sLog.outError("WORLD: CMSG_CALENDAR_EVENT_INVITE");
 
 	uint64 eventId;
 	uint64 inviteId;
@@ -271,12 +271,23 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket &recv_data)
 	recv_data >> status;
 	recv_data >> rank;
 
-	//FIXME - Finish it
+	CalendarInvite *invite = sCalendarMgr->GetInvite(inviteId);
+	Player *pPlayer =  GetPlayer()->GetMap()->GetPlayer((ObjectGuid)invite->target_guid);
+
+	WorldPacket data(SMSG_CALENDAR_EVENT_INVITE);
+	data.appendPackGUID(invite->target_guid);			//Invited Player
+	data << uint64(eventId);							//EventID
+	data << uint64(inviteId);							//InviteID
+	data << uint32(pPlayer->getLevel());				//Level
+	data << uint8(status);								//InviteStatus
+	data << uint8(0);									//unk
+	data << uint8(invite->invite_Type);					//InviteType
+	SendPacket(&data);
 }
 
 void WorldSession::HandleCalendarEventRsvp(WorldPacket &recv_data)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_EVENT_RSVP");
+    sLog.outError("WORLD: CMSG_CALENDAR_EVENT_RSVP");
 	uint64 eventId;
 	uint64 inviteId;
 	uint32 status;
@@ -291,7 +302,7 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket &recv_data)
 
 void WorldSession::HandleCalendarEventRemoveInvite(WorldPacket &recv_data)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_EVENT_REMOVE_INVITE");
+    sLog.outError("WORLD: CMSG_CALENDAR_EVENT_REMOVE_INVITE");
 	uint64 RemoveGuid;
 	uint64 RemoveInviteID;
 	uint64 RemoverGuid;
@@ -307,7 +318,7 @@ void WorldSession::HandleCalendarEventRemoveInvite(WorldPacket &recv_data)
 
 void WorldSession::HandleCalendarEventStatus(WorldPacket &recv_data)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_EVENT_STATUS");
+    sLog.outError("WORLD: CMSG_CALENDAR_EVENT_STATUS");
 	uint64 inviteeGUID;
 	uint64 eventID;
 	uint64 inviteeInviteID;
@@ -323,7 +334,7 @@ void WorldSession::HandleCalendarEventStatus(WorldPacket &recv_data)
 
 void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket &recv_data)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_EVENT_MODERATOR_STATUS");
+    sLog.outError("WORLD: CMSG_CALENDAR_EVENT_MODERATOR_STATUS");
 	uint64 participant;
 	uint64 eventID;
 	uint64 InviteID1;
@@ -339,7 +350,7 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket &recv_data)
 
 void WorldSession::HandleCalendarComplain(WorldPacket &recv_data)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_COMPLAIN");
+    sLog.outError("WORLD: CMSG_CALENDAR_COMPLAIN");
     recv_data.hexlike();
     recv_data.rpos(recv_data.wpos());                       // set to end to avoid warnings spam
 
@@ -350,7 +361,7 @@ void WorldSession::HandleCalendarComplain(WorldPacket &recv_data)
 
 void WorldSession::HandleCalendarGetNumPending(WorldPacket & /*recv_data*/)
 {
-    DEBUG_LOG("WORLD: CMSG_CALENDAR_GET_NUM_PENDING");      // empty
+    sLog.outError("WORLD: CMSG_CALENDAR_GET_NUM_PENDING");      // empty
 
     WorldPacket data(SMSG_CALENDAR_SEND_NUM_PENDING, 4);
     data << uint32(0);                                      // 0 - no pending invites, 1 - some pending invites
