@@ -1633,7 +1633,7 @@ bool ChatHandler::HandleNpcAddCommand(char* args)
 
     CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(id);
     //FIXME: need vehicle support like GenerateStaticCreatureLowGuid when its will allowed static spawns
-    if (!cinfo || cinfo->GetHighGuid() != HIGHGUID_UNIT)
+    if (!cinfo)
     {
         PSendSysMessage(LANG_COMMAND_INVALIDCREATUREID, id);
         SetSentErrorMessage(true);
