@@ -55,6 +55,12 @@ BattleGroundSA::BattleGroundSA()
     TimeST2Round = 120000;
     Round_timer = 0;
     Phase = 1;
+    bool GateRoomAncientShrineDamaged = false;
+    bool GateGreenEmeraldDamaged = false;
+    bool GateBlueSaphireDamaged = false;
+    bool GateMauveAmethystDamaged = false;
+    bool GateRedSunDamaged = false;
+    bool GateYellowMoonDamaged = false;
 }
 
 BattleGroundSA::~BattleGroundSA()
@@ -259,15 +265,6 @@ void BattleGroundSA::Update(uint32 diff)
 
 void BattleGroundSA::ResetWorldStates()
 {
-    //Player may enter BEFORE we set up bG - lets update his worldstates anyway...
-    /*UpdateWorldState(BG_SA_RIGHT_GY_HORDE , GraveyardStatus[BG_SA_RIGHT_CAPTURABLE_GY] == HORDE?1:0);
-UpdateWorldState(BG_SA_LEFT_GY_HORDE , GraveyardStatus[BG_SA_LEFT_CAPTURABLE_GY] == HORDE?1:0);
-UpdateWorldState(BG_SA_CENTER_GY_HORDE , GraveyardStatus[BG_SA_CENTRAL_CAPTURABLE_GY] == HORDE?1:0);
-
-UpdateWorldState(BG_SA_RIGHT_GY_ALLIANCE , GraveyardStatus[BG_SA_RIGHT_CAPTURABLE_GY] == ALLIANCE?1:0);
-UpdateWorldState(BG_SA_LEFT_GY_ALLIANCE , GraveyardStatus[BG_SA_LEFT_CAPTURABLE_GY] == ALLIANCE?1:0);
-UpdateWorldState(BG_SA_CENTER_GY_ALLIANCE , GraveyardStatus[BG_SA_CENTRAL_CAPTURABLE_GY] == ALLIANCE?1:0);*/
-
     if (GetDefender() == HORDE)
     {
         UpdateWorldState(BG_SA_ALLY_ATTACKS, 1);
@@ -421,7 +418,7 @@ void BattleGroundSA::UpdatePhase()
         Round_timer = 0;
         SetStatus(STATUS_WAIT_JOIN);
         SendMessageToAll(LANG_BG_SA_START_TWO_MINUTE, CHAT_MSG_BG_SYSTEM_NEUTRAL, NULL);
-}
+	}
 
     SpawnEvent(SA_EVENT_ADD_BOMB, (GetDefender() == ALLIANCE ? 1 : 0), true);
 
@@ -670,7 +667,11 @@ void BattleGroundSA::EventPlayerDamageGO(Player *player, GameObject* target_obj,
             switch (eventId)
             {
                 case 21630:
-                    SendMessageSA(player, BG_SA_ATTACK, _GatesName(target_obj));
+                    if (!GateRoomAncientShrineDamaged)
+                    {
+                        SendMessageSA(player, BG_SA_ATTACK, _GatesName(target_obj));
+                        GateRoomAncientShrineDamaged = true;
+                    }
                     break;
                 case 19836:
                     // SendMessageSA(player, BG_SA_DAMAGE, _GatesName(target_obj));
@@ -695,7 +696,11 @@ void BattleGroundSA::EventPlayerDamageGO(Player *player, GameObject* target_obj,
             switch (eventId)
             {
                 case 21630:
-                    SendMessageSA(player, BG_SA_ATTACK, _GatesName(target_obj));
+                    if (!GateGreenEmeraldDamaged)
+                    {
+                        SendMessageSA(player, BG_SA_ATTACK, _GatesName(target_obj));
+                        GateGreenEmeraldDamaged = true;
+                    }
                     break;
                 case 19041:
                     // SendMessageSA(player, BG_SA_DAMAGE, _GatesName(target_obj));
@@ -719,8 +724,12 @@ void BattleGroundSA::EventPlayerDamageGO(Player *player, GameObject* target_obj,
             switch (eventId)
             {
                 case 21630:
-                    SendMessageSA(player, BG_SA_ATTACK, _GatesName(target_obj));
-                    break;
+                    if (!GateBlueSaphireDamaged)
+                    {
+                        SendMessageSA(player, BG_SA_ATTACK, _GatesName(target_obj));
+                        GateBlueSaphireDamaged = true;
+                    }
+                   break;
                 case 19040:
                     // SendMessageSA(player, BG_SA_DAMAGE, _GatesName(target_obj));
                     SendWarningToAllSA(NULL, NULL, TEAM_NONE, true, type);
@@ -743,7 +752,11 @@ void BattleGroundSA::EventPlayerDamageGO(Player *player, GameObject* target_obj,
             switch (eventId)
             {
                 case 21630:
-                    SendMessageSA(player, BG_SA_ATTACK, _GatesName(target_obj));
+                    if (!GateMauveAmethystDamaged)
+                    {
+                        SendMessageSA(player, BG_SA_ATTACK, _GatesName(target_obj));
+                        GateMauveAmethystDamaged = true;
+                    }
                     break;
                 case 19043:
                     // SendMessageSA(player, BG_SA_DAMAGE, _GatesName(target_obj));
@@ -767,7 +780,11 @@ void BattleGroundSA::EventPlayerDamageGO(Player *player, GameObject* target_obj,
             switch (eventId)
             {
                 case 21630:
-                    SendMessageSA(player, BG_SA_ATTACK, _GatesName(target_obj));
+                    if (!GateRedSunDamaged)
+                    {
+                        SendMessageSA(player, BG_SA_ATTACK, _GatesName(target_obj));
+                        GateRedSunDamaged = true;
+                    }
                     break;
                 case 19042:
                     // SendMessageSA(player, BG_SA_DAMAGE, _GatesName(target_obj));
@@ -791,7 +808,11 @@ void BattleGroundSA::EventPlayerDamageGO(Player *player, GameObject* target_obj,
             switch (eventId)
             {
                 case 21630:
-                    SendMessageSA(player, BG_SA_ATTACK, _GatesName(target_obj));
+                    if (!GateYellowMoonDamaged)
+                    {
+                        SendMessageSA(player, BG_SA_ATTACK, _GatesName(target_obj));
+                        GateYellowMoonDamaged = true;
+                    }
                     break;
                 case 19044:
                     // SendMessageSA(player, BG_SA_DAMAGE, _GatesName(target_obj));

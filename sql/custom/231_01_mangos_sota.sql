@@ -6,23 +6,31 @@ UPDATE `creature_template` SET npcflag=1, `ScriptName` = 'npc_sa_vendor' WHERE e
 -- Seaforium source
 DELETE FROM `creature_template` WHERE `entry` in (50000);
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid_1`, `modelid_2`, `modelid_3`, `modelid_4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `minhealth`, `maxhealth`, `minmana`, `maxmana`, `armor`, `faction_A`, `faction_H`, `npcflag`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `PetSpellDataId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `unk16`, `unk17`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `equipment_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`) VALUES
-(50000, 0, 0, 0, 0, 0, 27462, 0, 27462, 0, 'Seaforium Charge', NULL, NULL, 0, 80, 80, 5000, 5000, 0, 0, 9730, 7, 7, 0, 1, 0.5, 0, 420, 630, 0, 157, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 336, 504, 126, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 94, 1, 0, 0, 0, 'npc_sa_bomb');
+(50000, 0, 0, 0, 0, 0, 27462, 0, 27462, 0, 'Seaforium Bomb', NULL, 'Interact', 0, 80, 80, 5000, 5000, 0, 0, 9730, 7, 7, 1, 1, 0.5, 0, 420, 630, 0, 157, 1, 2000, 2000, 1, 0, 0, 0, 0, 0, 0, 0, 336, 504, 126, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 0, 0, 0, 0, 0, 0, 0, 94, 1, 0, 0, 0, 'npc_sa_bomb');
+UPDATE `locales_creature` SET name_loc3 = 'Zephyriumbombe' WHERE entry = '50000';
 -- Doors
 UPDATE `gameobject_template` SET `faction` = 14 WHERE `entry` in (192549,190727,190726,190723,190724,190722);
 -- Seaforium barrels
 DELETE FROM `gameobject_template` WHERE `entry` in (190753,194086);
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `ScriptName`) VALUES
 (190753, 22, 8582, 'Seaforium Barrel', '', '', '', 12, 0, 2, 0, 0, 0, 0, 0, 0, 52415, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ''),
-(194086, 22, 8582, 'Seaforium Barrel', '', '', '', 29, 0, 2, 0, 0, 0, 0, 0, 0, 52415, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '');
+(194086, 22, 8582, 'Seaforium Barrel', '', '', '', 29, 0, 2, 0, 0, 0, 0, 0, 0, 52415, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ''),
+(402000, 22, 8582, 'Seaforium Barrel', '', '', '', 12, 0, 2, 0, 0, 0, 0, 0, 0, 52415, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'go_sa_bomb'),
+(402001, 22, 8582, 'Seaforium Barrel', '', '', '', 29, 0, 2, 0, 0, 0, 0, 0, 0, 52415, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'go_sa_bomb');
+UPDATE `locales_gameobject` SET name_loc3 = 'Zephyriumbombe' WHERE entry = '190753';
+UPDATE `locales_gameobject` SET name_loc3 = 'Zephyriumbombe' WHERE entry = '194086';
+INSERT INTO `locales_gameobject` VALUES (402000, '', '', 'Zephyriumbombe', '', '', '', '', '', '', '', '', '', '', '', '', '' );
+INSERT INTO `locales_gameobject` VALUES (402001, '', '', 'Zephyriumbombe', '', '', '', '', '', '', '', '', '', '', '', '', '' );
+
 -- Demolisher
 UPDATE creature_template SET npcflag = 1, minlevel = 70, maxlevel = 70, minhealth = 50000, maxhealth = 89820, spell1 = 52338, spell2 = 60206, `ScriptName` = 'npc_sa_demolisher' WHERE entry = 28781;
 UPDATE `creature_template` SET `difficulty_entry_1` = 0 WHERE `entry` = 28781;
 UPDATE creature_template SET npcflag = 1, minlevel = 80, maxlevel = 80, minhealth = 126000, maxhealth = 126000, spell1 = 52338, spell2 = 60206, `ScriptName` = 'npc_sa_demolisher' WHERE entry = 32796;
 DELETE FROM npc_spellclick_spells WHERE npc_entry = 28781;
 INSERT INTO npc_spellclick_spells VALUES (28781, 60968, 0, 0, 0, 0);
--- AP Cannon
+
 UPDATE `creature_template` SET `npcflag` = '1', `difficulty_entry_1` = '0', unit_flags = '4108', minhealth = '25000', maxhealth = '60000', `faction_A` = '35', `faction_H` = '35', `ScriptName` = 'npc_sa_cannon' WHERE entry = '27894';
-DeleTe From `npc_spellclick_spells` WHERE npc_entry in (27894);
+DELETE FROM `npc_spellclick_spells` WHERE npc_entry in (27894);
 INSERT INTO `npc_spellclick_spells` VALUES ('27894', '60968', '0', '0', '0', '0');
 -- Make Titan Relic clickable (hack, must be done via core, when door to Chamber of Ancient Relics is destroyed)
 UPDATE gameobject_template SET flags=flags&~16 WHERE entry = 192829;
@@ -151,69 +159,70 @@ INSERT INTO `creature_battleground` (`guid` ,`event1` ,`event2`) VALUES
 
 DELETE FROM `mangos_string` WHERE `entry` in (20000,20001,20002,20003,20004,20005,20006,20007,20008,20009,20010,20011,20012,20013,20014,20015,20016,20017,20018,20019,20020,20021,20022);
 INSERT INTO `mangos_string` (`entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`) VALUES
-(20000, 'The battle for Strand of the Ancients begins in 2 minute.', NULL, NULL, NULL, NULL, NULL, 'La batalla por la Playa de los Ancestros comenzará en 2 minutos.', 'La batalla por la Playa de los Ancestros comenzará en 2 minutos.', 'Битва за Берег Древних начнется через 2 минуты.'),
-(20001, 'The battle for Strand of the Ancients begins in 1 minute.', NULL, NULL, NULL, NULL, NULL, 'La batalla por la Playa de los Ancestros comenzará en 1 minuto.', 'La batalla por la Playa de los Ancestros comenzará en 1 minuto.', 'Битва за Берег Древних начнется через 1 минуту.'),
-(20002, 'The battle for Strand of the Ancients begins in 30 seconds.', NULL, NULL, NULL, NULL, NULL, 'La batalla por la Playa de los Ancestros comenzará en 30 segundos. ¡Preparaos!', 'La batalla por la Playa de los Ancestros comenzará en 30 segundos. ¡Preparaos!', 'Битва за Берег Древних начнется через 30 секунд. Приготовтесь!'),
-(20003, 'The battle for Strand of the Ancients has begun!', NULL, NULL, NULL, NULL, NULL, '¡Que comience la batalla por la Playa de los Ancestros!', '¡Que comience la batalla por la Playa de los Ancestros!', 'Битва за Берег Древних началась! '),
+(20000, 'The battle for Strand of the Ancients begins in 2 minute.', NULL, NULL, 'Die Schlacht um den Strand der Uralten beginnt in 2 Minuten.', NULL, NULL, 'La batalla por la Playa de los Ancestros comenzará en 2 minutos.', 'La batalla por la Playa de los Ancestros comenzará en 2 minutos.', 'Битва за Берег Древних начнется через 2 минуты.'),
+(20001, 'The battle for Strand of the Ancients begins in 1 minute.', NULL, NULL, 'Die Schlacht um den Strand der Uralten beginnt in 1 Minute.', NULL, NULL, 'La batalla por la Playa de los Ancestros comenzará en 1 minuto.', 'La batalla por la Playa de los Ancestros comenzará en 1 minuto.', 'Битва за Берег Древних начнется через 1 минуту.'),
+(20002, 'The battle for Strand of the Ancients begins in 30 seconds.', NULL, NULL, 'Die Schlacht um den Strand der Uralten beginnt in 30 Sekunden.', NULL, NULL, 'La batalla por la Playa de los Ancestros comenzará en 30 segundos. ¡Preparaos!', 'La batalla por la Playa de los Ancestros comenzará en 30 segundos. ¡Preparaos!', 'Битва за Берег Древних начнется через 30 секунд. Приготовтесь!'),
+(20003, 'The battle for Strand of the Ancients has begun!', NULL, NULL, 'Lasst die Schlacht um den Strand der Uralten beginnen!', NULL, NULL, '¡Que comience la batalla por la Playa de los Ancestros!', '¡Que comience la batalla por la Playa de los Ancestros!', 'Битва за Берег Древних началась! '),
 
-(20004, 'The %s is under attack!', NULL, NULL, NULL, NULL, NULL, '¡La puerta %s está siendo asediada!', '¡La puerta %s está siendo asediada!', 'Врата %s подвергаются нападению!'),
-(20005, 'The %s is damaged!', NULL, NULL, NULL, NULL, NULL, '¡La puerta %s ha sido dañada!', NULL, 'Врата %s повреждены!'),
-(20006, 'The %s was destroyed!', NULL, NULL, NULL, NULL, NULL, '¡La puerta %s ha sido destruida!', '¡La puerta %s ha sido destruida!', 'Врата %s уничтожены!'),
+(20004, 'The %s is under attack!', NULL, NULL, '%s wird angegriffen!', NULL, NULL, '¡La puerta %s está siendo asediada!', '¡La puerta %s está siendo asediada!', 'Врата %s подвергаются нападению!'),
+(20005, 'The %s is damaged!', NULL, NULL, '%s ist beschädigt!', NULL, NULL, '¡La puerta %s ha sido dañada!', NULL, 'Врата %s повреждены!'),
+(20006, 'The %s was destroyed!', NULL, NULL, '%s ist zerstört!', NULL, NULL, '¡La puerta %s ha sido destruida!', '¡La puerta %s ha sido destruida!', 'Врата %s уничтожены!'),
 
-(20007, 'Gate of the Green Emerald', NULL, NULL, NULL, NULL, NULL, 'de la Esmeralda Verde', 'de la Esmeralda Verde', 'Зеленого изумруда'),
-(20008, 'Gate of the Blue Sapphire', NULL, NULL, NULL, NULL, NULL, 'del Zafiro Azul', 'del Zafiro Azul', 'Синего сапфира'),
-(20009, 'Gate of the Purple Amethyst', NULL, NULL, NULL, NULL, NULL, 'de la Amatista Púrpura', 'de la Amatista Púrpura', 'Лилового аметиста'),
-(20010, 'Gate of the Red Sun', NULL, NULL, NULL, NULL, NULL, 'del Sol Rojo', 'del Sol Rojo', 'Красного солнца'),
-(20011, 'Gate of the Yellow Moon', NULL, NULL, NULL, NULL, NULL, 'de la Luna Amarilla', 'de la Luna Amarilla', 'Желтой луны'),
-(20012, 'Chamber of Ancient Relics', NULL, NULL, NULL, NULL, NULL, 'Cámara de Reliquias Antiguas', 'Cámara de Reliquias Antiguas', 'Комнаты древних святынь'),
+(20007, 'Gate of the Green Emerald', NULL, NULL, 'Das Tor des Smaragdhorizonts', NULL, NULL, 'de la Esmeralda Verde', 'de la Esmeralda Verde', 'Зеленого изумруда'),
+(20008, 'Gate of the Blue Sapphire', NULL, NULL, 'Das Tor des Saphirhimmels', NULL, NULL, 'del Zafiro Azul', 'del Zafiro Azul', 'Синего сапфира'),
+(20009, 'Gate of the Purple Amethyst', NULL, NULL, 'Das Tor des Amethysystems', NULL, NULL, 'de la Amatista Púrpura', 'de la Amatista Púrpura', 'Лилового аметиста'),
+(20010, 'Gate of the Red Sun', NULL, NULL, 'Das Tor der Rubinsonne', NULL, NULL, 'del Sol Rojo', 'del Sol Rojo', 'Красного солнца'),
+(20011, 'Gate of the Yellow Moon', NULL, NULL, 'Das Tor des Goldmondes', NULL, NULL, 'de la Luna Amarilla', 'de la Luna Amarilla', 'Желтой луны'),
+(20012, 'Chamber of Ancient Relics', NULL, NULL,'Die Kammer der Uralten', NULL, NULL, 'Cámara de Reliquias Antiguas', 'Cámara de Reliquias Antiguas', 'Комнаты древних святынь'),
 
-(20013, '%s precipitates %s!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '%s осаждает %s!'),
-(20014, '%s takes over %s!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '%s захватывает %s!'),
-(20015, 'East graveyard!', NULL, NULL, NULL, NULL, NULL, 'Cementerio Este', 'Cementerio Este', 'Восточное кладбище!'),
-(20016, 'West graveyard!', NULL, NULL, NULL, NULL, NULL, 'Cementerio Oeste', 'Cementerio Oeste', 'Западное кладбище!'),
-(20017, 'South graveyard!', NULL, NULL, NULL, NULL, NULL, 'Cementerio Sur', 'Cementerio Sur', 'Южное кладбище!'),
-(20018, '$n placed a Seaforium Charge!', NULL, NULL, NULL, NULL, NULL, '¡$n ha colocado una carga de seforio!', '¡$n ha colocado una carga de seforio!', '$n заложил сифориевый заряд!'),
+(20013, '%s precipitates %s!', NULL, NULL, '', NULL, NULL, NULL, NULL, '%s осаждает %s!'),
+(20014, '%s takes over %s!', NULL, NULL, '', NULL, NULL, NULL, NULL, '%s захватывает %s!'),
+(20015, 'East graveyard!', NULL, NULL, 'östlicher Friedhof!', NULL, NULL, 'Cementerio Este', 'Cementerio Este', 'Восточное кладбище!'),
+(20016, 'West graveyard!', NULL, NULL, 'westlicher Friedhof!', NULL, NULL, 'Cementerio Oeste', 'Cementerio Oeste', 'Западное кладбище!'),
+(20017, 'South graveyard!', NULL, NULL, 'südlicher Friedhof!', NULL, NULL, 'Cementerio Sur', 'Cementerio Sur', 'Южное кладбище!'),
+(20018, '$n placed a Seaforium Charge!', NULL, NULL, '$n plaziert eine Zephyriumladung!', NULL, NULL, '¡$n ha colocado una carga de seforio!', '¡$n ha colocado una carga de seforio!', '$n заложил сифориевый заряд!'),
 
-(20019, 'The Alliance won the first round, the Titan Relic was captured!', NULL, NULL, NULL, NULL, NULL, '¡La Alianza gana la primera ronda! ¡La reliquia de Titán ha sido capturada!', '¡La Alianza gana la primera ronda! ¡La reliquia de Titán ha sido capturada!', 'Первый раунд за Альянсом! Реликвия Титана захвачена!'),
-(20020, 'The Horde won the first round, the Relic of Titan was captured!', NULL, NULL, NULL, NULL, NULL, '¡La Horda gana la primera ronda! ¡La reliquia de Titán ha sido capturada!', '¡La Horda gana la primera ronda! ¡La reliquia de Titán ha sido capturada!', 'Второй раунд за Ордой! Реликвия Титана захвачена!'),
-(20021, 'The Horde won the second round, the Relic of Titan was captured!', NULL, NULL, NULL, NULL, NULL, '¡La Horda gana la segunda ronda! ¡La reliquia de Titán ha sido capturada!', '¡La Horda gana la segunda ronda! ¡La reliquia de Titán ha sido capturada!', 'Первый раунд Ничья! Реликвия Титана не захвачена!'),
-(20022, 'The Alliance won the second round, the Relic of Titan was captured!', NULL, NULL, NULL, NULL, NULL, '¡La Alianza gana la segunda ronda! ¡La reliquia de Titán ha sido capturada!', '¡La Alianza gana la segunda ronda! ¡La reliquia de Titán ha sido capturada!', 'Второй раунд Ничья! Реликвия Титана не захвачена!');
+(20019, 'The Alliance won the first round, the Titan Relic was captured!', NULL, NULL, 'Die Allianz hat das Titanenportal erobert!', NULL, NULL, '¡La Alianza gana la primera ronda! ¡La reliquia de Titán ha sido capturada!', '¡La Alianza gana la primera ronda! ¡La reliquia de Titán ha sido capturada!', 'Первый раунд за Альянсом! Реликвия Титана захвачена!'),
+(20020, 'The Horde won the first round, the Relic of Titan was captured!', NULL, NULL, 'Die Horde hat das Titanenportal erobert!', NULL, NULL, '¡La Horda gana la primera ronda! ¡La reliquia de Titán ha sido capturada!', '¡La Horda gana la primera ronda! ¡La reliquia de Titán ha sido capturada!', 'Второй раунд за Ордой! Реликвия Титана захвачена!'),
+(20021, 'The Horde won the second round, the Relic of Titan was captured!', NULL, NULL, 'Die Horde hat das Titanenportal erobert!', NULL, NULL, '¡La Horda gana la segunda ronda! ¡La reliquia de Titán ha sido capturada!', '¡La Horda gana la segunda ronda! ¡La reliquia de Titán ha sido capturada!', 'Первый раунд Ничья! Реликвия Титана не захвачена!'),
+(20022, 'The Alliance won the second round, the Relic of Titan was captured!', NULL, NULL, 'Die Allianz hat das Titanenportal erobert!', NULL, NULL, '¡La Alianza gana la segunda ronda! ¡La reliquia de Titán ha sido capturada!', '¡La Alianza gana la segunda ronda! ¡La reliquia de Titán ha sido capturada!', 'Второй раунд Ничья! Реликвия Титана не захвачена!');
 
 -- For SendWarningToAll(entry)
 DELETE FROM `mangos_string` WHERE `entry` IN (20024, 20025, 20026, 20027, 20028, 20029, 20030, 20031, 20032, 20033, 20034, 20035, 20036, 20037, 20038, 20039, 20040, 20041, 20042, 20043, 20044, 20045, 20046, 20047, 20048, 20049, 20050, 20051);
 INSERT INTO `mangos_string` (`entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`) VALUES
-(20024, 'The Horde attacks East Graveyard!', NULL, NULL, NULL, NULL, NULL, '¡La Horda está tomando el Cementerio Oriental!', '¡La Horda está tomando el Cementerio Oriental!', 'Орда атакует Восточное кладбище!'),
-(20025, 'The Horde attacks West Graveyard!', NULL, NULL, NULL, NULL, NULL, '¡La Horda está tomando el Cementerio Occidental!', '¡La Horda está tomando el Cementerio Occidental!', 'Орда атакует Западное кладбище!'),
-(20026, 'The Horde attacks South Graveyard!', NULL, NULL, NULL, NULL, NULL, '¡La Horda está tomando el Cementerio Sur!', '¡La Horda está tomando el Cementerio Sur!', 'Орда атакует Южное кладбище!'),
-(20027, 'The Alliance attacks East Graveyard!', NULL, NULL, NULL, NULL, NULL, '¡La Alianza está tomando el Cementerio Oriental!', '¡La Alianza está tomando el Cementerio Oriental!', 'Альянс атакует Восточное кладбище!'),
-(20028, 'The Alliance attacks West Graveyard!', NULL, NULL, NULL, NULL, NULL, '¡La Alianza está tomando el Cementerio Occidental!', '¡La Alianza está tomando el Cementerio Occidental!', 'Альянс атакует Западное кладбище!'),
-(20029, 'The Alliance attacks South Graveyard!', NULL, NULL, NULL, NULL, NULL, '¡La Alianza está tomando el Cementerio Sur!', '¡La Alianza está tomando el Cementerio Sur!', 'Альянс атакует Южное кладбище!'),
+(20024, 'The Horde attacks East Graveyard!', NULL, NULL, 'Der östliche Friedhof wird von der Horde angegriffen!', NULL, NULL, '¡La Horda está tomando el Cementerio Oriental!', '¡La Horda está tomando el Cementerio Oriental!', 'Орда атакует Восточное кладбище!'),
+(20025, 'The Horde attacks West Graveyard!', NULL, NULL, 'Der östliche Friedhof wird von der Horde angegriffen!', NULL, NULL, '¡La Horda está tomando el Cementerio Occidental!', '¡La Horda está tomando el Cementerio Occidental!', 'Орда атакует Западное кладбище!'),
+(20026, 'The Horde attacks South Graveyard!', NULL, NULL, 'Der östliche Friedhof wird von der Horde angegriffen!', NULL, NULL, '¡La Horda está tomando el Cementerio Sur!', '¡La Horda está tomando el Cementerio Sur!', 'Орда атакует Южное кладбище!'),
+(20027, 'The Alliance attacks East Graveyard!', NULL, NULL, 'Der östliche Friedhof wird von der Allianz angegriffen!', NULL, NULL, '¡La Alianza está tomando el Cementerio Oriental!', '¡La Alianza está tomando el Cementerio Oriental!', 'Альянс атакует Восточное кладбище!'),
+(20028, 'The Alliance attacks West Graveyard!', NULL, NULL, 'Der westliche Friedhof wird von der Allianz angegriffen!', NULL, NULL, '¡La Alianza está tomando el Cementerio Occidental!', '¡La Alianza está tomando el Cementerio Occidental!', 'Альянс атакует Западное кладбище!'),
+(20029, 'The Alliance attacks South Graveyard!', NULL, NULL, 'Der südliche Friedhof wird von der Allianz angegriffen', NULL, NULL, '¡La Alianza está tomando el Cementerio Sur!', '¡La Alianza está tomando el Cementerio Sur!', 'Альянс атакует Южное кладбище!'),
 
-(20030, 'The Horde has taken East Graveyard!', NULL, NULL, NULL, NULL, NULL, '¡La Horda ha tomado el Cementerio Oriental!', '¡La Horda ha tomado el Cementerio Oriental!', 'Орда захватила Восточное кладбище!'),
-(20031, 'The Horde has taken West Graveyard!', NULL, NULL, NULL, NULL, NULL, '¡La Horda ha tomado el Cementerio Occidental!', '¡La Horda ha tomado el Cementerio Occidental!', 'Орда захватила Западное кладбище!'),
-(20032, 'The Horde has taken South Graveyard!', NULL, NULL, NULL, NULL, NULL, '¡La Horda ha tomado el Cementerio Sur!', '¡La Horda ha tomado el Cementerio Sur!', 'Орда захватила Южное кладбище!'),
-(20033, 'The Alliance has taken East Graveyard!', NULL, NULL, NULL, NULL, NULL, '¡La Alianza ha tomado el Cementerio Oriental!', '¡La Alianza ha tomado el Cementerio Oriental!', 'Альянс захватил Восточное кладбище!'),
-(20034, 'The Alliance has taken West Graveyard!', NULL, NULL, NULL, NULL, NULL, '¡La Alianza ha tomado el Cementerio Occidental!', '¡La Alianza ha tomado el Cementerio Occidental!', 'Альянс захватил Западное кладбище!'),
-(20035, 'The Alliance has taken South Graveyard!', NULL, NULL, NULL, NULL, NULL, '¡La Alianza ha tomado el Cementerio Sur!', '¡La Alianza ha tomado el Cementerio Sur!', 'Альянс захватил Южное кладбище!'),
+(20030, 'The Horde has taken East Graveyard!', NULL, NULL, 'Der östliche Friedhof ist von der Horde erobert worden!', NULL, NULL, '¡La Horda ha tomado el Cementerio Oriental!', '¡La Horda ha tomado el Cementerio Oriental!', 'Орда захватила Восточное кладбище!'),
+(20031, 'The Horde has taken West Graveyard!', NULL, NULL, 'Der westlichen Friedhof ist von der Horde erobert worden!', NULL, NULL, '¡La Horda ha tomado el Cementerio Occidental!', '¡La Horda ha tomado el Cementerio Occidental!', 'Орда захватила Западное кладбище!'),
+(20032, 'The Horde has taken South Graveyard!', NULL, NULL, 'Der südlichen Friedhof ist von der Horde erobert worden!', NULL, NULL, '¡La Horda ha tomado el Cementerio Sur!', '¡La Horda ha tomado el Cementerio Sur!', 'Орда захватила Южное кладбище!'),
+(20033, 'The Alliance has taken East Graveyard!', NULL, NULL, 'Der östliche Friedhof ist von der Allianz erobert worden!', NULL, NULL, '¡La Alianza ha tomado el Cementerio Oriental!', '¡La Alianza ha tomado el Cementerio Oriental!', 'Альянс захватил Восточное кладбище!'),
+(20034, 'The Alliance has taken West Graveyard!', NULL, NULL, 'Der westliche Friedhof ist von der Allianz erobert worden!', NULL, NULL, '¡La Alianza ha tomado el Cementerio Occidental!', '¡La Alianza ha tomado el Cementerio Occidental!', 'Альянс захватил Западное кладбище!'),
+(20035, 'The Alliance has taken South Graveyard!', NULL, NULL, 'Der südliche Friedhof ist von der Allianz erobert worden!', NULL, NULL, '¡La Alianza ha tomado el Cementerio Sur!', '¡La Alianza ha tomado el Cementerio Sur!', 'Альянс захватил Южное кладбище!'),
 
-(20036, 'The Chamber of Ancient Relics was destroyed!', NULL, NULL, NULL, NULL, NULL, '¡La puerta de la Cámara de Reliquias antiguas ha sido destruída!', '¡La puerta de la Cámara de Reliquias antiguas ha sido destruída!', 'Комната древних святынь разрушена!'),
-(20037, 'The Gate of the Green Emerald was destroyed!', NULL, NULL, NULL, NULL, NULL, '¡La puerta de la Esmeralda Verde ha sido destruída!', '¡La puerta de la Esmeralda Verde ha sido destruída!', 'Врата Зеленого Изумруда разрушены!'),
-(20038, 'The Gate of the Blue Sapphire was destroyed!', NULL, NULL, NULL, NULL, NULL, '¡La puerta del Zafiro Azul ha sido destruída!', '¡La puerta del Zafiro Azul ha sido destruída!', 'Врата Синего Сапфира разрушены!'),
-(20039, 'The Gate of the Purple Amethyst was destroyed!', NULL, NULL, NULL, NULL, NULL, '¡La puerta de la Amatista Púrpura ha sido destruída!', '¡La puerta de la Amatista Púrpura ha sido destruída!', 'Врата Лилового Аметиста разрушены!'),
-(20040, 'The Gate of the Red Sun was destroyed!', NULL, NULL, NULL, NULL, NULL, '¡La puerta del Sol Rojo ha sido destruída!', '¡La puerta del Sol Rojo ha sido destruída!', 'Врата Красного Солнца разрушены!'),
-(20041, 'The Gate of the Yellow Moon was destroyed!', NULL, NULL, NULL, NULL, NULL, '¡La puerta de la Luna Amarilla ha sido destruída!', '¡La puerta de la Luna Amarilla ha sido destruída!', 'Врата Желтой Луны разрушены!'),
+(20036, 'The Chamber of Ancient Relics was destroyed!', NULL, NULL, 'In die Kammer wird eingebrochen! Der Titan ist in Gefahr!', NULL, NULL, '¡La puerta de la Cámara de Reliquias antiguas ha sido destruída!', '¡La puerta de la Cámara de Reliquias antiguas ha sido destruída!', 'Комната древних святынь разрушена!'),
+(20037, 'The Gate of the Green Emerald was destroyed!', NULL, NULL, 'Das Tor des Smaragdhorizonts ist zerstört!', NULL, NULL, '¡La puerta de la Esmeralda Verde ha sido destruída!', '¡La puerta de la Esmeralda Verde ha sido destruída!', 'Врата Зеленого Изумруда разрушены!'),
+(20038, 'The Gate of the Blue Sapphire was destroyed!', NULL, NULL, 'Das Tor des Saphirhimmels ist zerstört!', NULL, NULL, '¡La puerta del Zafiro Azul ha sido destruída!', '¡La puerta del Zafiro Azul ha sido destruída!', 'Врата Синего Сапфира разрушены!'),
+(20039, 'The Gate of the Purple Amethyst was destroyed!', NULL, NULL, 'Das Tor des Amethyststerns ist zerstört worden', NULL, NULL, '¡La puerta de la Amatista Púrpura ha sido destruída!', '¡La puerta de la Amatista Púrpura ha sido destruída!', 'Врата Лилового Аметиста разрушены!'),
+(20040, 'The Gate of the Red Sun was destroyed!', NULL, NULL, 'Das Tor der Rubinsonne ist zerstört worden!', NULL, NULL, '¡La puerta del Sol Rojo ha sido destruída!', '¡La puerta del Sol Rojo ha sido destruída!', 'Врата Красного Солнца разрушены!'),
+(20041, 'The Gate of the Yellow Moon was destroyed!', NULL, NULL, 'Das Tor des Goldmondes ist zerstört worden!', NULL, NULL, '¡La puerta de la Luna Amarilla ha sido destruída!', '¡La puerta de la Luna Amarilla ha sido destruída!', 'Врата Желтой Луны разрушены!'),
 
-(20042, 'The Chamber of Ancient Relics is damaged!', NULL, NULL, NULL, NULL, NULL, '¡La puerta de la Cámara de Reliquias antiguas ha sido dañada!', '¡La puerta de la Cámara de Reliquias antiguas ha sido dañada!', 'Комната древних святынь повреждена!'),
-(20043, 'The Gate of the Green Emerald is damaged!', NULL, NULL, NULL, NULL, NULL, '¡La puerta de la Esmeralda Verde ha sido dañada!', '¡La puerta de la Esmeralda Verde ha sido dañada!', 'Врата Зеленого Изумруда повреждены!'),
-(20044, 'The Gate of the Blue Sapphire is damaged!', NULL, NULL, NULL, NULL, NULL, '¡La puerta del Zafiro Azul ha sido dañada!', '¡La puerta del Zafiro Azul ha sido dañada!', 'Врата Синего Сапфира повреждены!'),
-(20045, 'The Gate of the Purple Amethyst is damaged!', NULL, NULL, NULL, NULL, NULL, '¡La puerta de la Amatista Púrpura ha sido dañada!', '¡La puerta de la Amatista Púrpura ha sido dañada!', 'Врата Лилового Аметиста повреждены!'),
-(20046, 'The Gate of the Red Sun is damaged!', NULL, NULL, NULL, NULL, NULL, '¡La puerta del Sol Rojo ha sido dañada!', '¡La puerta del Sol Rojo ha sido dañada!', 'Врата Красного Солнца повреждены!'),
-(20047, 'The Gate of the Yellow Moon is damaged!', NULL, NULL, NULL, NULL, NULL, '¡La puerta de la Luna Amarilla ha sido dañada!', '¡La puerta de la Luna Amarilla ha sido dañada!', 'Врата Желтой Луны повреждены!'),
+(20042, 'The Chamber of Ancient Relics is damaged!', NULL, NULL, 'Die Kammer der Uralten ist beschädigt worden!', NULL, NULL, '¡La puerta de la Cámara de Reliquias antiguas ha sido dañada!', '¡La puerta de la Cámara de Reliquias antiguas ha sido dañada!', 'Комната древних святынь повреждена!'),
+(20043, 'The Gate of the Green Emerald is damaged!', NULL, NULL, 'Das Tor des Smaragdhorizonts ist beschädigt worden', NULL, NULL, '¡La puerta de la Esmeralda Verde ha sido dañada!', '¡La puerta de la Esmeralda Verde ha sido dañada!', 'Врата Зеленого Изумруда повреждены!'),
+(20044, 'The Gate of the Blue Sapphire is damaged!', NULL, NULL, 'Das Tor des Saphirhimmels ist beschädigt worden!', NULL, NULL, '¡La puerta del Zafiro Azul ha sido dañada!', '¡La puerta del Zafiro Azul ha sido dañada!', 'Врата Синего Сапфира повреждены!'),
+(20045, 'The Gate of the Purple Amethyst is damaged!', NULL, NULL, 'Das Tor des Amethyststerns ist beschädigt worden!', NULL, NULL, '¡La puerta de la Amatista Púrpura ha sido dañada!', '¡La puerta de la Amatista Púrpura ha sido dañada!', 'Врата Лилового Аметиста повреждены!'),
+(20046, 'The Gate of the Red Sun is damaged!', NULL, NULL, 'Das Tor der Rubinsonne ist beschädigt worden!', NULL, NULL, '¡La puerta del Sol Rojo ha sido dañada!', '¡La puerta del Sol Rojo ha sido dañada!', 'Врата Красного Солнца повреждены!'),
+(20047, 'The Gate of the Yellow Moon is damaged!', NULL, NULL, 'Das Tor des Goldmondes ist beschädigt worden!', NULL, NULL, '¡La puerta de la Luna Amarilla ha sido dañada!', '¡La puerta de la Luna Amarilla ha sido dañada!', 'Врата Желтой Луны повреждены!'),
 
-(20048, 'Round 1 - Finished!', NULL, NULL, NULL, NULL, NULL, '¡Ronda 1 acabada!', '¡Ronda 1 acabada!', 'Первый раунд завершен!'),
-(20049, 'Round 1 - Finished!', NULL, NULL, NULL, NULL, NULL, '¡Ronda 1 acabada!', '¡Ronda 1 acabada!', 'Первый раунд завершен!'),
-(20050, 'Round 2 - Finished!', NULL, NULL, NULL, NULL, NULL, '¡Ronda 2 acabada!', '¡Ronda 2 acabada!', 'Второй раунд завершен!'),
-(20051, 'Round 2 - Finished!', NULL, NULL, NULL, NULL, NULL, '¡Ronda 2 acabada!', '¡Ronda 2 acabada!', 'Второй раунд завершен!');
+(20048, 'Round 1 - Finished!', NULL, NULL, 'Runde 1 - Beendet!', NULL, NULL, '¡Ronda 1 acabada!', '¡Ronda 1 acabada!', 'Первый раунд завершен!'),
+(20049, 'Round 1 - Finished!', NULL, NULL, 'Runde 1 - Beendet!', NULL, NULL, '¡Ronda 1 acabada!', '¡Ronda 1 acabada!', 'Первый раунд завершен!'),
+(20050, 'Round 2 - Finished!', NULL, NULL, 'Runde 2 - Beendet!', NULL, NULL, '¡Ronda 2 acabada!', '¡Ronda 2 acabada!', 'Второй раунд завершен!'),
+(20051, 'Round 2 - Finished!', NULL, NULL, 'Runde 2 - Beendet!', NULL, NULL, '¡Ronda 2 acabada!', '¡Ronda 2 acabada!', 'Второй раунд завершен!');
+
 
 DELETE FROM `gameobject` WHERE `guid` in (300008,300009,300010,300011,300012,300013,300014,300015,300016,300017,300018,300019,300020,300021,300022,300023,300024,300025,300026,300027,300028);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
