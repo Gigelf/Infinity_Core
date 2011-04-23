@@ -473,13 +473,8 @@ void WorldSession::LogoutPlayer(bool Save)
         ///- Reset the online field in the account table
         // no point resetting online in character table here as Player::SaveToDB() will set it to 1 since player has not been removed from world at this stage
         // No SQL injection as AccountID is uint32
-        static SqlStatementID id;
-
-        if (! _player->GetPlayerbotAI())
-        {
-            SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
-            stmt.PExecute(uint32(0), GetAccountId());
-        }
+       if (! _player->GetPlayerbotAI())
+           LoginDatabase.PExecute("UPDATE account SET active_realm_id = 0 WHERE id = '%u'", GetAccountId());
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
         if (Guild *guild = sObjectMgr.GetGuildById(_player->GetGuildId()))
