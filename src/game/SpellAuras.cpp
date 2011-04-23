@@ -2214,23 +2214,17 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 58591:                                 // Stoneclaw Totem X
                         target->CastSpell(target, 58585, true);
                         return;
-                    case 61187:                                 // Twilight Shift 
-                        target->CastSpell(target, 61885, true); 
-                        if (target->HasAura(57620)) 
-                            target->RemoveAurasDueToSpell(57620); 
-                        if (target->HasAura(57874)) 
-                            target->RemoveAurasDueToSpell(57874); 
+                    case 61187:                                 // Twilight Shift
+                    case 61190:
+                        target->CastSpell(target, 61885, true);
+                        if (target->HasAura(57620))
+                            target->RemoveAurasDueToSpell(57620);
+                        if (target->HasAura(57874))
+                            target->RemoveAurasDueToSpell(57874);
                         break;
                     case 54729:                             // Winged Steed of the Ebon Blade
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 0, 0, 54726, 54727, 0);
                         return;
-                    case 61187:
-                    case 61190:
-                    {
-                        target->RemoveAurasDueToSpell(57620);
-                        target->RemoveAurasDueToSpell(57874);
-                        return;
-                    }
                     case 62061:                             // Festive Holiday Mount
                         if (target->HasAuraType(SPELL_AURA_MOUNTED))
                             // Reindeer Transformation
@@ -10230,32 +10224,32 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 return;
             break;
         }
-        case SPELLFAMILY_ROGUE: 
-        { 
-            // remove debuf savage combat 
-            if (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0008000010014000)) 
-            { 
-                // search poison 
-                bool found = false; 
-                Unit::SpellAuraHolderMap const& auras = m_target->GetSpellAuraHolderMap(); 
-                for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr) 
-                { 
-                    uint32 flags1 = m_target->HasAuraState(AURA_STATE_DEADLY_POISON); 
-                    if (itr->second->GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && (flags1 & (0x80000))) 
-                    { 
-                        found = true; 
-                        break; 
-                    } 
-                } 
- 
-                if (!found) 
-                { 
-                    m_target->RemoveAurasDueToSpell(58684); // Savage Combat rank 1 
-                    m_target->RemoveAurasDueToSpell(58683); // Savage Combat rank 2 
-                } 
+        case SPELLFAMILY_ROGUE:
+        {
+            // remove debuf savage combat
+            if (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0008000010014000))
+            {
+                // search poison
+                bool found = false;
+                Unit::SpellAuraHolderMap const& auras = m_target->GetSpellAuraHolderMap();
+                for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                {
+                    uint32 flags1 = m_target->HasAuraState(AURA_STATE_DEADLY_POISON);
+                    if (itr->second->GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && (flags1 & (0x80000)))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    m_target->RemoveAurasDueToSpell(58684); // Savage Combat rank 1
+                    m_target->RemoveAurasDueToSpell(58683); // Savage Combat rank 2
+                }
             }
             // Sprint (skip non player casted spells by category)
-            else if (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000040) && GetSpellProto()->Category == 44) 
+            else if (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000040) && GetSpellProto()->Category == 44)
             {
                 if(!apply || m_target->HasAura(58039))      // Glyph of Blurred Speed
                     spellId1 = 61922;                       // Sprint (waterwalk)
