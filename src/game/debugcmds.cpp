@@ -1213,6 +1213,6 @@ bool ChatHandler::HandleSetVehicleIdCommand(char* args)
     }
 
     target->RemoveVehicleKit();
-    target->CreateVehicleKit(vehicleId);
+    target->SetVehicleId(vehicleId);
     return true;
 }
