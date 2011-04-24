@@ -39,6 +39,7 @@
 #include "Pet.h"
 #include "Util.h"
 #include "Totem.h"
+#include "Vehicle.h"
 #include "BattleGround.h"
 #include "InstanceData.h"
 #include "MapPersistentStateMgr.h"
@@ -183,8 +184,10 @@ void GlobalCooldownMgr::CancelGlobalCooldown(SpellEntry const* spellInfo)
 ////////////////////////////////////////////////////////////
 // Methods of class Unit
 
-Unit::Unit()
-: WorldObject(), i_motionMaster(this), m_ThreatManager(this), m_HostileRefManager(this)
+Unit::Unit() :
+    i_motionMaster(this), m_ThreatManager(this), m_HostileRefManager(this),
+    m_charmInfo(NULL),
+    m_vehicleInfo(NULL)
 {
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -278,8 +281,8 @@ Unit::Unit()
 
     m_transport = NULL;
 
-    m_pVehicle = NULL;
     m_pVehicleKit = NULL;
+    m_pVehicle    = NULL;
 
     // Frozen Mod
     m_spoofSamePlayerFaction = false;
@@ -298,8 +301,8 @@ Unit::~Unit()
         }
     }
 
-    if (m_charmInfo)
-        delete m_charmInfo;
+    delete m_charmInfo;
+    delete m_vehicleInfo;
 
     // those should be already removed at "RemoveFromWorld()" call
     MANGOS_ASSERT(m_gameObj.size() == 0);
@@ -2814,8 +2817,8 @@ void Unit::CalculateHealAbsorb(const uint32 heal, uint32 *absorb)
 
 void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool extra )
 {
-    if((hasUnitState(UNIT_STAT_CAN_NOT_REACT) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) &&
-        (!this->GetVehicle() || this->GetVehicle()->GetVehicleId() != 223))
+    if((hasUnitState(UNIT_STAT_CAN_NOT_REACT) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) && 
+        (!this->GetVehicle() || this->GetVehicleInfo()->GetEntry()->m_ID != 223))2
         return;
 
     if (!pVictim->isAlive())
@@ -6098,12 +6101,12 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
 
     if(GetTypeId()==TYPEID_PLAYER && GetVehicle())
     {
-        switch(this->GetVehicle()->GetVehicleId())
+        switch(this->GetVehicleInfo()->GetEntry()->m_ID)
         {
-        case 223:
-            break;
-        default:
-            return false;
+            case 223:
+                break;
+            default:
+                return false;
         }
     }
 
@@ -8403,22 +8406,11 @@ void Unit::Mount(uint32 mount, uint32 spellId, uint32 vehicleId, uint32 creature
 
         if (vehicleId)
         {
-            if (CreateVehicleKit(vehicleId))
-            {
-                GetVehicleKit()->Reset();
+            SetVehicleId(vehicleId);
+            GetVehicleKit()->Reset();
 
-                // Send others that we now have a vehicle
-                WorldPacket data(SMSG_SET_VEHICLE_REC_ID, 8+4);
-                data << GetPackGUID();
-                data << uint32(vehicleId);
-                SendMessageToSet(&data, true);
-
-                data.Initialize(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA, 0);
-                ((Player*)this)->GetSession()->SendPacket(&data);
-
-                // mounts can also have accessories
-                GetVehicleKit()->InstallAllAccessories(creatureEntry);
-            }
+            // mounts can also have accessories
+            GetVehicleKit()->InstallAllAccessories(creatureEntry);
         }
     }
 }
@@ -10261,9 +10253,10 @@ void Unit::CleanupsBeforeDelete()
 {
     if(m_uint32Values)                                      // only for fully created object
     {
-        RemoveVehicleKit();
-        ExitVehicle();
-
+        if (GetVehicle())
+            ExitVehicle();
+        if (GetVehicleKit())
+            RemoveVehicleKit();
         InterruptNonMeleeSpells(true);
         m_Events.KillAllEvents(false);                      // non-delatable (currently casted spells) will not deleted now but it will deleted at call in Map::RemoveAllObjectsInRemoveList
         CombatStop();
@@ -11826,18 +11819,6 @@ struct SetPvPHelper
     bool state;
 };
 
-bool Unit::CreateVehicleKit(uint32 vehicleId)
-{
-    VehicleEntry const *vehicleInfo = sVehicleStore.LookupEntry(vehicleId);
-
-    if (!vehicleInfo)
-        return false;
-
-    m_pVehicleKit = new VehicleKit(this, vehicleInfo);
-    m_updateFlag |= UPDATEFLAG_VEHICLE;
-    return true;
-}
-
 void Unit::RemoveVehicleKit()
 {
     if (!m_pVehicleKit)
@@ -11845,8 +11826,8 @@ void Unit::RemoveVehicleKit()
 
     m_pVehicleKit->RemoveAllPassengers();
 
-    delete m_pVehicleKit;
-    m_pVehicleKit = NULL;
+//    delete m_pVehicleKit;
+//    m_pVehicleKit = NULL;
 
     m_updateFlag &= ~UPDATEFLAG_VEHICLE;
     RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
@@ -11934,8 +11915,8 @@ void Unit::ExitVehicle()
         return;
 
     m_pVehicle->RemovePassenger(this);
-
-    if((GetTypeId() == TYPEID_PLAYER) && (((Player*)this)->GetQuestStatus(12779) == QUEST_STATUS_INCOMPLETE) && (m_pVehicle->GetVehicleId() == 156))
+	
+    if((GetTypeId() == TYPEID_PLAYER) && (((Player*)this)->GetQuestStatus(12779) == QUEST_STATUS_INCOMPLETE) && (this->GetVehicleInfo()->GetEntry()->m_ID == 156))
         ((Player*)this)->CastSpell(((Player*)this), 74470, false);
 
     m_pVehicle = NULL;
@@ -12419,5 +12400,57 @@ ObjectGuid const& Unit::GetCreatorGuid() const
 
         default:
             return ObjectGuid();
+    }
+}
+
+void Unit::MonsterJump(float x, float y, float z, float o, uint32 transitTime, uint32 verticalSpeed)
+{
+    SendMonsterMove(x, y, z, SPLINETYPE_NORMAL, SplineFlags(SPLINEFLAG_TRAJECTORY | SPLINEFLAG_WALKMODE), transitTime, NULL, double(verticalSpeed));
+
+    if (GetTypeId() != TYPEID_PLAYER)
+    {
+        Creature* c = (Creature*)this;
+        // Creature relocation acts like instant movement generator, so current generator expects interrupt/reset calls to react properly
+        if (!c->GetMotionMaster()->empty())
+            if (MovementGenerator *movgen = c->GetMotionMaster()->top())
+                movgen->Interrupt(*c);
+
+        GetMap()->CreatureRelocation((Creature*)this, x, y, z, o);
+
+        // finished relocation, movegen can different from top before creature relocation,
+        // but apply Reset expected to be safe in any case
+        if (!c->GetMotionMaster()->empty())
+            if (MovementGenerator *movgen = c->GetMotionMaster()->top())
+                movgen->Reset(*c);
+    }
+}
+
+void Unit::SetVehicleId(uint32 entry)
+{
+    delete m_vehicleInfo;
+
+    if (entry)
+    {
+        VehicleEntry const* ventry = sVehicleStore.LookupEntry(entry);
+        MANGOS_ASSERT(ventry != NULL);
+
+        m_vehicleInfo = new VehicleInfo(ventry);
+        m_updateFlag |= UPDATEFLAG_VEHICLE;
+
+        if (!m_pVehicleKit)
+            m_pVehicleKit = new VehicleKit(this);
+    }
+    else
+    {
+        m_vehicleInfo = NULL;
+        m_updateFlag &= ~UPDATEFLAG_VEHICLE;
+    }
+
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        WorldPacket data(SMSG_SET_VEHICLE_REC_ID, 16);
+        data << GetPackGUID();
+        data << uint32(entry);
+        SendMessageToSet(&data, true);
     }
 }
