@@ -55,12 +55,12 @@ BattleGroundSA::BattleGroundSA()
     TimeST2Round = 120000;
     Round_timer = 0;
     Phase = 1;
-    bool GateRoomAncientShrineDamaged = false;
-    bool GateGreenEmeraldDamaged = false;
-    bool GateBlueSaphireDamaged = false;
-    bool GateMauveAmethystDamaged = false;
-    bool GateRedSunDamaged = false;
-    bool GateYellowMoonDamaged = false;
+    GateRoomAncientShrineDamaged = false;
+    GateGreenEmeraldDamaged = false;
+    GateBlueSaphireDamaged = false;
+    GateMauveAmethystDamaged = false;
+    GateRedSunDamaged = false;
+    GateYellowMoonDamaged = false;
 }
 
 BattleGroundSA::~BattleGroundSA()
