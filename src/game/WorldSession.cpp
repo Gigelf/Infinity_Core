@@ -377,8 +377,8 @@ void WorldSession::LogoutPlayer(bool Save)
     if (_player)
     {
         // Playerbot mod: log out all player bots owned by this toon
-        if (_player->GetPlayerbotMgr())
-            _player->GetPlayerbotMgr()->LogoutAllBots();
+        if (GetPlayer()->GetPlayerbotMgr())
+            GetPlayer()->GetPlayerbotMgr()->LogoutAllBots();
 
         sLog.outChar("Account: %d (IP: %s) Logout Character:[%s] (guid: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName() ,_player->GetGUIDLow());
 
@@ -473,8 +473,14 @@ void WorldSession::LogoutPlayer(bool Save)
         ///- Reset the online field in the account table
         // no point resetting online in character table here as Player::SaveToDB() will set it to 1 since player has not been removed from world at this stage
         // No SQL injection as AccountID is uint32
-       if (! _player->GetPlayerbotAI())
-           LoginDatabase.PExecute("UPDATE account SET active_realm_id = 0 WHERE id = '%u'", GetAccountId());
+
+        if (!GetPlayer()->GetPlayerbotAI())
+        {
+            static SqlStatementID id;
+
+            SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
+            stmt.PExecute(uint32(0), GetAccountId());
+        }
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
         if (Guild *guild = sObjectMgr.GetGuildById(_player->GetGuildId()))
@@ -530,8 +536,8 @@ void WorldSession::LogoutPlayer(bool Save)
         sSocialMgr.SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetObjectGuid(), true);
         sSocialMgr.RemovePlayerSocial (_player->GetGUIDLow ());
 
-		// Playerbot - remember player GUID for update SQL below
-        uint32 guid = _player->GetGUIDLow();
+        // Playerbot - remember player GUID for update SQL below
+        uint32 guid = GetPlayer()->GetGUIDLow();
 
         ///- Remove the player from the world
         // the player may not be in the world when logging out

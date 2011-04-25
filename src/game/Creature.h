@@ -473,6 +473,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         // Playerbot mod - adds functionality to load/unload bots from NPC, also need to apply SQL scripts
         void LoadBotMenu(Player *pPlayer);
 
+        // Playerbot mod - adds functionality to load/unload bots from NPC, also need to apply SQL scripts
+        void LoadBotMenu(Player *pPlayer);
+
         bool IsCorpse() const { return getDeathState() ==  CORPSE; }
         bool IsDespawned() const { return getDeathState() ==  DEAD; }
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }

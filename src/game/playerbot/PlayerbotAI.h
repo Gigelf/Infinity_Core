@@ -140,7 +140,6 @@ public:
     };
 
     typedef std::map<uint32, uint32> BotNeedItem;
-    typedef std::pair<uint32,uint32>talentPair;
     typedef std::list<uint64> BotLootCreature;
     typedef std::list<uint32> BotLootEntry;
     typedef std::list<uint32> BotSpellList;
@@ -201,9 +200,6 @@ public:
     // Initialize spell using rank 1 spell id
     uint32 initSpell(uint32 spellId);
     uint32 initPetSpell(uint32 spellIconId);
-
-    // extracts talent ids to list
-    void extractTalentIds(const std::string& text, std::list<talentPair>& talentIds) const;
 
     // extracts item ids from links
     void extractItemIds(const std::string& text, std::list<uint32>& itemIds) const;

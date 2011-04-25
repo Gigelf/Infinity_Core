@@ -42,6 +42,9 @@
 // Playerbot mod:
 #include "playerbot/PlayerbotMgr.h"
 
+// Playerbot mod:
+#include "playerbot/PlayerbotMgr.h"
+
 // config option SkipCinematics supported values
 enum CinematicsSkipMode
 {
@@ -231,6 +234,11 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     recv_data >> race_;
     recv_data >> class_;
+
+    // extract other data required for player creating
+    uint8 gender, skin, face, hairStyle, hairColor, facialHair, outfitId;
+    recv_data >> gender >> skin >> face;
+    recv_data >> hairStyle >> hairColor >> facialHair >> outfitId;
 
     WorldPacket data(SMSG_CHAR_CREATE, 1);                  // returned with diff.values in all cases
 
@@ -471,11 +479,6 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         SendPacket( &data );
         return;
     }
-
-    // extract other data required for player creating
-    uint8 gender, skin, face, hairStyle, hairColor, facialHair, outfitId;
-    recv_data >> gender >> skin >> face;
-    recv_data >> hairStyle >> hairColor >> facialHair >> outfitId;
 
     Player *pNewChar = new Player(this);
     if (!pNewChar->Create(sObjectMgr.GeneratePlayerLowGuid(), name, race_, class_, gender, skin, face, hairStyle, hairColor, facialHair, outfitId))
@@ -1552,7 +1555,7 @@ void WorldSession::HandleEquipmentSetUseOpcode(WorldPacket &recv_data)
                 continue;
 
             ItemPosCountVec sDest;
-            uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, sDest, uItem, false );
+            InventoryResult msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, sDest, uItem, false );
             if(msg == EQUIP_ERR_OK)
             {
                 _player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
