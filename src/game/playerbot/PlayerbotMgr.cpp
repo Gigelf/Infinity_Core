@@ -394,7 +394,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             return;
         }
 
-            /*
+            
                case CMSG_NAME_QUERY:
                case MSG_MOVE_START_FORWARD:
                case MSG_MOVE_STOP:
@@ -422,12 +422,12 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 out << "masterin: " << oc;
                 sLog.outError(out.str().c_str());
                }
-             */
+             
     }
 }
 void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& packet)
 {
-    /*
+    
        switch (packet.GetOpcode())
        {
         // maybe our bots should only start looting after the master loots?
@@ -453,7 +453,7 @@ void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& packet)
             sLog.outError(out.str().c_str());
         }
        }
-     */
+     
 }
 
 void PlayerbotMgr::LogoutAllBots()
