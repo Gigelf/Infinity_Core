@@ -338,6 +338,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendAuctionOwnerNotification( AuctionEntry * auction );
         void SendAuctionOutbiddedMail( AuctionEntry * auction, uint32 newPrice );
         void SendAuctionCancelledToBidderMail( AuctionEntry* auction );
+
         AuctionHouseEntry const* GetCheckedAuctionHouseForAuctioneer(ObjectGuid guid);
 
         //Item Enchantment

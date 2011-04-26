@@ -57,13 +57,6 @@ libmangosbot_a_SOURCES = \
 
 ## Additional files to include when running 'make dist'
 #  Precompiled Headers for WIN
-EXTRA_DIST = \
-	config.h \
-	playerbot.conf.dist
-
-## Additional files to install
-sysconf_DATA = \
-	playerbot.conf.dist
 
 install-data-hook:
 	@list='$(sysconf_DATA)'
