@@ -356,6 +356,10 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    // players should be able to open chests in Malygos encounter
+    if (spellId == 61437 && _player->GetVehicle() && _player->GetVehicle()->GetBase()->GetVehicleInfo()->GetEntry()->m_ID == 30161)
+        mover = _player;
+
     if (mover->GetTypeId()==TYPEID_PLAYER)
     {
         // not have spell in spellbook or spell passive and not casted by client

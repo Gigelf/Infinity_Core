@@ -459,7 +459,7 @@ m_isPersistent(false), m_in_use(0), m_spellAuraHolder(holder)
             uint32 _periodicTime = m_modifier.periodictime;
 
             // Calculate new periodic timer
-            int32 ticks = oldDuration / _periodicTime;
+            int32 ticks = oldDuration / _periodicTime + 1;
 
             _periodicTime = new_duration / ticks;
 
@@ -5717,10 +5717,18 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     float mwb_min = caster->GetWeaponDamageRange(BASE_ATTACK,MINDAMAGE);
                     float mwb_max = caster->GetWeaponDamageRange(BASE_ATTACK,MAXDAMAGE);
                     m_modifier.m_amount+=int32(((mwb_min+mwb_max)/2+ap*mws/14000)*0.2f);
+
                     // If used while target is above 75% health, Rend does 35% more damage
                     if (spellProto->CalculateSimpleValue(EFFECT_INDEX_1) !=0 &&
                         target->GetHealth() > target->GetMaxHealth() * spellProto->CalculateSimpleValue(EFFECT_INDEX_1) / 100)
                         m_modifier.m_amount += m_modifier.m_amount * spellProto->CalculateSimpleValue(EFFECT_INDEX_2) / 100;
+
+                    // Improved Rend - Rank 1
+                    if (caster->HasAura(12286))
+                        m_modifier.m_amount += int32(m_modifier.m_amount * 0.1f);
+                    // Improved Rend - Rank 2
+                    if (caster->HasAura(12658))
+                        m_modifier.m_amount += int32(m_modifier.m_amount * 0.2f);
                 }
                 break;
             }
