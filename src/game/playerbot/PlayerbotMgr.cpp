@@ -236,6 +236,20 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             return;
         }
 
+        case CMSG_AREATRIGGER: 
+        { 
+            WorldPacket p(packet); 
+ 
+            for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it) 
+            { 
+                Player* const bot = it->second; 
+ 
+                p.rpos(0);         // reset reader 
+                bot->GetSession()->HandleAreaTriggerOpcode(p); 
+            } 
+            return; 
+        }
+
         // if master accepts a quest, bots should also try to accept quest
         case CMSG_QUESTGIVER_ACCEPT_QUEST:
         {
