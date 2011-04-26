@@ -1502,6 +1502,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void chompAndTrim(std::string& str);
         bool getNextQuestId(const std::string& pString, unsigned int& pStartPos, unsigned int& pId);
         void skill(std::list<uint32>& m_spellsToLearn);
+        void talent(std::ostringstream &out);
         bool requiredQuests(const char* pQuestIdString);
 
         /*********************************************************/

@@ -38,6 +38,8 @@ Commands:
 /t BOTNAME pet toggle <SPELLID | (part of) SPELLNAME | SPELLLINK> (Toggle autocast for a given spell)
 /t BOTNAME pet state (Shows current react mode of bot's pet)
 /t BOTNAME pet react <(a)ggressive | (d)efensive | (p)assive> (Set bot's pet reaction mode)
+/t BOTNAME talent   -- Lists bot(s) active talents & glyphs
+/t BOTNAME talent learn [HLINK][HLINK] .. -- Learn selected talent(shift click icon).
 
 Shortcuts:
 c = cast

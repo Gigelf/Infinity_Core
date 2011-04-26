@@ -3363,6 +3363,44 @@ void PlayerbotAI::extractSpellIdList(const std::string& text, BotSpellList& m_sp
     }
 }
 
+void PlayerbotAI::extractTalentIds(const std::string &text, std::list<talentPair> &talentIds) const 
+{ 
+    // Link format: 
+    // |color|Htalent:talent_id:rank|h[name]|h|r 
+    // |cff4e96f7|Htalent:1396:4|h[Unleashed Fury]|h|r 
+ 
+    uint8 pos = 0; 
+    while(true) 
+    { 
+        int i = text.find("Htalent:", pos); 
+        if (i == -1) 
+           break; 
+        pos = i + 8; 
+        // DEBUG_LOG("extractTalentIds first pos %u i %u",pos,i); 
+        // extract talent_id 
+        int endPos = text.find(':', pos); 
+        if (endPos == -1) 
+           break; 
+        // DEBUG_LOG("extractTalentId second endpos : %u pos : %u",endPos,pos); 
+        std::string idC = text.substr(pos, endPos - pos); 
+        uint32 id = atol(idC.c_str()); 
+        pos = endPos + 1; 
+        // extract rank 
+        endPos = text.find('|', pos); 
+        if (endPos == -1) 
+           break; 
+        // DEBUG_LOG("extractTalentId third endpos : %u pos : %u",endPos,pos); 
+        std::string rankC = text.substr(pos, endPos - pos); 
+        uint32 rank = atol(rankC.c_str()); 
+        pos = endPos + 1; 
+ 
+        // DEBUG_LOG("extractTalentId second id : %u  rank : %u",id,rank); 
+ 
+        if (id) 
+            talentIds.push_back(std::pair<uint32 ,uint32>(id, rank)); 
+    } 
+}
+
 void PlayerbotAI::extractGOinfo(const std::string& text, std::list<uint64>& m_lootTargets) const
 {
 
@@ -4103,6 +4141,61 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
             TellMaster("I'm collecting " + collset.substr(2));
         else
             TellMaster("I'm collecting nothing.");
+    }
+    // Handle talents & glyphs: 
+    // talent                           -- Lists bot(s) active talents & glyphs 
+    // talent learn [HLINK][HLINK] ..   -- Learn selected talent from bot 'inspect' (shift click icon). 
+    // talent unlearn [HLINK][HLINK] .. -- Unlearn selected talent (shift click [HLINK] from talent) 
+    else if (text.size() >= 6 && text.substr(0, 6) == "talent") 
+    { 
+        std::ostringstream out; 
+        std::string part = ""; 
+        std::string subcommand = ""; 
+ 
+        if (text.size() > 6 && text.substr(0, 7) == "talent ") 
+            part = text.substr(7);  // Truncate 'talent ' part 
+ 
+        if (part.find(" ") > 0) 
+        { 
+            subcommand = part.substr(0, part.find(" ")); 
+            if (part.size() > subcommand.size()) 
+                part = part.substr(subcommand.size() + 1); 
+        } 
+        else 
+            subcommand = part; 
+ 
+        if (subcommand == "learn" || subcommand == "unlearn") 
+        { 
+            if(subcommand == "learn") 
+            { 
+                std::list<talentPair>talents; 
+                extractTalentIds(part, talents); 
+ 
+                for(std::list<talentPair>::iterator itr = talents.begin(); itr != talents.end(); ++itr) 
+                { 
+                    uint32 talentid; 
+                    uint32 rank; 
+ 
+                    talentid = itr->first; 
+                    rank = itr->second; 
+ 
+                    m_bot->LearnTalent(talentid, ++rank); 
+                    m_bot->SendTalentsInfoData(false); 
+ 
+                } 
+                m_bot->talent(out); 
+                SendWhisper(out.str(), fromPlayer); 
+ 
+            } 
+            else if(subcommand == "unlearn") 
+            { 
+            } 
+        } 
+        else 
+        { 
+            m_bot->talent(out); 
+            SendWhisper(out.str(), fromPlayer); 
+        } 
     }
     else if (text == "quests")
     {
