@@ -261,7 +261,9 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket &recv_data)
 
 	uint64 eventId;
 	uint64 inviteId;
+	uint64 playerguid;
 	std::string name;
+	uint32 level;
 	uint8 status;
 	uint8 rank;
 
@@ -271,17 +273,33 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket &recv_data)
 	recv_data >> status;
 	recv_data >> rank;
 
+	sLog.outError("InviteID %u",inviteId);
 	CalendarInvite *invite = sCalendarMgr->GetInvite(inviteId);
-	Player *pPlayer =  GetPlayer()->GetMap()->GetPlayer((ObjectGuid)invite->target_guid);
+	playerguid = sObjectMgr.GetPlayerGUIDByName(name);
+	sLog.outError("PlayerID %u",playerguid);
+	Player *pPlayer = sObjectMgr.GetPlayer(playerguid);
+	if (!pPlayer)
+	{
+		sLog.outError("No player");
+		return;
+	}
+	level = pPlayer->getLevel();
+	sLog.outError("Playerlevel %u",level);
 
 	WorldPacket data(SMSG_CALENDAR_EVENT_INVITE);
-	data.appendPackGUID(invite->target_guid);			//Invited Player
+	data.appendPackGUID(playerguid);					//Invited Player
 	data << uint64(eventId);							//EventID
+	sLog.outError("EventID %u",eventId);
 	data << uint64(inviteId);							//InviteID
-	data << uint32(pPlayer->getLevel());				//Level
+	sLog.outError("Playerlevel %u",level);
+	data << uint8(level);								//Level
+	sLog.outError("Player status %u",status);
 	data << uint8(status);								//InviteStatus
+	sLog.outError("unknown");
 	data << uint8(0);									//unk
-	data << uint8(invite->invite_Type);					//InviteType
+	sLog.outError("invite_Type %u",rank);
+	data << uint8(rank);								//InviteType
+	sLog.outError("Sending invite");
 	SendPacket(&data);
 }
 
@@ -398,7 +416,7 @@ void WorldSession::SendCalendarEvent(uint64 eventId, bool added)
 			if (invite.eventID == eventId)
 			{
 				data.appendPackGUID(invite.target_guid);		// invite Player guid
-				Player *pPlayer =  GetPlayer()->GetMap()->GetPlayer((ObjectGuid)invite.target_guid);
+				Player *pPlayer = sObjectMgr.GetPlayer(invite.target_guid);
 				data << uint8(pPlayer->getLevel());				// level
 				data << uint8(invite.status);					// status
 				data << uint8(invite.rank);						// rank
