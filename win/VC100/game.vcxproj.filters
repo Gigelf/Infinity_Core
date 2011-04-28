@@ -1158,7 +1158,7 @@
     </ClInclude>
     <ClInclude Include="..\..\src\game\mangchat\IRCFunc.h">
       <Filter>IRC</Filter>
-    </ClCompile>
+    </ClInclude>
     <ClInclude Include="..\..\src\game\mangchat\IRCLog.h">
       <Filter>IRC</Filter>
     </ClInclude>
