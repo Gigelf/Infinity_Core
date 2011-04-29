@@ -11931,9 +11931,6 @@ void Unit::ExitVehicle()
 
     m_pVehicle->RemovePassenger(this);
 
-    if((GetTypeId() == TYPEID_PLAYER) && (((Player*)this)->GetQuestStatus(12779) == QUEST_STATUS_INCOMPLETE) && (this->GetVehicle()->GetBase()->GetVehicleInfo()->GetEntry()->m_ID == 156))
-        ((Player*)this)->CastSpell(((Player*)this), 74470, false);
-
     m_pVehicle = NULL;
 
     if (GetTypeId() == TYPEID_PLAYER)
