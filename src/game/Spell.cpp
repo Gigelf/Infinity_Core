@@ -1884,7 +1884,14 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 54522:
                 case 62477:                                 // Icicle (Hodir 25man)
                 case 61693:                                 // Arcane Storm (Malygos) (N)
+                case 60936:                                 // Surge of Power (h) (Malygos)
                     unMaxTargets = 3;
+                    break;
+                case 61916:                                 // Lightning Whirl (Stormcaller Brundir - Ulduar
+                    unMaxTargets = urand(2, 3);
+                    break;
+                case 63482:                                 // Lightning Whirl (h) (Stormcaller Brundir - Ulduar)
+                    unMaxTargets = urand(3, 6);
                     break;
                 case 67756:                                 // Nerubian Burrower (Trial of the Crusader, ->
                 case 67757:                                 // -> Anub'arak encounter, 25 and 25 heroic)
