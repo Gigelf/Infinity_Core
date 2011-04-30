@@ -4215,7 +4215,7 @@ bool PlayerbotAI::FollowCheckTeleport(WorldObject &obj)
         if (!ch.teleport(*m_bot))
         {
             ch.sysmessage(".. could not be teleported ..");
-            DEBUG_LOG( "[PlayerbotAI]: %s failed to teleport", m_bot->GetName() );
+            //sLog.outDebug( "[PlayerbotAI]: %s failed to teleport", m_bot->GetName() );
             return false;
         }
     }
