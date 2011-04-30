@@ -5510,6 +5510,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     {
         if (m_caster->IsTaxiFlying())
             return SPELL_FAILED_NOT_ON_TAXI;
+        // Flying mounts everywhere
         else if ((sWorld.getConfig(CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE)) && (m_spellInfo->Id==55884))
         {
             Player* player = (Player*)m_caster;
@@ -5947,12 +5948,12 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_EFFECT_CHARGE:
             {
                 if (m_caster->hasUnitState(UNIT_STAT_ROOT) && !(m_spellInfo->Id == 3411 && m_caster->HasAura(57499)))
-                { 
-                    // Intervene with Warbringer talent 
-                    if (m_spellInfo->Id == 3411 && m_caster->HasAura(57499, EFFECT_INDEX_2)) 
-                        m_caster->RemoveAurasAtMechanicImmunity(IMMUNE_TO_ROOT_AND_SNARE_MASK, 0); 
-                    else 
-                        return SPELL_FAILED_ROOTED; 
+                {
+                    // Intervene with Warbringer talent
+                    if (m_spellInfo->Id == 3411 && m_caster->HasAura(57499, EFFECT_INDEX_2))
+                        m_caster->RemoveAurasAtMechanicImmunity(IMMUNE_TO_ROOT_AND_SNARE_MASK, 0);
+                    else
+                        return SPELL_FAILED_ROOTED;
                 }
                 break;
             }
@@ -6882,6 +6883,7 @@ SpellCastResult Spell::CheckItems()
     Player* p_caster = (Player*)m_caster;
     bool isScrollItem = false;
     bool isVellumTarget = false;
+    // flying mounts everywhere
     if ((sWorld.getConfig(CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE)) && (m_spellInfo->Id==55884))
     {
         uint32 spellToLearn = ((m_spellInfo->Id==SPELL_ID_GENERIC_LEARN) || (m_spellInfo->Id==SPELL_ID_GENERIC_LEARN_PET)) ? damage : m_spellInfo->EffectTriggerSpell[0];

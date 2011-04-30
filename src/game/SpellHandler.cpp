@@ -512,6 +512,7 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
     // non channeled case
     _player->RemoveAurasDueToSpellByCancel(spellId);
 
+    // flying mounts everywhere
     if(_player->isFlyingSpell(spellInfo) || _player->isFlyingFormSpell(spellInfo))
         _player->SetFlyingMountTimer();
 }

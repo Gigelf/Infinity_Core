@@ -721,15 +721,15 @@ bool IsPositiveEffect(SpellEntry const *spellproto, SpellEffectIndex effIndex)
         case SPELL_EFFECT_THREAT:
             return false;
 
-        case SPELL_EFFECT_PERSISTENT_AREA_AURA: 
-            switch(spellproto->Id) 
-            { 
-                case 62821:                                 // Toasty Fire (Ulduar Hodir); unclear why this spell has SPELL_ATTR_EX_NEGATIVE 
-                    return true; 
-                    break; 
-                default: 
-                    break; 
-            } 
+        case SPELL_EFFECT_PERSISTENT_AREA_AURA:
+            switch(spellproto->Id)
+            {
+                case 62821:                                 // Toasty Fire (Ulduar Hodir); unclear why this spell has SPELL_ATTR_EX_NEGATIVE
+                    return true;
+                    break;
+                default:
+                    break;
+            }
             break;
 
             // non-positive aura use
