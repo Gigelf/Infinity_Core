@@ -1000,7 +1000,7 @@ Raid.MinLevel = 10
 #
 ###################################################################################################################
 
-AllowTwoSide.Accounts = 1
+AllowTwoSide.Accounts = 0
 AllowTwoSide.Interaction.Chat = 0
 AllowTwoSide.Interaction.Channel = 0
 AllowTwoSide.Interaction.Group = 0
@@ -1934,7 +1934,7 @@ Rate.RAF.LevelPerLevel  = 0.5
 #    LFG.MaxKicks            = 3
 #    LFG.KickVotes           = 3
 ###################################################################################################################
-LFR.Enable              = 1
+LFR.Enable              = 0
 LFG.Enable              = 0
 LFG.MaxKicks            = 3
 LFG.KickVotes           = 3
@@ -1993,7 +1993,7 @@ LFG.KickVotes           = 3
 #
 ###################################################################################################################
 
-PlayerbotAI.DisableBots = 0
+PlayerbotAI.DisableBots = 1
 PlayerbotAI.DebugWhisper = 0
 PlayerbotAI.FollowDistanceMin = 0.5
 PlayerbotAI.FollowDistanceMax = 1.0
@@ -2002,9 +2002,9 @@ PlayerbotAI.RestrictBotLevel = 80
 PlayerbotAI.BotguyQuests = ""
 PlayerbotAI.BotguyCost = 0
 PlayerbotAI.Collect.Combat = 0
-PlayerbotAI.Collect.Quest = 1
-PlayerbotAI.Collect.Profession = 1
-PlayerbotAI.Collect.Loot = 1
-PlayerbotAI.Collect.Skin = 1
-PlayerbotAI.Collect.Objects = 1
-PlayerbotAI.SellGarbage = 1
+PlayerbotAI.Collect.Quest = 0
+PlayerbotAI.Collect.Profession = 0
+PlayerbotAI.Collect.Loot = 0
+PlayerbotAI.Collect.Skin = 0
+PlayerbotAI.Collect.Objects = 0
+PlayerbotAI.SellGarbage = 0
