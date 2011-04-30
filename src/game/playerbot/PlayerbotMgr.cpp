@@ -975,8 +975,8 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
 {
     if (sWorld.getConfig(CONFIG_BOOL_PLAYERBOT_DISABLE))
     {
-        /*PSendSysMessage("|cffff0000Playerbot system is currently disabled!");
-        SetSentErrorMessage(true);*/
+        PSendSysMessage("|cffff0000Playerbot system is currently disabled!");
+        SetSentErrorMessage(true);
         return false;
     }
 
