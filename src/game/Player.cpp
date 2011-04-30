@@ -23293,8 +23293,8 @@ void Player::ReceiveToken()
     uint32 itemID = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMID);
     uint32 itemCount = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMCOUNT);
     uint32 goldAmount = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_GOLD);
-    uint32 honorAmount = sWorld.getConfig(CONFIG_PVP_TOKEN_HONOR);  
-    uint32 arenaAmount = sWorld.getConfig(CONFIG_PVP_TOKEN_ARENA);
+    uint32 honorAmount = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_HONOR);  
+    uint32 arenaAmount = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_ARENA);
 
     ItemPosCountVec dest;
     InventoryResult msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemID, itemCount);
