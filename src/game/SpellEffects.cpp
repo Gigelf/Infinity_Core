@@ -10216,7 +10216,7 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
         ((Creature *)unitTarget)->StopMoving();
 
-    m_caster->MonsterMoveByPath(x, y, z, 25, false);
+    m_caster->MonsterMoveByPath(x, y, z, 25, false, true);
 
     // not all charge effects used in negative spells
     if (unitTarget != m_caster && !IsPositiveSpell(m_spellInfo->Id))
@@ -10247,7 +10247,7 @@ void Spell::EffectCharge2(SpellEffectIndex /*eff_idx*/)
     // Try to normalize Z coord cuz GetContactPoint do nothing with Z axis
     unitTarget->UpdateGroundPositionZ(x, y, z);
 
-    m_caster->MonsterMoveByPath(x, y, z, 25, false);
+    m_caster->MonsterMoveByPath(x, y, z, 25, false, true);
 
     // not all charge effects used in negative spells
     if (unitTarget && unitTarget != m_caster && !IsPositiveSpell(m_spellInfo->Id))
