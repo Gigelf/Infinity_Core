@@ -1000,7 +1000,7 @@ Raid.MinLevel = 10
 #
 ###################################################################################################################
 
-AllowTwoSide.Accounts = 1
+AllowTwoSide.Accounts = 0
 AllowTwoSide.Interaction.Chat = 0
 AllowTwoSide.Interaction.Channel = 0
 AllowTwoSide.Interaction.Group = 0
@@ -1805,7 +1805,7 @@ SOAP.Port = 7878
 #
 ###################################################################################################################
 
-Anticheat.Enable = 1
+Anticheat.Enable = 0
 Anticheat.DelayAfterAction = 30
 Anticheat.GmLevel = 0
 
@@ -1855,13 +1855,13 @@ CharDelete.KeepDays = 30
 #    PvPToken.Gold
 #        The amount of gold that players will receive after killing an enemy.
 #        Default: 100000
-#    PvPToken.Honor  
-#        The amount of honor points that players will receive after killing an enemy.  
-#        Default: 75000  
-#  
-#    PvPToken.Arena  
-#        The amount of arena points that players will receive after killing an enemy.  
-#        Default: 5000 
+#    PvPToken.Honor
+#        The amount of honor points that players will receive after killing an enemy.
+#        Default: 75000
+#
+#    PvPToken.Arena
+#        The amount of arena points that players will receive after killing an enemy.
+#        Default: 5000
 #
 #
 #    PvPToken.MapRestriction
@@ -1873,15 +1873,14 @@ CharDelete.KeepDays = 30
 #
 ###################################################################################################################
 
-PvPToken.Enable = 1
+PvPToken.Enable = 0
 PvPToken.ItemID = 29434
 PvPToken.ItemCount = 1
-PvPToken.Gold = 100000
-PvPToken.Honor = 75000  
-PvPToken.Arena = 5000
+PvPToken.Gold = 0
+PvPToken.Honor = 0
+PvPToken.Arena = 0
 PvPToken.MapRestriction = 4
 
-############### PVP ANNOUNCER IS DISABLE ALL CODE FOR IT IS COMMENTED OUT IN CORE TIL WE FIX ######################
 ###################################################################################################################
 #    PvP Announcer System
 #
@@ -1891,12 +1890,10 @@ PvPToken.MapRestriction = 4
 #                0 - disabled
 ###################################################################################################################
 
-PvPAnnouncer.Enable = 1
+PvPAnnouncer.Enable = 0
 PvPAnnouncer.ColorKiller = |CFFFFFF01
 PvPAnnouncer.ColorKilled = |CFFFFFF01
 PvPAnnouncer.ColorArea = |CFFFE8A0E
-
-############### PVP ANNOUNCER IS DISABLE ALL CODE FOR IT IS COMMENTED OUT IN CORE TIL WE FIX ######################
 
 ###################################################################################################################
 #    Flying mounts Everywhere
@@ -1937,7 +1934,7 @@ Rate.RAF.LevelPerLevel  = 0.5
 #    LFG.MaxKicks            = 3
 #    LFG.KickVotes           = 3
 ###################################################################################################################
-LFR.Enable              = 1
+LFR.Enable              = 0
 LFG.Enable              = 0
 LFG.MaxKicks            = 3
 LFG.KickVotes           = 3
@@ -1979,8 +1976,24 @@ LFG.KickVotes           = 3
 #        If player has the cost, botguy menu will be displayed by NPCs
 #        Default: 0 - no cost, menu always displayed by NPCs
 #
+#    PlayerbotAI.Collect.Combat
+#    PlayerbotAI.Collect.Quest
+#    PlayerbotAI.Collect.Profession
+#    PlayerbotAI.Collect.Loot
+#    PlayerbotAI.Collect.Skin
+#    PlayerbotAI.Collect.Objects
+#        Enable collection options for after combat, quest items, profession, all loot, skin, or nearby objects
+#                 0 - off
+#        Default: 1 - on
+#
+#    PlayerbotAI.SellGarbage
+#        Allow bots to automatically sell all [GRAY|POOR] quality items as the player activates vendor
+#        Default: 0 - off
+#                 1 - on
+#
 ###################################################################################################################
-PlayerbotAI.DisableBots = 0
+
+PlayerbotAI.DisableBots = 1
 PlayerbotAI.DebugWhisper = 0
 PlayerbotAI.FollowDistanceMin = 0.5
 PlayerbotAI.FollowDistanceMax = 1.0
@@ -1988,3 +2001,10 @@ PlayerbotAI.MaxNumBots = 9
 PlayerbotAI.RestrictBotLevel = 80
 PlayerbotAI.BotguyQuests = ""
 PlayerbotAI.BotguyCost = 0
+PlayerbotAI.Collect.Combat = 0
+PlayerbotAI.Collect.Quest = 0
+PlayerbotAI.Collect.Profession = 0
+PlayerbotAI.Collect.Loot = 0
+PlayerbotAI.Collect.Skin = 0
+PlayerbotAI.Collect.Objects = 0
+PlayerbotAI.SellGarbage = 0

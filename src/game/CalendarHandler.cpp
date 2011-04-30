@@ -22,6 +22,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Opcodes.h"
+#include "ObjectMgr.h"
 #include "World.h"
 #include "MapPersistentStateMgr.h"
 #include "CalendarMgr.h"

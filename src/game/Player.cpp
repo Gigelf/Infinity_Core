@@ -4785,6 +4785,10 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 
     SetDeathState(ALIVE);
 
+    /*  Flying Everywhere   */
+    if (sWorld.getConfig(CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE))
+      CastSpell(this, 58601, true);   // needs a better umount spell  but this one removes all flight auras and triggers parachute so it is a fully clean wipe
+
     if(getRace() == RACE_NIGHTELF)
         RemoveAurasDueToSpell(20584);                       // speed bonuses
     RemoveAurasDueToSpell(8326);                            // SPELL_AURA_GHOST
@@ -5340,16 +5344,16 @@ void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, floa
             if(amount <= -100.0f)
                 amount = -200.0f;
 
-            // For Warriors, Shield Block Value PCT_MODs should be added, not multiplied 
-            if (modGroup == SHIELD_BLOCK_VALUE && getClass() == CLASS_WARRIOR) 
-            { 
-                val = amount / 100.0f; 
-                m_auraBaseMod[modGroup][modType] += apply ? val : -val; 
-            } 
-            else 
-            { 
-                val = (100.0f + amount) / 100.0f; 
-                m_auraBaseMod[modGroup][modType] *= apply ? val : (1.0f/val); 
+            // For Warriors, Shield Block Value PCT_MODs should be added, not multiplied
+            if (modGroup == SHIELD_BLOCK_VALUE && getClass() == CLASS_WARRIOR)
+            {
+                val = amount / 100.0f;
+                m_auraBaseMod[modGroup][modType] += apply ? val : -val;
+            }
+            else
+            {
+                val = (100.0f + amount) / 100.0f;
+                m_auraBaseMod[modGroup][modType] *= apply ? val : (1.0f/val);
             }
             break;
     }
@@ -12502,7 +12506,7 @@ void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
 {
     if (!pItem)
          return;
-		
+
     /*  Flying Everywhere   */
     if (sWorld.getConfig(CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE))
     {
@@ -23293,8 +23297,8 @@ void Player::ReceiveToken()
     uint32 itemID = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMID);
     uint32 itemCount = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMCOUNT);
     uint32 goldAmount = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_GOLD);
-    uint32 honorAmount = sWorld.getConfig(CONFIG_PVP_TOKEN_HONOR);  
-    uint32 arenaAmount = sWorld.getConfig(CONFIG_PVP_TOKEN_ARENA);
+    uint32 honorAmount = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_HONOR);
+    uint32 arenaAmount = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_ARENA);
 
     ItemPosCountVec dest;
     InventoryResult msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemID, itemCount);
@@ -23304,25 +23308,25 @@ void Player::ReceiveToken()
         return;
     }
 
-    Item* item = StoreNewItem( dest, itemID, true, Item::GenerateItemRandomPropertyId(itemID));  
-    SendNewItem(item,itemCount,true,false);  
-  
-   if( honorAmount > 0 )  
-       ModifyHonorPoints(honorAmount);  
-       SaveToDB();  
-       return;  
-  
-   if( goldAmount > 0 )  
-       ModifyMoney(goldAmount);  
-       SaveGoldToDB();  
-       return; 
-  
-   if( arenaAmount > 0 )  
-       ModifyArenaPoints(arenaAmount); 
-       SaveToDB(); 
+    Item* item = StoreNewItem( dest, itemID, true, Item::GenerateItemRandomPropertyId(itemID));
+    SendNewItem(item,itemCount,true,false);
+
+   if( honorAmount > 0 )
+       ModifyHonorPoints(honorAmount);
+       SaveToDB();
        return;
 
-    ChatHandler(this).PSendSysMessage(LANG_EVENTMESSAGE);
+   if( goldAmount > 0 )
+       ModifyMoney(goldAmount);
+       SaveGoldToDB();
+       return;
+
+   if( arenaAmount > 0 )
+       ModifyArenaPoints(arenaAmount);
+       SaveToDB();
+       return;
+
+    ChatHandler(this).PSendSysMessage(LANG_YOU_RECEIVE_TOKEN);
 }
 
 void Player::UnsummonPetTemporaryIfAny()
@@ -24179,7 +24183,7 @@ void Player::FlyingMountsSpellsToItems()
 
             if(! (isFlyingSpell(sEntry) || isFlyingFormSpell(sEntry)) )
                 continue;
- 
+
             if(HasSpell(pProto->Spells[i].SpellId))
             {
                 uint16 RindingSkill = GetSkillValue(SKILL_RIDING);
@@ -24187,8 +24191,8 @@ void Player::FlyingMountsSpellsToItems()
                 SetSkill(SKILL_RIDING, RindingSkill, 300);
                 break;
             }
- 
-        }        
+
+        }
     }
 
     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
@@ -24200,7 +24204,7 @@ void Player::FlyingMountsSpellsToItems()
                 Item* pItem = GetItemByPos( i, j );
                 if(!pItem)
                     continue;
- 
+
                 ItemPrototype const *pProto = sObjectMgr.GetItemPrototype(pItem->GetEntry());
                 if(!pProto)
                     continue;
@@ -24213,7 +24217,7 @@ void Player::FlyingMountsSpellsToItems()
 
                     if(! (isFlyingSpell(sEntry) || isFlyingFormSpell(sEntry)) )
                         continue;
- 
+
                     if(HasSpell(pProto->Spells[i].SpellId))
                     {
                         uint16 RindingSkill = GetSkillValue(SKILL_RIDING);
@@ -24239,7 +24243,7 @@ bool Player::CanUseFlyingMounts(SpellEntry const* sEntry)
         WorldPacket data(SMSG_CAST_FAILED, (4+1+1));
         data << uint8(0);
         data << uint32(sEntry->Id);
-        data << uint8(SPELL_FAILED_TARGET_IN_COMBAT); 
+        data << uint8(SPELL_FAILED_TARGET_IN_COMBAT);
         GetSession()->SendPacket(&data);
         return false;
     }
@@ -24249,7 +24253,7 @@ bool Player::CanUseFlyingMounts(SpellEntry const* sEntry)
         WorldPacket data(SMSG_CAST_FAILED, (4+1+1));
         data << uint8(0);
         data << uint32(sEntry->Id);
-        data << uint8(SPELL_FAILED_NOT_HERE); 
+        data << uint8(SPELL_FAILED_NOT_HERE);
         GetSession()->SendPacket(&data);
         return false;
     }

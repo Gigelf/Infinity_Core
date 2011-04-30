@@ -984,6 +984,7 @@ enum MangosStrings
     //                                    10000-10999
 
     // Use for custom patches             11000-11999
+    LANG_YOU_RECEIVE_TOKEN              = 11050,
     LANG_COMMAND_FRIEND                 = 11133,
     LANG_COMMAND_FRIEND_ERROR           = 11134,
     LANG_BG_SA_START_TWO_MINUTE         = 20000,

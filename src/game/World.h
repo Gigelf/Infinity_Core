@@ -296,8 +296,8 @@ enum eConfigFloatValues
     CONFIG_FLOAT_PVP_TOKEN_ITEMID,
     CONFIG_FLOAT_PVP_TOKEN_ITEMCOUNT,
     CONFIG_FLOAT_PVP_TOKEN_GOLD,
-    CONFIG_PVP_TOKEN_HONOR,
-    CONFIG_PVP_TOKEN_ARENA,
+    CONFIG_FLOAT_PVP_TOKEN_HONOR,
+    CONFIG_FLOAT_PVP_TOKEN_ARENA,
     CONFIG_FLOAT_PVP_TOKEN_RESTRICTION,
 
     CONFIG_FLOAT_PLAYERBOT_MINDISTANCE,
@@ -369,7 +369,7 @@ enum eConfigBoolValues
     // PvP Token
     CONFIG_BOOL_PVP_TOKEN_ENABLE,
     /// PvP Announcer
-    //CONFIG_BOOL_PVP_ANNOUNCER,
+    CONFIG_BOOL_PVP_ANNOUNCER,
     // Flying Everywhere
     CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE,
 
@@ -377,6 +377,13 @@ enum eConfigBoolValues
     CONFIG_BOOL_LFR_ENABLE,
     CONFIG_BOOL_PLAYERBOT_DISABLE,
     CONFIG_BOOL_PLAYERBOT_DEBUGWHISPER,
+    CONFIG_BOOL_PLAYERBOT_COLLECT_COMBAT,
+    CONFIG_BOOL_PLAYERBOT_COLLECT_QUESTS,
+    CONFIG_BOOL_PLAYERBOT_COLLECT_PROFESSION,
+    CONFIG_BOOL_PLAYERBOT_COLLECT_LOOT,
+    CONFIG_BOOL_PLAYERBOT_COLLECT_SKIN,
+    CONFIG_BOOL_PLAYERBOT_COLLECT_OBJECTS,
+    CONFIG_BOOL_PLAYERBOT_SELL_TRASH,
     CONFIG_BOOL_VALUE_COUNT
 
 };
@@ -561,7 +568,7 @@ class World
         void SendServerMessage(ServerMessageType type, const char *text = "", Player* player = NULL);
 
         ///PVP Announcer
-        //void SendPvPAnnounce(Player* killer, Player* killed);
+        void SendPvPAnnounce(Player* killer, Player* killed);
 
         /// Are we in the middle of a shutdown?
         bool IsShutdowning() const { return m_ShutdownTimer > 0; }

@@ -315,5 +315,10 @@ EXTRA_DIST = \
 	11299_01_characters_character_aura \
 	11299_02_characters_pet_aura \
 	11310_01_mangos_mangos_string \
-	11312_01_mangos_mangos_string
+	11312_01_mangos_mangos_string \
+    11335_01_mangos_mangos_string \
+    11335_02_mangos_mangos_string \
+    11337_01_mangos_mangos_string \
+	11348_01_mangos_spell_bonus_data \
+    11385_01_mangos_creature_template \
 	README
