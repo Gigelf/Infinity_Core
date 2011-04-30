@@ -23322,7 +23322,7 @@ void Player::ReceiveToken()
        SaveToDB(); 
        return;
 
-    ChatHandler(this).PSendSysMessage(LANG_EVENTMESSAGE);
+    ChatHandler(this).PSendSysMessage(LANG_YOU_RECEIVE_TOKEN);
 }
 
 void Player::UnsummonPetTemporaryIfAny()
