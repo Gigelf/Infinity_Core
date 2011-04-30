@@ -1841,8 +1841,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 63024:                                 // XT002's Gravitiy Bomb
                 case 64234:                                 // XT002's Gravitiy Bomb (h)
                 case 63545:                                 // Icicle Hodir(trigger spell from 62227)
-                case 61916:                                 // Lightning Whirl (10 man)
-                case 63482:                                 // Lightning Whirl (25 man)
                 case 55479:                                 // Force Obedience (Naxxramas - Razovius encounter)
                 case 63387:                                 // Rapid Burst
                 case 64531:                                 // Rapid Burst (h)

@@ -622,6 +622,13 @@ void World::LoadConfigSettings(bool reload)
     setConfigMinMax(CONFIG_UINT32_PLAYERBOT_RESTRICTLEVEL, "PlayerbotAI.RestrictBotLevel", getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL), 1, getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
     setConfig(CONFIG_FLOAT_PLAYERBOT_MINDISTANCE, "PlayerbotAI.FollowDistanceMin", 0.5f);
     setConfig(CONFIG_FLOAT_PLAYERBOT_MAXDISTANCE, "PlayerbotAI.FollowDistanceMax", 1.0f);
+    setConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_COMBAT, "PlayerbotAI.Collect.Combat", true);
+    setConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_QUESTS, "PlayerbotAI.Collect.Quest", true);
+    setConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_PROFESSION, "PlayerbotAI.Collect.Profession", true);
+    setConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_LOOT, "PlayerbotAI.Collect.Loot", true);
+    setConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_SKIN, "PlayerbotAI.Collect.Skin", true);
+    setConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_OBJECTS, "PlayerbotAI.Collect.Objects", true);
+    setConfig(CONFIG_BOOL_PLAYERBOT_SELL_TRASH, "PlayerbotAI.SellGarbage", true);
 
     setConfig(CONFIG_BOOL_LFG_ENABLE, "LFG.Enable",false);
     setConfig(CONFIG_BOOL_LFR_ENABLE, "LFR.Enable",false);
@@ -828,7 +835,7 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMID,"PvPToken.ItemID", 29434);
     setConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMCOUNT,"PvPToken.ItemCount", 1);
     setConfig(CONFIG_FLOAT_PVP_TOKEN_GOLD,"PvPToken.Gold", 100000);
-    setConfig(CONFIG_PVP_TOKEN_HONOR,"PvPToken.Honor", 75000);  
+    setConfig(CONFIG_PVP_TOKEN_HONOR,"PvPToken.Honor", 75000);
     setConfig(CONFIG_PVP_TOKEN_ARENA,"PvPToken.Arena", 5000);
     setConfig(CONFIG_FLOAT_PVP_TOKEN_RESTRICTION,"PvPToken.MapRestriction", 4);
 
@@ -837,7 +844,7 @@ void World::LoadConfigSettings(bool reload)
 
     /// PvP Announcer System
     //setConfig(CONFIG_BOOL_PVP_ANNOUNCER,"PvPAnnouncer.Enable", true);
-	
+
     /*  Flying Everywhere   */
     setConfig(CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE, "Custom.AllowFlyingMountsEverywhere", true);
 
