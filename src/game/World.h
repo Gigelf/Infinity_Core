@@ -369,7 +369,7 @@ enum eConfigBoolValues
     // PvP Token
     CONFIG_BOOL_PVP_TOKEN_ENABLE,
     /// PvP Announcer
-    //CONFIG_BOOL_PVP_ANNOUNCER,
+    CONFIG_BOOL_PVP_ANNOUNCER,
     // Flying Everywhere
     CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE,
 
@@ -568,7 +568,7 @@ class World
         void SendServerMessage(ServerMessageType type, const char *text = "", Player* player = NULL);
 
         ///PVP Announcer
-        //void SendPvPAnnounce(Player* killer, Player* killed);
+        void SendPvPAnnounce(Player* killer, Player* killed);
 
         /// Are we in the middle of a shutdown?
         bool IsShutdowning() const { return m_ShutdownTimer > 0; }

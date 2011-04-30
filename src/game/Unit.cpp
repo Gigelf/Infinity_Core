@@ -908,12 +908,12 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             if((pVictim->GetTypeId() == TYPEID_PLAYER) && leveldiff < 10)
                 player_tap->ReceiveToken();
 				
-            /*/// PvP Announcer
+            /// PvP Announcer
             if (sWorld.getConfig(CONFIG_BOOL_PVP_ANNOUNCER))
             {
                 if (pVictim->GetTypeId() == TYPEID_PLAYER)
                     sWorld.SendPvPAnnounce(player_tap, ((Player*)pVictim));
-            }*/
+            }
 
             WorldPacket data(SMSG_PARTYKILLLOG, (8+8));     //send event PARTY_KILL
             data << player_tap->GetObjectGuid();            //player with killing blow
