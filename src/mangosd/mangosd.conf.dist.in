@@ -1876,9 +1876,9 @@ CharDelete.KeepDays = 30
 PvPToken.Enable = 1
 PvPToken.ItemID = 29434
 PvPToken.ItemCount = 1
-PvPToken.Gold = 100000
-PvPToken.Honor = 75000
-PvPToken.Arena = 5000
+PvPToken.Gold = 0
+PvPToken.Honor = 0
+PvPToken.Arena = 0
 PvPToken.MapRestriction = 4
 
 ############### PVP ANNOUNCER IS DISABLE ALL CODE FOR IT IS COMMENTED OUT IN CORE TIL WE FIX ######################
@@ -2004,7 +2004,7 @@ PlayerbotAI.MaxNumBots = 9
 PlayerbotAI.RestrictBotLevel = 80
 PlayerbotAI.BotguyQuests = ""
 PlayerbotAI.BotguyCost = 0
-PlayerbotAI.Collect.Combat = 1
+PlayerbotAI.Collect.Combat = 0
 PlayerbotAI.Collect.Quest = 1
 PlayerbotAI.Collect.Profession = 1
 PlayerbotAI.Collect.Loot = 1
