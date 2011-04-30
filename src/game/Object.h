@@ -140,7 +140,7 @@ class MANGOS_DLL_SPEC Object
         }
 
         ObjectGuid const& GetObjectGuid() const { return GetGuidValue(OBJECT_FIELD_GUID); }
-        const uint64& GetGUID() const { return GetUInt64Value(OBJECT_FIELD_GUID); }
+        const uint64& GetGUID() const { return GetObjectGuid().GetRawValue(); }
         uint32 GetGUIDLow() const { return GetObjectGuid().GetCounter(); }
         PackedGuid const& GetPackGUID() const { return m_PackGUID; }
         std::string GetGuidStr() const { return GetObjectGuid().GetString(); }
@@ -474,8 +474,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         virtual float GetObjectBoundingRadius() const { return DEFAULT_WORLD_OBJECT_SIZE; }
 
         bool IsPositionValid() const;
-        void UpdateGroundPositionZ(float x, float y, float &z, float maxDiff = 30.0f) const;
-		bool IsAtGroundLevel(float x, float y, float z) const;
+        void UpdateGroundPositionZ(float x, float y, float &z) const;
         void UpdateAllowedPositionZ(float x, float y, float &z) const;
 
         void GetRandomPoint( float x, float y, float z, float distance, float &rand_x, float &rand_y, float &rand_z ) const;

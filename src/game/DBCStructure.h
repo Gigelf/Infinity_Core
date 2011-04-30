@@ -524,7 +524,10 @@ struct AreaTableEntry
     char*   area_name[16];                                  // 11-26    m_AreaName_lang
                                                             // 27 string flags
     uint32  team;                                           // 28       m_factionGroupMask
-                                                            //          m_liquidTypeID, m_minElevation, m_ambient_multiplier, m_lightid...
+                                                            // 29-32    m_liquidTypeID[4]
+                                                            // 33       m_minElevation
+                                                            // 34       m_ambient_multiplier
+                                                            // 35       m_lightid
 };
 
 struct AreaGroupEntry
@@ -567,15 +570,15 @@ struct BankBagSlotPricesEntry
 struct BarberShopStyleEntry
 {
     uint32  Id;                                             // 0        m_ID
-    uint32  type;                                           // 1 value 0 -> hair, value 2 -> facialhair
-    //char*   name[16];                                     // 2-17 name of hair style
+    uint32  type;                                           // 1        m_type
+    //char*   name[16];                                     // 2-17     m_DisplayName_lang
     //uint32  name_flags;                                   // 18 string flags
-    //uint32  unk_name[16];                                 // 19-34 all empty
+    //uint32  unk_name[16];                                 // 19-34    m_Description_lang
     //uint32  unk_flags;                                    // 35 string flags
-    //float   CostMultiplier;                               // 36 values 1 and 0.75
-    uint32  race;                                           // 37 race
-    uint32  gender;                                         // 38 0 -> male, 1 -> female
-    uint32  hair_id;                                        // 39 real ID to hair/facial hair
+    //float   CostMultiplier;                               // 36       m_Cost_Modifier
+    uint32  race;                                           // 37       m_race
+    uint32  gender;                                         // 38       m_sex
+    uint32  hair_id;                                        // 39       m_data (real ID to hair/facial hair)
 };
 
 struct BattlemasterListEntry
@@ -1036,17 +1039,17 @@ struct HolidayNamesEntry
 struct HolidaysEntry
 {
     uint32 ID;                                            // 0        m_ID
-    uint32 unk1[10];                                      // 1-10     m_duration
+    uint32 duration[10];                                  // 1-10     m_duration
     uint32 Dates[26];                                     // 11-36, dates in unix time starting at January, 1, 2000
-    uint32 unk37;                                         // 37       m_region (wow region)
-    uint32 unk38;                                         // 38       m_looping
-    uint32 unk39[10];                                     // 39-48    m_calendarFlags
+    uint32 region;                                        // 37       m_region (wow region)
+    uint32 looping;                                       // 38       m_looping
+    uint32 calendarFlags[10];                             // 39-48    m_calendarFlags
     uint32 holidayNameId;                                 // 49       m_holidayNameID (HolidayNames.dbc)
     uint32 holidayDescriptionId;                          // 50       m_holidayDescriptionID (HolidayDescriptions.dbc)
     char *texture;                                        // 51       m_textureFilename
-    uint32 unk52;                                         // 52       m_priority
-    uint32 RepeatingMethod;                               // 53       m_calendarFilterType (-1,0,1 or 2)
-    uint32 unk54;                                         // 54       m_flags
+    uint32 priority;                                      // 52       m_priority
+    uint32 calendarFilterType;                            // 53       m_calendarFilterType (-1,0,1 or 2)
+    uint32 flags;                                         // 54       m_flags
 };
 
 struct ItemEntry
@@ -1148,23 +1151,23 @@ struct ItemSetEntry
 
 struct LFGDungeonEntry
 {
-    uint32  ID;                                             // 0
-    //char*   name[16];                                     // 1-17 Name lang
-    uint32  minlevel;                                       // 18
-    uint32  maxlevel;                                       // 19
-    uint32  reclevel;                                       // 20
-    uint32  recminlevel;                                    // 21
-    uint32  recmaxlevel;                                    // 22
-    uint32  map;                                            // 23
-    uint32  difficulty;                                     // 24
-    //uint32  unk;                                          // 25
-    uint32  type;                                           // 26
-    //uint32  unk2;                                         // 27
-    //char*   unk3;                                         // 28
-    uint32  expansion;                                      // 29
-    //uint32  unk4;                                         // 30
-    uint32  grouptype;                                      // 31
-    //char*   desc[16];                                     // 32-47 Description
+    uint32  ID;                                             // 0     m_ID
+    //char*   name[16];                                     // 1-17  m_name_lang
+    uint32  minlevel;                                       // 18    m_minLevel
+    uint32  maxlevel;                                       // 19    m_maxLevel
+    uint32  reclevel;                                       // 20    m_target_level
+    uint32  recminlevel;                                    // 21    m_target_level_min
+    uint32  recmaxlevel;                                    // 22    m_target_level_max
+    uint32  map;                                            // 23    m_mapID
+    uint32  difficulty;                                     // 24    m_difficulty
+    uint32  flags;                                          // 25    m_flags
+    uint32  type;                                           // 26    m_typeID
+    uint32  faction;                                        // 27    m_faction
+    //char*   unk3;                                         // 28    m_textureFilename
+    uint32  expansion;                                      // 29    m_expansionLevel
+    uint32  index;                                          // 30    m_order_index
+    uint32  grouptype;                                      // 31    m_group_id
+    //char*   desc[16];                                     // 32-47 m_description_lang
     //uint32 unk5                                           // 48 language flags?
     // Helpers
     uint32 Entry() const { return ID + (type << 24); }
@@ -1172,14 +1175,14 @@ struct LFGDungeonEntry
 
 struct LFGDungeonExpansionEntry
 {
-    uint32  ID;                                             // 0 id
-    uint32  dungeonID;                                      // 1 LFGDungeonEntry.ID
-    uint32  expansion;                                      // 2 expansion
-    uint32  randomEntry;                                    // 3 LFGDungeonEntry.ID (only random ids!), inside of which is used this record
-    uint32  minlevel;                                       // 4
-    uint32  maxlevel;                                       // 5
-    uint32  recminlevel;                                    // 6
-    uint32  recmaxlevel;                                    // 7
+    uint32  ID;                                             // 0    m_ID
+    uint32  dungeonID;                                      // 1    m_lfg_id
+    uint32  expansion;                                      // 2    m_expansion_level
+    uint32  randomEntry;                                    // 3    m_random_id, inside of which is used this record
+    uint32  minlevelHard;                                   // 4    m_hard_level_min
+    uint32  maxlevelHard;                                   // 5    m_hard_level_max
+    uint32  minlevel;                                       // 6    m_target_level_min
+    uint32  maxlevel;                                       // 7    m_target_level_max
     // Helpers
     bool IsRandom() const { return randomEntry == 0; }
 };
@@ -1706,15 +1709,15 @@ struct SpellRadiusEntry
 {
     uint32    ID;                                           //          m_ID
     float     Radius;                                       //          m_radius
-    float     Radius2;                                      //          m_radiusPerLevel
-                                                            //          m_radiusMax
+                                                            //          m_radiusPerLevel
+    //float     RadiusMax;                                  //          m_radiusMax
 };
 
 struct SpellRangeEntry
 {
     uint32    ID;                                           // 0        m_ID
     float     minRange;                                     // 1        m_rangeMin[2]
-    float     minRangeFriendly;                             // 2 
+    float     minRangeFriendly;                             // 2
     float     maxRange;                                     // 3        m_rangeMax[2]
     float     maxRangeFriendly;                             // 4
     //uint32  Flags;                                        // 5        m_flags

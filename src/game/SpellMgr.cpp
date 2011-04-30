@@ -664,6 +664,11 @@ bool IsPositiveEffect(SpellEntry const *spellproto, SpellEffectIndex effIndex)
 
     switch(spellproto->Id)
     {
+        case 72219:                                         // Gastric Bloat 10 N
+        case 72551:                                         // Gastric Bloat 10 H
+        case 72552:                                         // Gastric Bloat 25 N
+        case 72553:                                         // Gastric Bloat 25 H
+            return false;
         case 47540:                                         // Penance start dummy aura - Rank 1
         case 53005:                                         // Penance start dummy aura - Rank 2
         case 53006:                                         // Penance start dummy aura - Rank 3
@@ -4087,6 +4092,29 @@ void SpellMgr::LoadSpellAreas()
 
 SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spellInfo, uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player)
 {
+    /*  Flying Everywhere   */
+    if (sWorld.getConfig(CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE))
+    {
+        if(player && (player->isFlyingSpell(spellInfo) || player->isFlyingFormSpell(spellInfo)))
+        {
+            uint32 v_map = GetVirtualMapForMapAndZone(map_id, zone_id);
+            MapEntry const* mapEntry = sMapStore.LookupEntry(v_map);
+            if(!mapEntry)
+                return SPELL_FAILED_NOT_HERE;
+            /*else if(mapEntry->Instanceable())
+                return SPELL_FAILED_NOT_HERE;*/
+            else if(mapEntry->IsDungeon())
+                return SPELL_FAILED_NOT_HERE;
+            else if(mapEntry->IsRaid())
+                return SPELL_FAILED_NOT_HERE;
+            else if(mapEntry->IsBattleArena())
+                return SPELL_FAILED_NOT_HERE;
+            else if(mapEntry->IsBattleGround())
+                return SPELL_FAILED_NOT_HERE;
+            else
+                return SPELL_CAST_OK;
+        }
+    }
     // normal case
     int32 areaGroupId = spellInfo->AreaGroupId;
     if (areaGroupId > 0)
@@ -4775,6 +4803,12 @@ SpellEntry const* GetSpellEntryByDifficulty(uint32 id, Difficulty difficulty)
 
     if (!spellDiff)
         return NULL;
+
+    if (!spellDiff->spellId[difficulty])
+    {
+        if (difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+            difficulty = RAID_DIFFICULTY_25MAN_NORMAL;
+    }
 
     if (!spellDiff->spellId[difficulty])
         return NULL;

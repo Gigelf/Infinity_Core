@@ -805,6 +805,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 // list out items available for trade
                 std::ostringstream out;
 
+                out << "In my main backpack:";
                 // list out items in main backpack
                 for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
                 {
@@ -819,14 +820,25 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         out << " |cffffffff|Hitem:" << pItemProto->ItemId
                             << ":0:0:0:0:0:0:0" << "|h[" << itemName << "]|h|r";
                         if (pItem->GetCount() > 1)
-                            out << "x" << pItem->GetCount() << ' ';
+                            out << "x" << pItem->GetCount();
                     }
                 }
+                ChatHandler ch(m_bot->GetTrader());
+                ch.SendSysMessage(out.str().c_str());
+
                 // list out items in other removable backpacks
                 for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
                 {
                     const Bag* const pBag = (Bag *) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
                     if (pBag)
+                    {
+                        std::ostringstream outbag;
+                        outbag << "In my ";
+                        const ItemPrototype* const pBagProto = pBag->GetProto();
+                        std::string bagName = pBagProto->Name1;
+                        ItemLocalization(bagName, pBagProto->ItemId);
+                        outbag << bagName << ":";
+
                         for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
                         {
                             const Item* const pItem = m_bot->GetItemByPos(bag, slot);
@@ -839,13 +851,16 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
                                 // item link format: http://www.wowwiki.com/ItemString
                                 // itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId
-                                out << " |cffffffff|Hitem:" << pItemProto->ItemId
-                                    << ":0:0:0:0:0:0:0" << "|h[" << itemName
-                                    << "]|h|r";
+
+                                outbag << " |cffffffff|Hitem:" << pItemProto->ItemId
+                                       << ":0:0:0:0:0:0:0" << "|h[" << itemName
+                                       << "]|h|r";
                                 if (pItem->GetCount() > 1)
-                                    out << "x" << pItem->GetCount() << ' ';
+                                    outbag << "x" << pItem->GetCount();
                             }
                         }
+                        ch.SendSysMessage(outbag.str().c_str());
+                    }
                 }
 
                 // calculate how much money bot has
@@ -860,10 +875,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 whisper << "I have |cff00ff00" << gold
                         << "|r|cfffffc00g|r|cff00ff00" << silver
                         << "|r|cffcdcdcds|r|cff00ff00" << copper
-                        << "|r|cffffd333c|r" << " and the following items:";
+                        << "|r|cffffd333c|r";
                 SendWhisper(whisper.str().c_str(), *(m_bot->GetTrader()));
-                ChatHandler ch(m_bot->GetTrader());
-                ch.SendSysMessage(out.str().c_str());
             }
             return;
         }
@@ -1791,7 +1804,7 @@ void PlayerbotAI::DoCombatMovement()
     float targetDist = m_bot->GetDistance(m_targetCombat);
 
     // if m_bot has it's back to the attacker, turn
-    if(!m_bot->HasInArc(M_PI_F,m_targetCombat))
+    if (!m_bot->HasInArc(M_PI_F, m_targetCombat))
     {
         // TellMaster("%s is facing the wrong way!", m_bot->GetName());
         m_bot->GetMotionMaster()->Clear(true);
@@ -1905,7 +1918,8 @@ void PlayerbotAI::DoLoot()
 
         if (go)
             m_bot->GetMotionMaster()->MovePoint(go->GetMapId(), go->GetPositionX(), go->GetPositionY(), go->GetPositionZ());
-            //sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s'", m_bot->GetName(), go->GetGOInfo()->name);
+
+        //sLog.outDebug( "[PlayerbotAI]: %s is going to loot '%s'", m_bot->GetName(), go->GetGOInfo()->name);
 
         // TEMP HACK: attempt to fix duplicate loot attempt (shows when getting ores occasionally)
         // give time to move to point before trying again
@@ -2446,7 +2460,7 @@ uint32 PlayerbotAI::EstRepair(uint16 pos)
     return TotalCost;
 }
 
-Unit *PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit *victim)
+Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit *victim)
 {
     // list empty? why are we here?
     if (m_attackerInfo.empty())
@@ -3349,42 +3363,42 @@ void PlayerbotAI::extractSpellIdList(const std::string& text, BotSpellList& m_sp
     }
 }
 
-void PlayerbotAI::extractTalentIds(const std::string &text, std::list<talentPair> &talentIds) const
-{
-    // Link format:
-    // |color|Htalent:talent_id:rank|h[name]|h|r
-    // |cff4e96f7|Htalent:1396:4|h[Unleashed Fury]|h|r
-
-    uint8 pos = 0;
-    while(true)
-    {
-        int i = text.find("Htalent:", pos);
-        if (i == -1)
-           break;
-        pos = i + 8;
-        // DEBUG_LOG("extractTalentIds first pos %u i %u",pos,i);
-        // extract talent_id
-        int endPos = text.find(':', pos);
-        if (endPos == -1)
-           break;
-        // DEBUG_LOG("extractTalentId second endpos : %u pos : %u",endPos,pos);
-        std::string idC = text.substr(pos, endPos - pos);
-        uint32 id = atol(idC.c_str());
-        pos = endPos + 1;
-        // extract rank
-        endPos = text.find('|', pos);
-        if (endPos == -1)
-           break;
-        // DEBUG_LOG("extractTalentId third endpos : %u pos : %u",endPos,pos);
-        std::string rankC = text.substr(pos, endPos - pos);
-        uint32 rank = atol(rankC.c_str());
-        pos = endPos + 1;
-
-        // DEBUG_LOG("extractTalentId second id : %u  rank : %u",id,rank);
-
-        if (id)
-            talentIds.push_back(std::pair<uint32 ,uint32>(id, rank));
-    }
+void PlayerbotAI::extractTalentIds(const std::string &text, std::list<talentPair> &talentIds) const 
+{ 
+    // Link format: 
+    // |color|Htalent:talent_id:rank|h[name]|h|r 
+    // |cff4e96f7|Htalent:1396:4|h[Unleashed Fury]|h|r 
+ 
+    uint8 pos = 0; 
+    while(true) 
+    { 
+        int i = text.find("Htalent:", pos); 
+        if (i == -1) 
+           break; 
+        pos = i + 8; 
+        // DEBUG_LOG("extractTalentIds first pos %u i %u",pos,i); 
+        // extract talent_id 
+        int endPos = text.find(':', pos); 
+        if (endPos == -1) 
+           break; 
+        // DEBUG_LOG("extractTalentId second endpos : %u pos : %u",endPos,pos); 
+        std::string idC = text.substr(pos, endPos - pos); 
+        uint32 id = atol(idC.c_str()); 
+        pos = endPos + 1; 
+        // extract rank 
+        endPos = text.find('|', pos); 
+        if (endPos == -1) 
+           break; 
+        // DEBUG_LOG("extractTalentId third endpos : %u pos : %u",endPos,pos); 
+        std::string rankC = text.substr(pos, endPos - pos); 
+        uint32 rank = atol(rankC.c_str()); 
+        pos = endPos + 1; 
+ 
+        // DEBUG_LOG("extractTalentId second id : %u  rank : %u",id,rank); 
+ 
+        if (id) 
+            talentIds.push_back(std::pair<uint32 ,uint32>(id, rank)); 
+    } 
 }
 
 void PlayerbotAI::extractGOinfo(const std::string& text, std::list<uint64>& m_lootTargets) const
@@ -3500,6 +3514,9 @@ void PlayerbotAI::findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<
             if (pItem->GetProto()->ItemId != *it)
                 continue;
 
+            if (m_bot->GetTrader() && m_bot->GetTradeData()->HasItem(pItem->GetObjectGuid()))
+                continue;
+
             foundItemList.push_back(pItem);
             itemIdSearchList.erase(it);
             break;
@@ -3522,6 +3539,9 @@ void PlayerbotAI::findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<
             for (std::list<uint32>::iterator it = itemIdSearchList.begin(); it != itemIdSearchList.end(); ++it)
             {
                 if (pItem->GetProto()->ItemId != *it)
+                    continue;
+
+                if (m_bot->GetTrader() && m_bot->GetTradeData()->HasItem(pItem->GetObjectGuid()))
                     continue;
 
                 foundItemList.push_back(pItem);
@@ -3890,10 +3910,12 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         m_lootCurrent = ObjectGuid();
         m_targetCombat = 0;
         // do we want to reset all states on this command?
-//		m_combatOrder = ORDERS_NONE;
-//		m_targetCombat = 0;
-//		m_targetAssisst = 0;
-//		m_targetProtect = 0;
+
+//        m_combatOrder = ORDERS_NONE;
+//        m_targetCombat = 0;
+//        m_targetAssisst = 0;
+//        m_targetProtect = 0;
+
     }
     else if (text == "report")
         SendQuestItemList(*GetMaster());
@@ -3908,9 +3930,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         ObjectGuid attackOnGuid = fromPlayer.GetSelectionGuid();
         if (!attackOnGuid.IsEmpty())
         {
-            Unit* thingToAttack = ObjectAccessor::GetUnit(*m_bot, attackOnGuid);
-            if (!m_bot->IsFriendlyTo(thingToAttack) && m_bot->IsWithinLOSInMap(thingToAttack))
-                GetCombatTarget(thingToAttack);
+           if (Unit* thingToAttack = ObjectAccessor::GetUnit(*m_bot, attackOnGuid)) 
+                if (!m_bot->IsFriendlyTo(thingToAttack) && m_bot->IsWithinLOSInMap(thingToAttack)) 
+                    GetCombatTarget(thingToAttack);
         }
         else
         {
@@ -4120,63 +4142,61 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         else
             TellMaster("I'm collecting nothing.");
     }
-
-    // Handle talents & glyphs:
-    // talent                           -- Lists bot(s) active talents & glyphs
-    // talent learn [HLINK][HLINK] ..   -- Learn selected talent from bot 'inspect' (shift click icon).
-    // talent unlearn [HLINK][HLINK] .. -- Unlearn selected talent (shift click [HLINK] from talent)
-    else if (text.size() >= 6 && text.substr(0, 6) == "talent")
-    {
-        std::ostringstream out;
-        std::string part = "";
-        std::string subcommand = "";
-
-        if (text.size() > 6 && text.substr(0, 7) == "talent ")
-            part = text.substr(7);  // Truncate 'talent ' part
-
-        if (part.find(" ") > 0)
-        {
-            subcommand = part.substr(0, part.find(" "));
-            if (part.size() > subcommand.size())
-                part = part.substr(subcommand.size() + 1);
-        }
-        else
-            subcommand = part;
-
-        if (subcommand == "learn" || subcommand == "unlearn")
-        {
-            if(subcommand == "learn")
-            {
-                std::list<talentPair>talents;
-                extractTalentIds(part, talents);
-
-                for(std::list<talentPair>::iterator itr = talents.begin(); itr != talents.end(); ++itr)
-                {
-                    uint32 talentid;
-                    uint32 rank;
-
-                    talentid = itr->first;
-                    rank = itr->second;
-
-                    m_bot->LearnTalent(talentid, ++rank);
-                    m_bot->SendTalentsInfoData(false);
-
-                }
-                m_bot->talent(out);
-                SendWhisper(out.str(), fromPlayer);
-
-            }
-            else if(subcommand == "unlearn")
-            {
-            }
-        }
-        else
-        {
-            m_bot->talent(out);
-            SendWhisper(out.str(), fromPlayer);
-        }
+    // Handle talents & glyphs: 
+    // talent                           -- Lists bot(s) active talents & glyphs 
+    // talent learn [HLINK][HLINK] ..   -- Learn selected talent from bot 'inspect' (shift click icon). 
+    // talent unlearn [HLINK][HLINK] .. -- Unlearn selected talent (shift click [HLINK] from talent) 
+    else if (text.size() >= 6 && text.substr(0, 6) == "talent") 
+    { 
+        std::ostringstream out; 
+        std::string part = ""; 
+        std::string subcommand = ""; 
+ 
+        if (text.size() > 6 && text.substr(0, 7) == "talent ") 
+            part = text.substr(7);  // Truncate 'talent ' part 
+ 
+        if (part.find(" ") > 0) 
+        { 
+            subcommand = part.substr(0, part.find(" ")); 
+            if (part.size() > subcommand.size()) 
+                part = part.substr(subcommand.size() + 1); 
+        } 
+        else 
+            subcommand = part; 
+ 
+        if (subcommand == "learn" || subcommand == "unlearn") 
+        { 
+            if(subcommand == "learn") 
+            { 
+                std::list<talentPair>talents; 
+                extractTalentIds(part, talents); 
+ 
+                for(std::list<talentPair>::iterator itr = talents.begin(); itr != talents.end(); ++itr) 
+                { 
+                    uint32 talentid; 
+                    uint32 rank; 
+ 
+                    talentid = itr->first; 
+                    rank = itr->second; 
+ 
+                    m_bot->LearnTalent(talentid, ++rank); 
+                    m_bot->SendTalentsInfoData(false); 
+ 
+                } 
+                m_bot->talent(out); 
+                SendWhisper(out.str(), fromPlayer); 
+ 
+            } 
+            else if(subcommand == "unlearn") 
+            { 
+            } 
+        } 
+        else 
+        { 
+            m_bot->talent(out); 
+            SendWhisper(out.str(), fromPlayer); 
+        } 
     }
-
     else if (text == "quests")
     {
         bool hasIncompleteQuests = false;

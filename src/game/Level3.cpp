@@ -2900,7 +2900,7 @@ bool ChatHandler::HandleAddItemSetCommand(char* args)
         {
             found = true;
             ItemPosCountVec dest;
-            uint8 msg = plTarget->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, pProto->ItemId, 1 );
+            InventoryResult msg = plTarget->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, pProto->ItemId, 1 );
             if (msg == EQUIP_ERR_OK)
             {
                 Item* item = plTarget->StoreNewItem( dest, pProto->ItemId, true);
@@ -4483,7 +4483,7 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     uint32 Entry = target->GetEntry();
     uint32 phaseMask = target->GetPhaseMask();
     CreatureInfo const* cInfo = target->GetCreatureInfo();
-    uint32 VehicleId = target->GetVehicleKit() ? target->GetVehicleKit()->GetVehicleId() : 0;
+    //uint32 VehicleId = target->GetVehicleKit() ? target->GetVehicleKit()->GetVehicleId() : 0;
     uint32 difficulty_entry_1 = cInfo ? cInfo->DifficultyEntry[0] : 0;
     uint32 difficulty_entry_2 = cInfo ? cInfo->DifficultyEntry[1] : 0;
     uint32 difficulty_entry_3 = cInfo ? cInfo->DifficultyEntry[2] : 0;
@@ -4508,7 +4508,8 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     else
         PSendSysMessage(LANG_NPCINFO_CHAR,  target->GetGUIDLow(), faction, npcflags, Entry, displayid, nativeid);
 
-    PSendSysMessage("VehicleId: %u", VehicleId);
+    if (cInfo->vehicleId)
+    PSendSysMessage("VehicleId: %u", cInfo->vehicleId);
     PSendSysMessage("difficulty_entry_1: %u, difficulty_entry_2: %u, difficulty_entry_3: %u", difficulty_entry_1, difficulty_entry_2, difficulty_entry_3);
 
     PSendSysMessage(LANG_NPCINFO_LEVEL, target->getLevel());

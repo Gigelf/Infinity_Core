@@ -28,7 +28,7 @@
 #include "ScriptMgr.h"
 #include "Totem.h"
 #include "SpellAuras.h"
-
+#include "World.h"
 #include <G3D/Vector3.h>
 
 using G3D::Vector3;
@@ -95,7 +95,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    uint8 msg = pUser->CanUseItem(pItem);
+    InventoryResult msg = pUser->CanUseItem(pItem);
     if (msg != EQUIP_ERR_OK)
     {
         recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
@@ -356,6 +356,21 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    // players should be able to open chests in Malygos encounter
+    if (spellId == 61437 && _player->GetVehicle() && _player->GetVehicle()->GetBase()->GetVehicleInfo()->GetEntry()->m_ID == 30161)
+        mover = _player;
+
+    if (sWorld.getConfig(CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE))
+    {
+        if (_player->isRunningSpell(spellInfo))
+        {
+            _player->Unmount();
+            _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+        }
+        else if (_player->isRunningFormSpell(spellInfo))
+            _player->RemoveFlyingSpells();
+    }
+
     if (mover->GetTypeId()==TYPEID_PLAYER)
     {
         // not have spell in spellbook or spell passive and not casted by client
@@ -496,6 +511,9 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
 
     // non channeled case
     _player->RemoveAurasDueToSpellByCancel(spellId);
+
+    if(_player->isFlyingSpell(spellInfo) || _player->isFlyingFormSpell(spellInfo))
+        _player->SetFlyingMountTimer();
 }
 
 void WorldSession::HandlePetCancelAuraOpcode( WorldPacket& recvPacket)

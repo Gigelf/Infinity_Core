@@ -581,7 +581,7 @@ class ChatHandler
         bool HandleKickPlayerCommand(char* args);
 
         bool HandleTicketCommand(char* args);
-        bool HandleDelTicketCommand(char* args);
+        bool HandleCloseTicketCommand(char* args);
         bool HandleMaxSkillCommand(char* args);
         bool HandleSetSkillCommand(char* args);
         bool HandleRespawnCommand(char* args);

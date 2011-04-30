@@ -189,7 +189,7 @@ Creature::~Creature()
 void Creature::AddToWorld()
 {
     ///- Register the creature for guid lookup
-    if(!IsInWorld() && GetObjectGuid().IsCreatureOrVehicle())
+    if (!IsInWorld() && GetObjectGuid().IsCreatureOrVehicle())
         GetMap()->GetObjectsStore().insert<Creature>(GetGUID(), (Creature*)this);
 
     Unit::AddToWorld();
@@ -201,7 +201,7 @@ void Creature::AddToWorld()
 void Creature::RemoveFromWorld()
 {
     ///- Remove the creature from the accessor
-    if(IsInWorld() && GetObjectGuid().IsCreatureOrVehicle())
+    if (IsInWorld() && GetObjectGuid().IsCreatureOrVehicle())
         GetMap()->GetObjectsStore().erase<Creature>(GetGUID(), (Creature*)NULL);
 
     Unit::RemoveFromWorld();
@@ -401,6 +401,8 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData *data /*=
     for(int i = 0; i < CREATURE_MAX_SPELLS; ++i)
         m_spells[i] = GetCreatureInfo()->spells[i];
 
+    SetVehicleId(GetCreatureInfo()->vehicleId);
+
     // if eventData set then event active and need apply spell_start
     if (eventData)
         ApplyGameEventSpells(eventData, true);
@@ -499,10 +501,13 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                     UpdateEntry(m_originalEntry, TEAM_NONE, NULL, eventData);
                 }
 
+                if (GetDisplayId() != GetNativeDisplayId() )
+                    SetDisplayId(GetNativeDisplayId() );
+
                 CreatureInfo const *cinfo = GetCreatureInfo();
 
                 SelectLevel(cinfo);
-                SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
+                SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
                 if (m_isDeadByDefault)
                 {
                     SetDeathState(JUST_DIED);
@@ -549,8 +554,9 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                     else
                         StopGroupLoot();
                 }
+                m_Events.Update(update_diff);
+                _UpdateSpells(update_diff);
             }
-
             break;
         }
         case ALIVE:
@@ -603,22 +609,7 @@ void Creature::Update(uint32 update_diff, uint32 diff)
             if (IsPet())                           // Regenerated before
                 break;
 
-            if(m_regenTimer > 0)
-            {
-                if(update_diff >= m_regenTimer)
-                    m_regenTimer = 0;
-                else
-                    m_regenTimer -= update_diff;
-            }
-            if (m_regenTimer != 0)
-                break;
-
-            if (!isInCombat() || IsPolymorphed())
-                RegenerateHealth();
-
-            Regenerate(getPowerType());
-            m_regenTimer = REGEN_TIME_FULL;
-
+            RegenerateAll(update_diff);
             break;
         }
         case CORPSE_FALLING:
@@ -628,6 +619,26 @@ void Creature::Update(uint32 update_diff, uint32 diff)
         default:
             break;
     }
+}
+
+void Creature::RegenerateAll(uint32 update_diff)
+{
+    if(m_regenTimer > 0)
+    {
+        if(update_diff >= m_regenTimer)
+            m_regenTimer = 0;
+        else
+            m_regenTimer -= update_diff;
+    }
+    if (m_regenTimer != 0)
+        return;
+
+    if (!isInCombat() || IsPolymorphed())
+        RegenerateHealth();
+
+    Regenerate(getPowerType());
+
+    m_regenTimer = REGEN_TIME_FULL;
 }
 
 void Creature::Regenerate(Powers power)
@@ -660,9 +671,9 @@ void Creature::Regenerate(Powers power)
             break;
         }
         case POWER_ENERGY:
-            if (GetObjectGuid().IsVehicle())
+            if (IsVehicle())
             {
-                if (VehicleEntry const* vehicleInfo = sVehicleStore.LookupEntry(GetCreatureInfo()->VehicleId))
+                if (VehicleEntry const* vehicleInfo = sVehicleStore.LookupEntry(GetCreatureInfo()->vehicleId))
                 {
 
                     switch (vehicleInfo->m_powerType)
@@ -1263,8 +1274,8 @@ bool Creature::CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, Team t
         return false;
 
     // Checked at startup
-    if (GetCreatureInfo()->VehicleId)
-        CreateVehicleKit(GetCreatureInfo()->VehicleId);
+    if (GetCreatureInfo()->vehicleId)
+        SetVehicleId(GetCreatureInfo()->vehicleId);
 
     return true;
 }
@@ -1512,13 +1523,12 @@ void Creature::SetDeathState(DeathState s)
 
     if (s == JUST_ALIVED)
     {
+        CreatureInfo const *cinfo = GetCreatureInfo();
+
         SetHealth(GetMaxHealth());
         SetLootRecipient(NULL);
-        CreatureInfo const *cinfo = GetCreatureInfo();
-        SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
-        RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+
         AddSplineFlag(SPLINEFLAG_WALKMODE);
-        SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
 
         if (GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_RESPAWN)
             ClearTemporaryFaction();
@@ -1527,8 +1537,18 @@ void Creature::SetDeathState(DeathState s)
 
         clearUnitState(UNIT_STAT_ALL_STATE);
         i_motionMaster.Clear();
+
         SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
+
+        // Dynamic flags may be adjusted by spells. Clear them
+        // first and let spell from *addon apply where needed.
+        SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
         LoadCreatureAddon(true);
+
+        // Flags after LoadCreatureAddon. Any spell in *addon
+        // will not be able to adjust these.
+        SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
     }
 }
 
@@ -1931,11 +1951,12 @@ CreatureDataAddon const* Creature::GetCreatureAddon() const
     // dependent from difficulty mode entry
     if (GetEntry() != GetCreatureInfo()->Entry)
     {
+        // If CreatureTemplateAddon for difficulty_entry_N exist, it's there for a reason
         if (CreatureDataAddon const* addon =  ObjectMgr::GetCreatureTemplateAddon(GetCreatureInfo()->Entry))
             return addon;
     }
 
-    // fallback to entry of normal mode
+    // Return CreatureTemplateAddon when nothing else exist
     return ObjectMgr::GetCreatureTemplateAddon(GetEntry());
 }
 

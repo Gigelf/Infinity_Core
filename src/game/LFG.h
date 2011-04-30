@@ -28,6 +28,7 @@ enum LFGRoles
     ROLE_TANK   = 1,
     ROLE_HEALER = 2,
     ROLE_DAMAGE = 3,
+    ROLE_MAX,
 };
 
 enum LFGRoleMask
@@ -64,15 +65,16 @@ enum LFGRoleMask
 
 enum LFGMemberFlags
 {
-    LFG_MEMBER_FLAG_NONE     = 0x00,
-    LFG_MEMBER_FLAG_CHARINFO = 0x01,
-    LFG_MEMBER_FLAG_COMMENT  = 0x02,
-    LFG_MEMBER_FLAG_UNK1     = 0x04,
-    LFG_MEMBER_FLAG_GROUP    = 0x08,
-    LFG_MEMBER_FLAG_ROLES    = 0x10,
-    LFG_MEMBER_FLAG_UNK2     = 0x20,
-    LFG_MEMBER_FLAG_UNK3     = 0x40,
-    LFG_MEMBER_FLAG_BIND     = 0x80,  // unk guid + unk int
+    LFG_MEMBER_FLAG_NONE         = 0x00,
+    LFG_MEMBER_FLAG_CHARINFO     = 0x01,      // have charinfo
+    LFG_MEMBER_FLAG_COMMENT      = 0x02,      // have comment
+    LFG_MEMBER_FLAG_GROUPLEADER  = 0x04,      // IsInGroup
+    LFG_MEMBER_FLAG_GROUPGUID    = 0x08,      // Have group guid
+    LFG_MEMBER_FLAG_ROLES        = 0x10,      // have roles
+    LFG_MEMBER_FLAG_AREA         = 0x20,      // have areaid
+    LFG_MEMBER_FLAG_STATUS       = 0x40,      // have status (unknown bool)
+    LFG_MEMBER_FLAG_BIND         = 0x80,      // have bind and completed encounter on this dungeon
+    LFG_MEMBER_FLAG_UPDATE       = 0x1000,    // special custom flag for clear client cache
 };
 
 enum LFGState
@@ -192,14 +194,15 @@ enum LFGJoinResult
     LFG_JOIN_FAILED2               = 18,                    // RoleCheck Failed
 };
 
-enum LFGRoleCheckResult
+enum LFGRoleCheckState
 {
-    LFG_ROLECHECK_FINISHED     = 1,                         // Role check finished
-    LFG_ROLECHECK_INITIALITING = 2,                         // Role check begins
-    LFG_ROLECHECK_MISSING_ROLE = 3,                         // Someone didn't selected a role after 2 mins
-    LFG_ROLECHECK_WRONG_ROLES  = 4,                         // Can't form a group with that role selection
-    LFG_ROLECHECK_ABORTED      = 5,                         // Someone leave the group
-    LFG_ROLECHECK_NO_ROLE      = 6,                         // Someone selected no role
+    LFG_ROLECHECK_NONE                           = 0,      // Internal use = Not initialized.
+    LFG_ROLECHECK_FINISHED                       = 1,      // Role check finished
+    LFG_ROLECHECK_INITIALITING                   = 2,      // Role check begins
+    LFG_ROLECHECK_MISSING_ROLE                   = 3,      // Someone didn't selected a role after 2 mins
+    LFG_ROLECHECK_WRONG_ROLES                    = 4,      // Can't form a group with that role selection
+    LFG_ROLECHECK_ABORTED                        = 5,      // Someone leave the group
+    LFG_ROLECHECK_NO_ROLE                        = 6       // Someone selected no role
 };
 
 enum LFGAnswer
@@ -242,7 +245,13 @@ struct LFGPlayerState
     void AddRole(LFGRoles role) { rolesMask = LFGRoleMask( rolesMask | (1 << role)); };
     void RemoveRole(LFGRoles role) { rolesMask = LFGRoleMask( rolesMask & ~(1 << role)); };
 
-    uint32*        GetFlags()    { return &m_flags;};
+    uint32         GetFlags()                { return m_flags;};
+    void           AddFlags(uint32 flags)    { m_flags = m_flags | flags;};
+    void           RemoveFlags(uint32 flags) { m_flags = m_flags & ~flags;};
+
+    void           SetAnswer(LFGAnswer _accept) { accept = _accept;};
+    LFGAnswer      GetAnswer() { return accept;};
+
     LFGType        GetType();
 
 private:
@@ -254,7 +263,10 @@ private:
     LFGDungeonSet m_DungeonsList;                   // Dungeons the player have applied for
     LFGLockStatusMap m_LockMap;                     // Dungeons lock map
     std::string   m_comment;
+    LFGAnswer     accept;                           ///< Accept status (-1 not answer | 0 Not agree | 1 agree)
 };
+
+struct LFGProposal;
 
 struct LFGGroupState
 {
@@ -267,8 +279,12 @@ struct LFGGroupState
     void Update(bool _update = true) { update = _update; };
     LFGDungeonSet* GetDungeons()   { return &m_DungeonsList; };
 
+    LFGProposal*   GetProposal()   { return m_proposal; };
+    void           SetProposal(LFGProposal* proposal)   { m_proposal = proposal; };
+
     uint32* GetFlags()  { return &m_flags;};
-    LFGType        GetType();
+    LFGType       GetType();
+    uint8         GetRoles(LFGRoles role);
 
     bool          queued;
     bool          update;
@@ -279,6 +295,7 @@ struct LFGGroupState
     bool          kickActive;
     LFGDungeonStatus     status;
     LFGDungeonSet    m_DungeonsList;                // Dungeons the group have applied for
+    LFGProposal*  m_proposal;
 };
 
 #endif

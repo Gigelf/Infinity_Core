@@ -86,8 +86,7 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket *sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale) :
-LookingForGroup_auto_join(false), LookingForGroup_auto_add(false), m_muteTime(mute_time),
-_player(NULL), m_Socket(sock),_security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
+m_muteTime(mute_time), _player(NULL), m_Socket(sock),_security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
 m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
 m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
 m_latency(0), m_tutorialState(TUTORIALDATA_UNCHANGED)
@@ -136,7 +135,8 @@ char const* WorldSession::GetPlayerName() const
 void WorldSession::SendPacket(WorldPacket const* packet)
 {
     // Playerbot mod: send packet to bot AI
-    if (GetPlayer()) {
+    if (GetPlayer() && GetPlayer()->IsInWorld())
+    {
         if (GetPlayer()->GetPlayerbotAI())
             GetPlayer()->GetPlayerbotAI()->HandleBotOutgoingPacket(*packet);
         else if (GetPlayer()->GetPlayerbotMgr())
@@ -211,7 +211,7 @@ void WorldSession::LogUnprocessedTail(WorldPacket *packet)
 }
 
 /// Update the WorldSession (triggered by World update)
-bool WorldSession::Update(uint32 diff, PacketFilter& updater)
+bool WorldSession::Update(PacketFilter& updater)
 {
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// not process packets if socket already closed
@@ -378,8 +378,8 @@ void WorldSession::LogoutPlayer(bool Save)
     if (_player)
     {
         // Playerbot mod: log out all player bots owned by this toon
-        if (_player->GetPlayerbotMgr())
-            _player->GetPlayerbotMgr()->LogoutAllBots();
+        if (GetPlayer()->GetPlayerbotMgr())
+            GetPlayer()->GetPlayerbotMgr()->LogoutAllBots();
 
         sLog.outChar("Account: %d (IP: %s) Logout Character:[%s] (guid: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName() ,_player->GetGUIDLow());
 
@@ -474,10 +474,11 @@ void WorldSession::LogoutPlayer(bool Save)
         ///- Reset the online field in the account table
         // no point resetting online in character table here as Player::SaveToDB() will set it to 1 since player has not been removed from world at this stage
         // No SQL injection as AccountID is uint32
-        static SqlStatementID id;
 
-        if (! _player->GetPlayerbotAI())
+        if (!GetPlayer()->GetPlayerbotAI())
         {
+            static SqlStatementID id;
+
             SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
             stmt.PExecute(uint32(0), GetAccountId());
         }
@@ -536,8 +537,8 @@ void WorldSession::LogoutPlayer(bool Save)
         sSocialMgr.SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetObjectGuid(), true);
         sSocialMgr.RemovePlayerSocial (_player->GetGUIDLow ());
 
-		// Playerbot - remember player GUID for update SQL below
-        uint32 guid = _player->GetGUIDLow();
+        // Playerbot - remember player GUID for update SQL below
+        uint32 guid = GetPlayer()->GetGUIDLow();
 
         ///- Remove the player from the world
         // the player may not be in the world when logging out

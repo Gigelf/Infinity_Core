@@ -202,7 +202,7 @@ public:
     uint32 initSpell(uint32 spellId);
     uint32 initPetSpell(uint32 spellIconId);
 
-    // extracts talent ids to list
+    // extracts talent ids to list 
     void extractTalentIds(const std::string& text, std::list<talentPair>& talentIds) const;
 
     // extracts item ids from links

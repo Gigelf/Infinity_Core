@@ -23,7 +23,7 @@
 #include "ItemPrototype.h"
 #include "Unit.h"
 #include "Item.h"
-
+#include "SpellMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "NPCHandler.h"
 #include "QuestDef.h"
@@ -41,6 +41,10 @@
 #include "LFG.h"
 #include "AntiCheat.h"
 
+// Playerbot mod
+#include "playerbot/PlayerbotMgr.h"
+#include "playerbot/PlayerbotAI.h"
+
 #include<string>
 #include<vector>
 
@@ -52,7 +56,6 @@ class PlayerMenu;
 class UpdateMask;
 class SpellCastTargets;
 class PlayerSocial;
-class Vehicle;
 class DungeonPersistentState;
 class Spell;
 class Item;
@@ -1243,13 +1246,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool CanNoReagentCast(SpellEntry const* spellInfo) const;
         bool HasItemOrGemWithIdEquipped( uint32 item, uint32 count, uint8 except_slot = NULL_SLOT) const;
         bool HasItemOrGemWithLimitCategoryEquipped( uint32 limitCategory, uint32 count, uint8 except_slot = NULL_SLOT) const;
-        uint8 CanTakeMoreSimilarItems(Item* pItem) const { return _CanTakeMoreSimilarItems(pItem->GetEntry(), pItem->GetCount(), pItem); }
-        uint8 CanTakeMoreSimilarItems(uint32 entry, uint32 count) const { return _CanTakeMoreSimilarItems(entry, count, NULL); }
-        uint8 CanStoreNewItem( uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 item, uint32 count, uint32* no_space_count = NULL ) const
+        InventoryResult CanTakeMoreSimilarItems(Item* pItem) const { return _CanTakeMoreSimilarItems(pItem->GetEntry(), pItem->GetCount(), pItem); }
+        InventoryResult CanTakeMoreSimilarItems(uint32 entry, uint32 count) const { return _CanTakeMoreSimilarItems(entry, count, NULL); }
+        InventoryResult CanStoreNewItem( uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 item, uint32 count, uint32* no_space_count = NULL ) const
         {
             return _CanStoreItem(bag, slot, dest, item, count, NULL, false, no_space_count );
         }
-        uint8 CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec& dest, Item *pItem, bool swap = false ) const
+        InventoryResult CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec& dest, Item *pItem, bool swap = false ) const
         {
             if(!pItem)
                 return EQUIP_ERR_ITEM_NOT_FOUND;
@@ -1257,19 +1260,19 @@ class MANGOS_DLL_SPEC Player : public Unit
             return _CanStoreItem( bag, slot, dest, pItem->GetEntry(), count, pItem, swap, NULL );
 
         }
-        uint8 CanStoreItems( Item **pItem,int count) const;
-        uint8 CanEquipNewItem( uint8 slot, uint16 &dest, uint32 item, bool swap ) const;
-        uint8 CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool not_loading = true ) const;
+        InventoryResult CanStoreItems( Item **pItem,int count) const;
+        InventoryResult CanEquipNewItem( uint8 slot, uint16 &dest, uint32 item, bool swap ) const;
+        InventoryResult CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool not_loading = true ) const;
 
-        uint8 CanEquipUniqueItem( Item * pItem, uint8 except_slot = NULL_SLOT, uint32 limit_count = 1 ) const;
-        uint8 CanEquipUniqueItem( ItemPrototype const* itemProto, uint8 except_slot = NULL_SLOT, uint32 limit_count = 1 ) const;
-        uint8 CanUnequipItems( uint32 item, uint32 count ) const;
-        uint8 CanUnequipItem( uint16 src, bool swap ) const;
-        uint8 CanBankItem( uint8 bag, uint8 slot, ItemPosCountVec& dest, Item *pItem, bool swap, bool not_loading = true ) const;
-        uint8 CanUseItem( Item *pItem, bool not_loading = true ) const;
+        InventoryResult CanEquipUniqueItem( Item * pItem, uint8 except_slot = NULL_SLOT, uint32 limit_count = 1 ) const;
+        InventoryResult CanEquipUniqueItem( ItemPrototype const* itemProto, uint8 except_slot = NULL_SLOT, uint32 limit_count = 1 ) const;
+        InventoryResult CanUnequipItems( uint32 item, uint32 count ) const;
+        InventoryResult CanUnequipItem( uint16 src, bool swap ) const;
+        InventoryResult CanBankItem( uint8 bag, uint8 slot, ItemPosCountVec& dest, Item *pItem, bool swap, bool not_loading = true ) const;
+        InventoryResult CanUseItem( Item *pItem, bool not_loading = true ) const;
         bool HasItemTotemCategory( uint32 TotemCategory ) const;
-        uint8 CanUseItem( ItemPrototype const *pItem ) const;
-        uint8 CanUseAmmo( uint32 item ) const;
+        InventoryResult CanUseItem( ItemPrototype const *pItem ) const;
+        InventoryResult CanUseAmmo( uint32 item ) const;
         Item* StoreNewItem( ItemPosCountVec const& pos, uint32 item, bool update,int32 randomPropertyId = 0, AllowedLooterSet* allowedLooters = NULL );
         Item* StoreItem( ItemPosCountVec const& pos, Item *pItem, bool update );
         Item* EquipNewItem( uint16 pos, uint32 item, bool update );
@@ -1281,8 +1284,103 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AutoStoreLoot(uint32 loot_id, LootStore const& store, bool broadcast = false, uint8 bag = NULL_BAG, uint8 slot = NULL_SLOT);
         void AutoStoreLoot(Loot& loot, bool broadcast = false, uint8 bag = NULL_BAG, uint8 slot = NULL_SLOT);
 
-        uint8 _CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count = NULL) const;
-        uint8 _CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count, Item *pItem = NULL, bool swap = false, uint32* no_space_count = NULL ) const;
+        /// Flying Everywhere
+        void FlyingMountsSpellsToItems();
+        bool CanUseFlyingMounts(SpellEntry const* spellInfo);
+        // helper functions
+        bool isFlyingSpell(SpellEntry const* spellInfo) const
+        {
+            return spellInfo->EffectApplyAuraName[0]==SPELL_AURA_MOUNTED &&
+            IsSpellHaveAura(spellInfo, SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED);
+            //IsSpellHaveAura(spellInfo, SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
+            //spellInfo->EffectApplyAuraName[1]==SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED &&
+            //spellInfo->EffectApplyAuraName[2]==SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED;
+        }
+
+        bool isRunningSpell(SpellEntry const* spellInfo) const
+        {
+            return spellInfo->EffectApplyAuraName[0]==SPELL_AURA_MOUNTED &&
+            spellInfo->EffectApplyAuraName[1]==SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED;
+        }
+
+        bool isFlyingFormSpell(SpellEntry const* spellInfo) const
+        {
+            return spellInfo->EffectApplyAuraName[0]==SPELL_AURA_MOD_SHAPESHIFT &&
+            spellInfo->EffectApplyAuraName[1]==SPELL_AURA_MECHANIC_IMMUNITY &&
+            spellInfo->EffectApplyAuraName[2]==SPELL_AURA_FLY;
+        }
+
+        bool isRunningFormSpell(SpellEntry const* spellInfo) const
+        {
+            return spellInfo->EffectApplyAuraName[0]==SPELL_AURA_MOD_SHAPESHIFT &&
+            spellInfo->EffectApplyAuraName[1]==SPELL_AURA_MECHANIC_IMMUNITY &&
+            spellInfo->EffectApplyAuraName[2]!=SPELL_AURA_FLY;
+        }
+
+        void RemoveFlyingSpells()
+        {
+            Unmount();
+            RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+            RemoveSpellsCausingAura(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED); //BM added
+            //RemoveSpellsCausingAura(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED); //BM removed
+            //RemoveSpellsCausingAura(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED); //BM removed
+        }
+
+        void RemoveFlyingFormSpells()
+        {
+            RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
+            RemoveSpellsCausingAura(SPELL_AURA_MECHANIC_IMMUNITY);
+            RemoveSpellsCausingAura(SPELL_AURA_FLY);
+        }
+
+        void RemoveRunningFormSpells()
+        {
+            RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
+            RemoveSpellsCausingAura(SPELL_AURA_MECHANIC_IMMUNITY);
+        }
+
+        void RemoveAllFlyingSpells()
+        {
+            RemoveFlyingSpells();
+            RemoveFlyingFormSpells();
+        }
+
+        bool HasAuraTypeFlyingSpell()
+        {
+            return HasAuraType(SPELL_AURA_MOUNTED) &&
+            HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED);       //BM added
+            //HasAuraType(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED) &&  //BM removed
+            //HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);   //BM removed
+        }
+
+        bool HasAuraTypeFlyingFormSpell()
+        {
+            return HasAuraType(SPELL_AURA_MOD_SHAPESHIFT) &&
+            HasAuraType(SPELL_AURA_MECHANIC_IMMUNITY) &&
+            HasAuraType(SPELL_AURA_FLY);
+        }
+
+        bool HasAuraTypeRunningFormSpell()
+        {
+            return HasAuraType(SPELL_AURA_MOD_SHAPESHIFT) &&
+            HasAuraType(SPELL_AURA_MECHANIC_IMMUNITY) &&
+            !HasAuraType(SPELL_AURA_FLY);
+        }
+
+        bool GetFlyingMountTimer()
+        {
+            return m_flytimer < time(NULL);
+        }
+
+        void SetFlyingMountTimer()
+        {
+            m_flytimer = time(NULL) + 0.5;
+        }
+        //end of helpers.
+        ///end of Flying Everywhere
+
+        InventoryResult _CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count = NULL) const;
+        InventoryResult _CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count, Item *pItem = NULL, bool swap = false, uint32* no_space_count = NULL ) const;
 
         void ApplyEquipCooldown( Item * pItem );
         void SetAmmo( uint32 item );
@@ -1317,9 +1415,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void TakeExtendedCost(uint32 extendedCostId, uint32 count);
 
         uint32 GetMaxKeyringSize() const { return KEYRING_SLOT_END-KEYRING_SLOT_START; }
-        void SendEquipError( uint8 msg, Item* pItem, Item *pItem2 = NULL, uint32 itemid = 0 ) const;
-        void SendBuyError( uint8 msg, Creature* pCreature, uint32 item, uint32 param );
-        void SendSellError( uint8 msg, Creature* pCreature, uint64 guid, uint32 param );
+        void SendEquipError( InventoryResult msg, Item* pItem, Item *pItem2 = NULL, uint32 itemid = 0 ) const;
+        void SendBuyError( BuyResult msg, Creature* pCreature, uint32 item, uint32 param );
+        void SendSellError( SellResult msg, Creature* pCreature, uint64 guid, uint32 param );
         void AddWeaponProficiency(uint32 newflag) { m_WeaponProficiency |= newflag; }
         void AddArmorProficiency(uint32 newflag) { m_ArmorProficiency |= newflag; }
         uint32 GetWeaponProficiency() const { return m_WeaponProficiency; }
@@ -1479,7 +1577,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendQuestCompleteEvent(uint32 quest_id);
         void SendQuestReward( Quest const *pQuest, uint32 XP, Object* questGiver );
-        void SendQuestFailed( uint32 quest_id, InventoryChangeFailure reason = EQUIP_ERR_OK);
+        void SendQuestFailed( uint32 quest_id, InventoryResult reason = EQUIP_ERR_OK);
         void SendQuestTimerFailed( uint32 quest_id );
         void SendCanTakeQuestResponse( uint32 msg ) const;
         void SendQuestConfirmAccept(Quest const* pQuest, Player* pReceiver);
@@ -1797,7 +1895,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static void RemovePetitionsAndSigns(ObjectGuid guid, uint32 type);
 
         // Arena Team
-        void SetInArenaTeam(uint32 ArenaTeamId, uint8 slot, uint8 type)
+        void SetInArenaTeam(uint32 ArenaTeamId, uint8 slot, ArenaType type)
         {
             SetArenaTeamInfoField(slot, ARENA_TEAM_ID, ArenaTeamId);
             SetArenaTeamInfoField(slot, ARENA_TEAM_TYPE, type);
@@ -1808,7 +1906,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         }
         uint32 GetArenaTeamId(uint8 slot) { return GetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * ARENA_TEAM_END) + ARENA_TEAM_ID); }
         uint32 GetArenaPersonalRating(uint8 slot) { return GetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * ARENA_TEAM_END) + ARENA_TEAM_PERSONAL_RATING); }
-        static uint32 GetArenaTeamIdFromDB(ObjectGuid guid, uint8 slot);
+        static uint32 GetArenaTeamIdFromDB(ObjectGuid guid, ArenaType type);
         void SetArenaTeamIdInvited(uint32 ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
         uint32 GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
         static void LeaveAllArenaTeams(ObjectGuid guid);
@@ -1948,6 +2046,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CleanupChannels();
         void UpdateLocalChannels( uint32 newZone );
         void LeaveLFGChannel();
+        void JoinLFGChannel();
 
         void UpdateDefense();
         void UpdateWeaponSkill (WeaponAttackType attType);
@@ -2059,6 +2158,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _ApplyWeaponDependentAuraMods(Item *item, WeaponAttackType attackType, bool apply);
         void _ApplyWeaponDependentAuraCritMod(Item *item, WeaponAttackType attackType, Aura* aura, bool apply);
         void _ApplyWeaponDependentAuraDamageMod(Item *item, WeaponAttackType attackType, Aura* aura, bool apply);
+
+        ///PVP Token
+        void ReceiveToken();
 
         void _ApplyItemMods(Item *item,uint8 slot,bool apply);
         void _RemoveAllItemMods();
@@ -2661,6 +2763,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_deathTimer;
         time_t m_deathExpireTime;
 
+        /// Flying mount everywhere
+        time_t m_flytimer;
+
         uint32 m_restTime;
 
         uint32 m_WeaponProficiency;
@@ -2717,9 +2822,9 @@ class MANGOS_DLL_SPEC Player : public Unit
     private:
         void _HandleDeadlyPoison(Unit* Target, WeaponAttackType attType, SpellEntry const *spellInfo);
         // internal common parts for CanStore/StoreItem functions
-        uint8 _CanStoreItem_InSpecificSlot( uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemPrototype const *pProto, uint32& count, bool swap, Item *pSrcItem ) const;
-        uint8 _CanStoreItem_InBag( uint8 bag, ItemPosCountVec& dest, ItemPrototype const *pProto, uint32& count, bool merge, bool non_specialized, Item *pSrcItem, uint8 skip_bag, uint8 skip_slot ) const;
-        uint8 _CanStoreItem_InInventorySlots( uint8 slot_begin, uint8 slot_end, ItemPosCountVec& dest, ItemPrototype const *pProto, uint32& count, bool merge, Item *pSrcItem, uint8 skip_bag, uint8 skip_slot ) const;
+        InventoryResult _CanStoreItem_InSpecificSlot( uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemPrototype const *pProto, uint32& count, bool swap, Item *pSrcItem ) const;
+        InventoryResult _CanStoreItem_InBag( uint8 bag, ItemPosCountVec& dest, ItemPrototype const *pProto, uint32& count, bool merge, bool non_specialized, Item *pSrcItem, uint8 skip_bag, uint8 skip_slot ) const;
+        InventoryResult _CanStoreItem_InInventorySlots( uint8 slot_begin, uint8 slot_end, ItemPosCountVec& dest, ItemPrototype const *pProto, uint32& count, bool merge, Item *pSrcItem, uint8 skip_bag, uint8 skip_slot ) const;
         Item* _StoreItem( uint16 pos, Item *pItem, uint32 count, bool clone, bool update );
 
         void UpdateKnownCurrencies(uint32 itemId, bool apply);

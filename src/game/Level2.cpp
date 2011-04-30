@@ -26,7 +26,6 @@
 #include "TemporarySummon.h"
 #include "Totem.h"
 #include "Pet.h"
-#include "Vehicle.h"
 #include "GameObject.h"
 #include "Opcodes.h"
 #include "Chat.h"
@@ -1632,8 +1631,7 @@ bool ChatHandler::HandleNpcAddCommand(char* args)
         return false;
 
     CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(id);
-    //FIXME: need vehicle support like GenerateStaticCreatureLowGuid when its will allowed static spawns
-    if (!cinfo || cinfo->GetHighGuid() != HIGHGUID_UNIT)
+    if (!cinfo)
     {
         PSendSysMessage(LANG_COMMAND_INVALIDCREATUREID, id);
         SetSentErrorMessage(true);
@@ -2810,24 +2808,24 @@ bool ChatHandler::HandleTicketCommand(char* args)
     return true;
 }
 
-//dell all tickets
-bool ChatHandler::HandleDelTicketCommand(char *args)
+//close all tickets
+bool ChatHandler::HandleCloseTicketCommand(char *args)
 {
     char* px = ExtractLiteralArg(&args);
     if (!px)
         return false;
 
-    // delticket all
+    // close all
     if (strncmp(px, "all", 4) == 0)
     {
-        sTicketMgr.DeleteAll();
-        SendSysMessage(LANG_COMMAND_ALLTICKETDELETED);
+        sTicketMgr.CloseAll();
+        SendSysMessage(LANG_COMMAND_ALLTICKETCLOSED);
         return true;
     }
 
     uint32 num;
 
-    // delticket #num
+    // close #num
     if (ExtractUInt32(&px, num))
     {
         if (num ==0)
@@ -2845,16 +2843,16 @@ bool ChatHandler::HandleDelTicketCommand(char *args)
 
         ObjectGuid guid = ticket->GetPlayerGuid();
 
-        sTicketMgr.Delete(guid);
+        sTicketMgr.Close(guid);
 
         //notify player
         if (Player* pl = sObjectMgr.GetPlayer(guid))
         {
             pl->GetSession()->SendGMTicketGetTicket(0x0A);
-            PSendSysMessage(LANG_COMMAND_TICKETPLAYERDEL, GetNameLink(pl).c_str());
+            PSendSysMessage(LANG_COMMAND_TICKETPLAYERCLOSE, GetNameLink(pl).c_str());
         }
         else
-            PSendSysMessage(LANG_COMMAND_TICKETDEL);
+            PSendSysMessage(LANG_COMMAND_TICKETCLOSE);
 
         return true;
     }
@@ -2865,8 +2863,8 @@ bool ChatHandler::HandleDelTicketCommand(char *args)
     if (!ExtractPlayerTarget(&px, &target, &target_guid, &target_name))
         return false;
 
-    // delticket $char_name
-    sTicketMgr.Delete(target_guid);
+    // closeticket $char_name
+    sTicketMgr.Close(target_guid);
 
     // notify players about ticket deleting
     if (target)
@@ -2874,7 +2872,7 @@ bool ChatHandler::HandleDelTicketCommand(char *args)
 
     std::string nameLink = playerLink(target_name);
 
-    PSendSysMessage(LANG_COMMAND_TICKETPLAYERDEL,nameLink.c_str());
+    PSendSysMessage(LANG_COMMAND_TICKETPLAYERCLOSE,nameLink.c_str());
     return true;
 }
 

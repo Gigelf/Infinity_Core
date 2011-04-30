@@ -67,10 +67,28 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
     //else if (is_water_ok)                                 // 3D system under water and above ground (swimming mode)
     else                                                    // 2D only
     {
-        destZ = respZ;
-        if(!map->IsNextZcoordOK(destX, destY, destZ, travelDistZ))
-            return;                                         // let's forget this bad coords where a z cannot be find and retry at next tick
-        creature.UpdateGroundPositionZ(destX, destY, destZ, travelDistZ);
+        // 10.0 is the max that vmap high can check (MAX_CAN_FALL_DISTANCE)
+        travelDistZ = travelDistZ >= 100.0f ? 10.0f : sqrtf(travelDistZ);
+
+        // The fastest way to get an accurate result 90% of the time.
+        // Better result can be obtained like 99% accuracy with a ray light, but the cost is too high and the code is too long.
+        destZ = map->GetHeight(destX, destY, respZ+travelDistZ-2.0f, false);
+
+        if (fabs(destZ - respZ) > travelDistZ)              // Map check
+        {
+            // Vmap Horizontal or above
+            destZ = map->GetHeight(destX, destY, respZ - 2.0f, true);
+
+            if (fabs(destZ - respZ) > travelDistZ)
+            {
+                // Vmap Higher
+                destZ = map->GetHeight(destX, destY, respZ+travelDistZ-2.0f, true);
+
+                // let's forget this bad coords where a z cannot be find and retry at next tick
+                if (fabs(destZ - respZ) > travelDistZ)
+                    return;
+            }
+        }
     }
 
     Traveller<Creature> traveller(creature);
@@ -79,10 +97,10 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
     i_destinationHolder.SetDestination(traveller, destX, destY, destZ);
     creature.addUnitState(UNIT_STAT_ROAMING_MOVE);
 
-    if (is_air_ok && !(creature.CanWalk() && creature.IsAtGroundLevel(destX, destY, destZ)))
+    if (is_air_ok)
     {
         i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
-        creature.AddSplineFlag(SPLINEFLAG_UNKNOWN7);
+        creature.AddSplineFlag(SPLINEFLAG_FLYING);
     }
     //else if (is_water_ok)                                 // Swimming mode to be done with more than this check
     else
@@ -98,9 +116,8 @@ void RandomMovementGenerator<Creature>::Initialize(Creature &creature)
     if (!creature.isAlive())
         return;
 
-    if (creature.CanFly() && !(creature.CanWalk() &&
-        creature.IsAtGroundLevel(creature.GetPositionX(), creature.GetPositionY(), creature.GetPositionZ())))
-        creature.AddSplineFlag(SPLINEFLAG_UNKNOWN7);
+    if (creature.CanFly())
+        creature.AddSplineFlag(SPLINEFLAG_FLYING);
     else
         creature.AddSplineFlag(SPLINEFLAG_WALKMODE);
 
@@ -153,14 +170,8 @@ bool RandomMovementGenerator<Creature>::Update(Creature &creature, const uint32 
 
         if (i_nextMoveTime.Passed())
         {
-            float x,y,z;
-            if(i_destinationHolder.HasDestination())
-                i_destinationHolder.GetLocationNowNoMicroMovement(x,y,z);
-            else
-                creature.GetPosition(x,y,z);
-
-            if (creature.CanFly() && !(creature.CanWalk() && creature.IsAtGroundLevel(x,y,z)))
-                creature.AddSplineFlag(SPLINEFLAG_UNKNOWN7);
+            if (creature.CanFly())
+                creature.AddSplineFlag(SPLINEFLAG_FLYING);
             else
                 creature.AddSplineFlag(SPLINEFLAG_WALKMODE);
 

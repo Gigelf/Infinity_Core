@@ -36,6 +36,9 @@
 #include "LootMgr.h"
 #include "LFGMgr.h"
 
+// Playerbot
+#include "playerbot/PlayerbotMgr.h"
+
 #define LOOT_ROLL_TIMEOUT  (1*MINUTE*IN_MILLISECONDS)
 
 //===================================================
@@ -426,6 +429,8 @@ void Group::ChangeLeader(ObjectGuid guid)
     member_citerator slot = _getMemberCSlot(guid);
     if (slot == m_memberSlots.end())
         return;
+
+    sLFGMgr.Leave(this);
 
     _setLeader(guid);
 
@@ -867,7 +872,7 @@ void Group::CountTheRoll(Rolls::iterator& rollI)
 
                 ItemPosCountVec dest;
                 LootItem *item = &(roll->getLoot()->items[roll->itemSlot]);
-                uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, roll->itemid, item->count );
+                InventoryResult msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, roll->itemid, item->count );
                 if ( msg == EQUIP_ERR_OK )
                 {
                     item->is_looted = true;
@@ -923,7 +928,7 @@ void Group::CountTheRoll(Rolls::iterator& rollI)
                 if(rollvote == ROLL_GREED)
                 {
                     ItemPosCountVec dest;
-                    uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, roll->itemid, item->count );
+                    InventoryResult msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, roll->itemid, item->count );
                     if ( msg == EQUIP_ERR_OK )
                     {
                         item->is_looted = true;
@@ -1416,7 +1421,7 @@ void Group::SetGroupUniqueFlag(ObjectGuid guid, GroupFlagsAssignment assignment,
             {
                 if (itr->guid != guid )
                 {
-                    if (itr->flags & mask)
+                    if ((itr->flags & mask) && sWorld.getConfig(CONFIG_BOOL_RAID_FLAGS_UNIQUE))
                     {
                         GroupFlagMask oldMask = itr->flags;
                         itr->flags = GroupFlagMask(oldMask & ~mask);
@@ -1632,7 +1637,7 @@ GroupJoinBattlegroundResult Group::CanJoinBattleGroundQueue(BattleGround const* 
 
     uint32 allowedPlayerCount = 0;
 
-    BattleGroundQueueTypeId bgQueueTypeIdRandom = BattleGroundMgr::BGQueueTypeId(BATTLEGROUND_RB, 0);
+    BattleGroundQueueTypeId bgQueueTypeIdRandom = BattleGroundMgr::BGQueueTypeId(BATTLEGROUND_RB, ARENA_TYPE_NONE);
 
     // check every member of the group to be able to join
     for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())

@@ -40,6 +40,9 @@
 // Playerbot mod
 #include "playerbot/PlayerbotAI.h"
 
+// Playerbot mod
+#include "playerbot/PlayerbotAI.h"
+
 bool WorldSession::processChatmessageFurtherAfterSecurityChecks(std::string& msg, uint32 lang)
 {
     if (lang != LANG_ADDON)

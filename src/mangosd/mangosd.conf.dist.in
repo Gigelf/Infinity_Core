@@ -845,6 +845,11 @@ LexicsCutterNoActionOnGM = 1
 #                 0 - unsummon only for flying mounts
 #        Default: 1 - unsummon for any mount
 #
+#    RaidFlags.Unique
+#        Set raid flags (assistant, main assistant, main tank) unique in raid
+#        Default: 0 - flags not unique
+#                 1 - flags unique, not more then 1 player may have this flag
+#
 #    WOWArmorySupport
 #        Support collect statistics for Shadez WOW Armory frontend
 #        Default: 0 - don't support
@@ -947,6 +952,7 @@ SkillChance.Prospecting = 0
 SkillChance.Milling = 0
 OffhandCheckAtTalentsReset = 0
 PetUnsummonAtMount = 1
+RaidFlags.Unique = 0
 AllowFlightOnOldMaps = 0
 WOWArmorySupport = 0
 ClientCacheVersion = 0
@@ -1831,6 +1837,81 @@ CharDelete.MinLevel = 10
 CharDelete.KeepDays = 30
 
 ###################################################################################################################
+#    PvP Token System
+#
+#    PvPToken.Enable
+#        Enable/disable PvP Token system.
+#        Default: 1 (enabled)
+#        0 (disabled)
+#
+#    PvPToken.ItemID
+#        The item ID of the token that players will receive after killing an enemy.
+#        Default: 29434 (Badge of Justice)
+#
+#    PvPToken.ItemCount
+#        The count amount of the ItemID
+#        Default: 1
+#
+#    PvPToken.Gold
+#        The amount of gold that players will receive after killing an enemy.
+#        Default: 100000
+#    PvPToken.Honor  
+#        The amount of honor points that players will receive after killing an enemy.  
+#        Default: 75000  
+#  
+#    PvPToken.Arena  
+#        The amount of arena points that players will receive after killing an enemy.  
+#        Default: 5000 
+#
+#
+#    PvPToken.MapRestriction
+#        The type of maps where players can receive the token
+#        Default: 4 - all maps
+#                 3 - battlegrounds only
+#                 2 - FFA areas only (both instanced and world arenas)
+#                 1 - battlegrounds and FFA areas only
+#
+###################################################################################################################
+
+PvPToken.Enable = 1
+PvPToken.ItemID = 29434
+PvPToken.ItemCount = 1
+PvPToken.Gold = 100000
+PvPToken.Honor = 75000  
+PvPToken.Arena = 5000
+PvPToken.MapRestriction = 4
+
+############### PVP ANNOUNCER IS DISABLE ALL CODE FOR IT IS COMMENTED OUT IN CORE TIL WE FIX ######################
+###################################################################################################################
+#    PvP Announcer System
+#
+#    PvPAnnouncer.Enable
+#       Enable/disable PvP Announcer system.
+#       Default: 1 - enabled
+#                0 - disabled
+###################################################################################################################
+
+PvPAnnouncer.Enable = 1
+PvPAnnouncer.ColorKiller = |CFFFFFF01
+PvPAnnouncer.ColorKilled = |CFFFFFF01
+PvPAnnouncer.ColorArea = |CFFFE8A0E
+
+############### PVP ANNOUNCER IS DISABLE ALL CODE FOR IT IS COMMENTED OUT IN CORE TIL WE FIX ######################
+
+###################################################################################################################
+#    Flying mounts Everywhere
+#
+#    Allows you to fly through Azeroth
+#
+#    Custom.AllowFlyingMountsEverywhere
+#       Enable/disable Flying mounts Everywhere.
+#       Default: 1 - enabled
+#                0 - disabled
+###################################################################################################################
+
+Custom.AllowFlyingMountsEverywhere = 0
+
+###################################################################################################################
 #    Refer-A-Friend system by Mas0n
 #    RAF.MaxGrantLevel       = 60  (max level for granting level bonuses)
 #    RAF.MaxReferals         = 5   (max referals for one account)
@@ -1856,8 +1937,54 @@ Rate.RAF.LevelPerLevel  = 0.5
 #    LFG.MaxKicks            = 3
 #    LFG.KickVotes           = 3
 ###################################################################################################################
-LFR.Enable              = 0
+LFR.Enable              = 1
 LFG.Enable              = 0
 LFG.MaxKicks            = 3
 LFG.KickVotes           = 3
 
+###################################################################################################################
+# PLAYERBOTAI CONFIGURATION
+#
+#    PlayerbotAI.DisableBots
+#        Disable the bot command and bot menu
+#        Default: 0 - off
+#                 1 - on
+#
+#    PlayerbotAI.DebugWhisper
+#        Enable debug output by whispering master
+#        Default: 0 - off
+#                 1 - on
+#
+#    PlayerbotAI.FollowDistanceMin
+#    PlayerbotAI.FollowDistanceMax
+#        Min. and Max. follow distance for bots
+#        Default: 0.5 / 1.0
+#
+#    PlayerbotAI.MaxNumBots
+#        Limits the number of bots per account (Max 9)
+#        Default: 9
+#
+#    PlayerbotAI.RestrictBotLevel
+#        Restrict the allowed bot level (Current Max 80)
+#        Default: 80
+#
+#    PlayerbotAI.BotguyQuests
+#        List of Quest ids, any of which, once completed will enable botguy menu on NPCs
+#        List must be enclosed in double quotes ("") and multiple Quest Ids separated by a delimiter(,)
+#        Example: "805,383,2160,54,8350,9313,1656,2159"
+#        Default: "" no quest restriction, memu always displayed by NPCs
+#
+#    PlayerbotAI.BotguyCost
+#        Cost (Copper coins) levied on summoning a bot
+#        If player has the cost, botguy menu will be displayed by NPCs
+#        Default: 0 - no cost, menu always displayed by NPCs
+#
+###################################################################################################################
+PlayerbotAI.DisableBots = 1
+PlayerbotAI.DebugWhisper = 0
+PlayerbotAI.FollowDistanceMin = 0.5
+PlayerbotAI.FollowDistanceMax = 1.0
+PlayerbotAI.MaxNumBots = 9
+PlayerbotAI.RestrictBotLevel = 80
+PlayerbotAI.BotguyQuests = ""
+PlayerbotAI.BotguyCost = 0

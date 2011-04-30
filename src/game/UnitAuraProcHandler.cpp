@@ -1007,6 +1007,31 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                     triggered_spell_id = 63311;
                     break;
                 }
+                case 71169:
+                {
+                    // Shadow's Fate
+                    if (GetTypeId() != TYPEID_UNIT)
+                        return SPELL_AURA_PROC_FAILED;
+                    switch (((Creature*)this)->GetCreatureInfo()->Entry)
+                    {
+                        case 38431:  // Puthricide 25
+                        case 38586:
+                            CastSpell(this, 71518, true);
+                            break;
+                        case 38434:  // Lanathel 25
+                        case 38436:
+                            CastSpell(this, 72934, true);
+                            break;
+                        case 38265:  // Sindragosa 25
+                        case 38267:
+                            CastSpell(this, 72289, true);
+                            break;
+                        default:
+                            break;
+                    }
+                    CastSpell(triggeredByAura->GetCaster(), 71203, true);
+                    return SPELL_AURA_PROC_OK;
+                }
                 // Item - Shadowmourne Legendary
                 case 71903:
                 {
@@ -2206,16 +2231,19 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                     if (pVictim == this)
                        return SPELL_AURA_PROC_FAILED;
 
-                    // PPM per victim
-                    float ppmJoL = 15.0f; // must be hard-coded + 100% proc chance in DB
-                    WeaponAttackType attType = BASE_ATTACK; // TODO: attack type based?
-                    uint32 WeaponSpeed = pVictim->GetAttackTime(attType);
-                    float chanceForVictim = pVictim->GetPPMProcChance(WeaponSpeed, ppmJoL);
-                    if (!roll_chance_f(chanceForVictim))
-                       return SPELL_AURA_PROC_FAILED;
+                    if (urand(0,1)) // only 50% chance to proc
+                    {
+                        // PPM per victim
+                        float ppmJoL = 15.0f; // must be hard-coded + 100% proc chance in DB
+                        WeaponAttackType attType = BASE_ATTACK; // TODO: attack type based? 
+                        uint32 WeaponSpeed = pVictim->GetAttackTime(attType);
+                        float chanceForVictim = pVictim->GetPPMProcChance(WeaponSpeed, ppmJoL);
+                        if (!roll_chance_f(chanceForVictim))
+                           return SPELL_AURA_PROC_FAILED;
 
-                    basepoints[0] = int32( pVictim->GetMaxHealth() * triggeredByAura->GetModifier()->m_amount / 100 );
-                    pVictim->CastCustomSpell(pVictim, 20267, &basepoints[0], NULL, NULL, true, NULL, triggeredByAura);
+                        basepoints[0] = int32( pVictim->GetMaxHealth() * triggeredByAura->GetModifier()->m_amount / 100 );
+                        pVictim->CastCustomSpell(pVictim, 20267, &basepoints[0], NULL, NULL, true, NULL, triggeredByAura);
+                    }
                     return SPELL_AURA_PROC_OK;
                 }
                 // Judgement of Wisdom
@@ -2223,9 +2251,12 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                 {
                     if (pVictim->getPowerType() == POWER_MANA)
                     {
-                        // 2% of maximum base mana
-                        basepoints[0] = int32(pVictim->GetCreateMana() * 2 / 100);
-                        pVictim->CastCustomSpell(pVictim, 20268, &basepoints[0], NULL, NULL, true, NULL, triggeredByAura);
+                        if (urand(0,1)) // only 50% chance to proc
+                        {
+                            // 2% of maximum base mana
+                            basepoints[0] = int32(pVictim->GetCreateMana() * 2 / 100);
+                            pVictim->CastCustomSpell(pVictim, 20268, &basepoints[0], NULL, NULL, true, NULL, triggeredByAura);
+                        }
                     }
                     return SPELL_AURA_PROC_OK;
                 }
@@ -4102,6 +4133,10 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit *pVictim, uint32 d
         case 14157: // Ruthlessness
         case 70802: // Mayhem (Shadowblade sets)
         {
+            // add cooldown to prevent Seal Fate to proc from Mutilate with both hands
+            if (trigger_spell_id == 14189 && (procSpell->SpellFamilyFlags & UI64LIT(0x600000000)))
+                cooldown = time(NULL) + 1;
+
             // Need add combopoint AFTER finishing move (or they get dropped in finish phase)
             if (Spell* spell = GetCurrentSpell(CURRENT_GENERIC_SPELL))
             {
