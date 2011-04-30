@@ -1980,7 +1980,7 @@ LFG.KickVotes           = 3
 #        Default: 0 - no cost, menu always displayed by NPCs
 #
 ###################################################################################################################
-PlayerbotAI.DisableBots = 1
+PlayerbotAI.DisableBots = 0
 PlayerbotAI.DebugWhisper = 0
 PlayerbotAI.FollowDistanceMin = 0.5
 PlayerbotAI.FollowDistanceMax = 1.0
