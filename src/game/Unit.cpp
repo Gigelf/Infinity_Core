@@ -905,7 +905,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
             // PvP Token
             int8 leveldiff = player_tap->getLevel() - pVictim->getLevel();
-            if((pVictim->GetTypeId() == TYPEID_PLAYER) && leveldiff < 10)
+            if((pVictim->GetTypeId() == TYPEID_PLAYER) && leveldiff < 1)
                 player_tap->ReceiveToken();
 
             /// PvP Announcer
