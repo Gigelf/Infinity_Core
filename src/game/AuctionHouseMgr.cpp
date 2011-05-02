@@ -577,18 +577,8 @@ void AuctionHouseObject::BuildListBidderItems(WorldPacket& data, Player* player,
 {
     for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin();itr != AuctionsMap.end();++itr)
     {
-        AuctionHouseMgr::ReadGuard Guard(sAuctionMgr.GetLock());
-
         AuctionEntry *Aentry = itr->second;
-<<<<<<< HEAD
         if( Aentry && Aentry->bidder == player->GetGUIDLow() )
-=======
-
-        if (!Aentry || Aentry->IsDeleted() || Aentry->moneyDeliveryTime)
-            continue;
-
-        if (Aentry && Aentry->bidder == player->GetGUIDLow())
->>>>>>> 6e03b7fdbab722775a19a3b8c6820fc338396080
         {
             if (itr->second->BuildAuctionInfo(data))
                 ++count;
@@ -618,204 +608,10 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
 {
     int loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
 
-<<<<<<< HEAD
     for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin();itr != AuctionsMap.end();++itr)
     {
         AuctionEntry *Aentry = itr->second;
         Item *item = sAuctionMgr.GetAItem(Aentry->item_guidlow);
-=======
-    if (auc1->IsDeleted() || auc2->IsDeleted())
-        return false;
-
-    ItemPrototype const* proto1 = sAuctionMgr.GetAItemProto(auc1->itemGuidLow);
-    ItemPrototype const* proto2 = sAuctionMgr.GetAItemProto(auc2->itemGuidLow);
-
-    uint32 count1 = 0;
-    uint32 count2 = 0;
-
-    if (Item* item1 = sAuctionMgr.GetAItem(auc1->itemGuidLow))
-        count1 = item1->GetCount();
-
-    if (Item* item2 = sAuctionMgr.GetAItem(auc2->itemGuidLow))
-        count2 = item2->GetCount();
-
-    if (!proto1 || !proto2)
-        return false;
-
-    Player *pl1 = NULL;
-    Player *pl2 = NULL;
-    int res = 0;
-    time_t currentTime = time(NULL);
-
-    switch (column)
-    {
-        case 0:                                             // level = 0
-            if (proto1->RequiredLevel < proto2->RequiredLevel)
-                return true;
-            else if (proto1->RequiredLevel > proto2->RequiredLevel)
-                return false;
-            break;
-        case 1:                                             // quality = 1
-            if (proto1->Quality < proto2->Quality)
-                return true;
-            else if (proto1->Quality > proto2->Quality)
-                return false;
-            break;
-        case 2:                                             // buyoutthenbid = 2
-            if (auc1->buyout)
-            {
-                if (auc1->buyout < auc2->buyout)
-                    return true;
-                else if (auc1->buyout > auc2->buyout)
-                    return false;
-            }
-            else
-            {
-                if (auc1->bid < auc2->bid)
-                    return true;
-                else if (auc1->bid > auc2->bid)
-                    return false;
-            }
-            break;
-        case 3:                                             // duration = 3
-            if ((auc1->expireTime - currentTime) < (auc2->expireTime - currentTime))
-                return true;
-            else if ((auc1->expireTime - currentTime) > (auc2->expireTime - currentTime))
-                return false;
-            break;
-        case 4:                                             // status = 4
-            if (auc1->bidder < auc2->bidder)
-                return true;
-            else if (auc1->bidder > auc2->bidder)
-                return false;
-            break;
-        case 5:                                             // name = 5
-            res = strcmp(proto1->Name1, proto2->Name1);
-            if (res < 0)
-                return true;
-            else if (res > 0)
-                return false;
-            break;
-        case 6:                                             // minbidbuyout = 6
-            if (auc1->bid)
-            {
-                if (auc1->bid < auc2->bid)
-                    return true;
-                else if (auc1->bid > auc2->bid)
-                    return false;
-            }
-            else if (auc1->startbid)
-            {
-                if (auc1->startbid < auc2->startbid)
-                    return true;
-                else if (auc1->startbid > auc2->startbid)
-                    return false;
-            }
-            else
-            {
-                if (auc1->buyout < auc2->buyout)
-                    return true;
-                else if (auc1->buyout > auc2->buyout)
-                    return false;
-            }
-            break;
-        case 7:                                             // seller = 7
-            pl1 = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, auc1->owner));
-            pl2 = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, auc2->owner));
-            if (!pl1 || !pl2)
-                break;
-            res = strcmp(pl1->GetName(), pl2->GetName());
-            if (res < 0)
-                return true;
-            else if (res > 0)
-                return false;
-            break;
-        case 8:                                             // bid = 8
-            if (auc1->bid)
-            {
-                if (auc1->bid < auc2->bid)
-                    return true;
-                else if (auc1->bid > auc2->bid)
-                    return false;
-            }
-            else
-            {
-                if (auc1->startbid < auc2->startbid)
-                    return true;
-                else if (auc1->startbid > auc2->startbid)
-                    return false;
-            }
-            break;
-        case 9:                                             // quantity = 9
-            if (count1 < count2)
-                return true;
-            else if (count1 > count2)
-                return false;
-            break;
-        case 10:                                            // buyout = 10
-            if (auc1->buyout < auc2->buyout)
-                return true;
-            else if (auc1->buyout > auc2->buyout)
-                return false;
-            break;
-        case 11:                                            // unused = 11
-            break;
-        default:
-            break;
-    }
-
-    if (auc1->Id < auc2->Id)
-        return true;
-    else if (auc1->Id > auc2->Id)
-        return false;
-
-    return false;
-}
-
-bool AuctionSorter::operator()(const AuctionEntry *auc1, const AuctionEntry *auc2) const
-{
-    bool result = false;
-    uint32 column = 0;
-
-    for (uint32 i = 0; i < MAX_AUCTION_SORT; ++i)
-    {
-        if (m_sort[i] == MAX_AUCTION_SORT)                  // end of sort
-        {
-            column = m_sort[0];                             // use main column
-            break;
-        }
-
-        column = m_sort[i];
-
-        AuctionHouseMgr::ReadGuard Guard(sAuctionMgr.GetLock());
-        result = sAuctionMgr.CompareAuctionEntry(column & ~AUCTION_SORT_REVERSED, auc1, auc2);
-
-        if (result)
-            break;
-    }
-
-    if (column & AUCTION_SORT_REVERSED)                     // reversed flag
-        result = !result;
-
-    return result;
-}
-
-void WorldSession::BuildListAuctionItems(std::list<AuctionEntry*> &auctions, WorldPacket& data, std::wstring const& wsearchedname, uint32 listfrom, uint32 levelmin,
-    uint32 levelmax, uint32 usable, uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality, uint32& count, uint32& totalcount, bool isFull)
-{
-    int loc_idx = _player->GetSession()->GetSessionDbLocaleIndex();
-
-    for (std::list<AuctionEntry*>::const_iterator itr = auctions.begin(); itr != auctions.end();++itr)
-    {
-        AuctionHouseMgr::ReadGuard Guard(sAuctionMgr.GetLock());
-
-        AuctionEntry *Aentry = *itr;
-
-        if (!Aentry || Aentry->IsDeleted() || Aentry->moneyDeliveryTime)
-            continue;
-
-        Item *item = sAuctionMgr.GetAItem(Aentry->itemGuidLow);
->>>>>>> 6e03b7fdbab722775a19a3b8c6820fc338396080
         if (!item)
             continue;
 
@@ -854,23 +650,7 @@ void WorldSession::BuildListAuctionItems(std::list<AuctionEntry*> &auctions, Wor
             }
         }
 
-<<<<<<< HEAD
         if (!wsearchedname.empty() && !Utf8FitTo(name, wsearchedname) )
-=======
-        ++totalcount;
-    }
-}
-
-void AuctionHouseObject::BuildListPendingSales(WorldPacket& data, Player* player, uint32& count)
-{
-    AuctionHouseMgr::ReadGuard Guard(sAuctionMgr.GetLock());
-    for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
-    {
-        AuctionHouseMgr::ReadGuard Guard(sAuctionMgr.GetLock());
-        AuctionEntry *Aentry = itr->second;
-
-        if (Aentry->IsDeleted())
->>>>>>> 6e03b7fdbab722775a19a3b8c6820fc338396080
             continue;
 
         if (count < 50 && totalcount >= listfrom)
@@ -885,16 +665,7 @@ void AuctionHouseObject::BuildListPendingSales(WorldPacket& data, Player* player
 //this function inserts to WorldPacket auction's data
 bool AuctionEntry::BuildAuctionInfo(WorldPacket & data) const
 {
-<<<<<<< HEAD
     Item *pItem = sAuctionMgr.GetAItem(item_guidlow);
-=======
-    if (IsDeleted())
-        return false;
-
-    AuctionHouseMgr::ReadGuard Guard(sAuctionMgr.GetLock());
-
-    Item *pItem = sAuctionMgr.GetAItem(itemGuidLow);
->>>>>>> 6e03b7fdbab722775a19a3b8c6820fc338396080
     if (!pItem)
     {
         sLog.outError("auction to item, that doesn't exist !!!!");
