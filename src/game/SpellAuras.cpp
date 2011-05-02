@@ -5638,6 +5638,23 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
                     target->CastSpell(target, 67375, true, NULL, this);
                 return;
+            case 63018: // Searing Light (Ulduar: XT-002)
+            case 65121: // Searing Light (h) (Ulduar: XT-002)
+                if (Unit *pCaster = pCaster = GetCaster())
+                {
+                    if (pCaster->HasAura(GetModifier()->m_amount))
+                        pCaster->CastSpell(target, 64210, true);
+                }
+
+                return;
+            case 63024: // Gravity Bomb (Ulduar: XT-002)
+            case 64234: // Gravity Bomb (h) (Ulduar: XT-002)
+                if (Unit *pCaster = pCaster = GetCaster())
+                {
+                    uint32 spellId = GetId() == 63024 ? 64203 : 64235;
+                    if (pCaster->HasAura(GetModifier()->m_amount))
+                        pCaster->CastSpell(target, spellId, true);
+                }
             default:
                 break;
         }
@@ -8633,11 +8650,6 @@ void Aura::PeriodicDummyTick()
                     if (target->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    Unit * caster = GetCaster();
-                    if (!caster)
-                        return;
-
-
                     // aura stack increase every 3 (data in m_miscvalue) seconds and decrease every 1s
                     // Reset reapply counter at move and decrease stack amount by 1
                     if (((Player*)target)->isMoving())
@@ -8663,6 +8675,45 @@ void Aura::PeriodicDummyTick()
                     // recast every ~3 seconds
                     m_modifier.m_miscvalue = 3;
                     return;
+                }
+                case 54798: // FLAMING Arrow Triggered Effect 
+                { 
+                    Unit * caster = GetCaster(); 
+                    if (!caster) 
+                        return; 
+ 
+                    Player *rider = caster->GetCharmerOrOwnerPlayerOrPlayerItself(); 
+                    if (!rider) 
+                        return; 
+ 
+                    if (target->GetEntry() == 29358) 
+                    { 
+                        if (target->HasAura(54683, EFFECT_INDEX_0)) 
+                            return; 
+                        else 
+                        { 
+                            // Credit Frostworgs 
+                            rider->CastSpell(rider, 54896, true); 
+                            // set ablaze 
+                            target->CastSpell(target, 54683, true); 
+                            ((Creature*)target)->ForcedDespawn(6000); 
+                        } 
+                    } 
+                    else if (target->GetEntry() == 29351) 
+                    { 
+                        if (target->HasAura(54683, EFFECT_INDEX_0)) 
+                            return; 
+                        else 
+                        { 
+                            // Credit Frost Giants 
+                            rider->CastSpell(rider, 54893, true); 
+                            // set ablaze 
+                            target->CastSpell(target, 54683, true); 
+                            ((Creature*)target)->ForcedDespawn(6000); 
+                        } 
+                    } 
+ 
+                    break; 
                 }
                 case 62717:                                 // Slag Pot (periodic dmg)
                 case 63477:
@@ -10025,10 +10076,10 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     }
                     break;
                 }
-                case 69290:                                 // Blighted Spores
-                case 71222:
+                case 73034:                                 // Blighted Spores
                 case 73033:
-                case 73034:
+                case 71222:
+                case 69290:
                 {
                     if (!apply)
                     {
