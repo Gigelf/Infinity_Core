@@ -10042,10 +10042,10 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     }
                     break;
                 }
-                case 73034:                                 // Blighted Spores
-                case 73033:
+                case 69290:                                 // Blighted Spores
                 case 71222:
-                case 69290:
+                case 73033:
+                case 73034:
                 {
                     if (!apply)
                     {

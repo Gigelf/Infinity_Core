@@ -365,10 +365,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     else 
         mover = _mover;
 
-    // players should be able to open chests in Malygos encounter
-    if (spellId == 61437 && _player->GetVehicle() && _player->GetVehicle()->GetBase()->GetVehicleInfo()->GetEntry()->m_ID == 30161)
-        mover = _player;
-
     if (sWorld.getConfig(CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE))
     {
         if (_player->isRunningSpell(spellInfo))
