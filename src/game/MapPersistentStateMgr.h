@@ -152,7 +152,10 @@ class MapPersistentState
 inline bool MapPersistentState::CanBeUnload() const
 {
     // prevent unload if used for loaded map
-    return !m_usedByMap;
+    if (Map* map = GetMap())
+        return false;
+    else
+        return true;
 }
 
 class WorldPersistentState : public MapPersistentState
@@ -226,7 +229,7 @@ class DungeonPersistentState : public MapPersistentState
 
         // DBC encounter state at kill/spellcast update/set/get
         void UpdateEncounterState(EncounterCreditType type, uint32 creditEntry, Player* player = NULL);
-        void SetCompletedEncountersMask(uint32 newMask) { m_completedEncountersMask = newMask; }
+        bool IsCompleted();
         uint32 GetCompletedEncountersMask() { return m_completedEncountersMask; }
 
 
@@ -375,7 +378,7 @@ class MANGOS_DLL_DECL MapPersistentStateManager : public MaNGOS::Singleton<MapPe
 
         DungeonResetScheduler& GetScheduler() { return m_Scheduler; }
 
-        static void DeleteInstanceFromDB(uint32 instanceid, bool isExtended);
+        static void DeleteInstanceFromDB(uint32 instanceid);
 
         void GetStatistics(uint32& numStates, uint32& numBoundPlayers, uint32& numBoundGroups);
 

@@ -30,6 +30,11 @@
 #include "Unit.h"
 #include "Player.h"
 
+#include "../../dep/tbb/include/tbb/concurrent_vector.h"
+#include <memory>
+
+#define MAX_SPELL_ID   100000
+
 class WorldSession;
 class WorldPacket;
 class DynamicObj;
@@ -354,6 +359,7 @@ class Spell
         void EffectPlayMusic(SpellEffectIndex eff_idx);
         void EffectSpecCount(SpellEffectIndex eff_idx);
         void EffectActivateSpec(SpellEffectIndex eff_idx);
+        void EffectCancelAura(SpellEffectIndex eff_idx);
 
         void EffectFriendSummon(SpellEffectIndex eff_idx);
 
@@ -482,7 +488,7 @@ class Spell
         Unit* GetCaster() const { return m_caster; }
         // real source of cast affects, explicit caster, or DoT/HoT applier, or GO owner, or wild GO itself. Can be NULL
         WorldObject* GetAffectiveCasterObject() const;
-        // limited version returning NULL in cases not Unit* caster object, need for Aura (auras currently not support non-Unit caster)
+        // limited version returning NULL in cases wild gameobject caster object, need for Aura (auras currently not support non-Unit caster)
         Unit* GetAffectiveCaster() const { return !m_originalCasterGUID.IsEmpty() ? m_originalCaster : m_caster; }
         // m_originalCasterGUID can store GO guid, and in this case this is visual caster
         WorldObject* GetCastingObject() const;
@@ -528,6 +534,7 @@ class Spell
         WeaponAttackType m_attackType;                      // For weapon based attack
         uint32 m_powerCost;                                 // Calculated spell cost     initialized only in Spell::prepare
         int32 m_casttime;                                   // Calculated spell cast time initialized only in Spell::prepare
+        int32 m_duration;
         bool m_canReflect;                                  // can reflect this spell?
         bool m_autoRepeat;
         uint8 m_runesState;
@@ -558,7 +565,7 @@ class Spell
         Unit* unitTarget;
         Item* itemTarget;
         GameObject* gameObjTarget;
-        SpellAuraHolder* spellAuraHolder;                   // spell aura holder for current target, created only if spell has aura applying effect
+        SpellAuraHolder* m_spellAuraHolder;                 // spell aura holder for current target, created only if spell has aura applying effect
         int32 damage;
 
         // this is set in Spell Hit, but used in Apply Aura handler
@@ -596,8 +603,10 @@ class Spell
             SpellMissInfo reflectResult:8;
             uint8  effectMask:8;
             bool   processed:1;
+            bool   deleted:1;
         };
         uint8 m_needAliveTargetMask;                        // Mask req. alive targets
+        bool m_destroyed;
 
         struct GOTargetInfo
         {
@@ -605,17 +614,20 @@ class Spell
             uint64 timeDelay;
             uint8  effectMask:8;
             bool   processed:1;
+            bool   deleted:1;
         };
 
         struct ItemTargetInfo
         {
             Item  *item;
             uint8 effectMask;
+            bool   processed:1;
+            bool   deleted:1;
         };
 
-        typedef std::list<TargetInfo>     TargetList;
-        typedef std::list<GOTargetInfo>   GOTargetList;
-        typedef std::list<ItemTargetInfo> ItemTargetList;
+        typedef tbb::concurrent_vector<TargetInfo>     TargetList;
+        typedef tbb::concurrent_vector<GOTargetInfo>   GOTargetList;
+        typedef tbb::concurrent_vector<ItemTargetInfo> ItemTargetList;
 
         TargetList     m_UniqueTargetInfo;
         GOTargetList   m_UniqueGOTargetInfo;
@@ -669,13 +681,13 @@ namespace MaNGOS
 {
     struct MANGOS_DLL_DECL SpellNotifierPlayer
     {
-        std::list<Unit*> &i_data;
+        Spell::UnitList &i_data;
         Spell &i_spell;
         const uint32& i_index;
         float i_radius;
         WorldObject* i_originalCaster;
 
-        SpellNotifierPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i, float radius)
+        SpellNotifierPlayer(Spell &spell, Spell::UnitList &data, const uint32 &i, float radius)
             : i_data(data), i_spell(spell), i_index(i), i_radius(radius)
         {
             i_originalCaster = i_spell.GetAffectiveCasterObject();
@@ -704,7 +716,7 @@ namespace MaNGOS
 
     struct MANGOS_DLL_DECL SpellNotifierCreatureAndPlayer
     {
-        std::list<Unit*> *i_data;
+        Spell::UnitList *i_data;
         Spell &i_spell;
         SpellNotifyPushType i_push_type;
         float i_radius;
@@ -712,7 +724,7 @@ namespace MaNGOS
         WorldObject* i_originalCaster;
         bool i_playerControlled;
 
-        SpellNotifierCreatureAndPlayer(Spell &spell, std::list<Unit*> &data, float radius, SpellNotifyPushType type,
+        SpellNotifierCreatureAndPlayer(Spell &spell, Spell::UnitList &data, float radius, SpellNotifyPushType type,
             SpellTargets TargetType = SPELL_TARGETS_NOT_FRIENDLY, WorldObject* originalCaster = NULL)
             : i_data(&data), i_spell(spell), i_push_type(type), i_radius(radius), i_TargetType(TargetType),
             i_originalCaster(originalCaster)

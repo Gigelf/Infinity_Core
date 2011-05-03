@@ -216,7 +216,7 @@ BattleGround::BattleGround()
     m_BracketId         = BG_BRACKET_ID_FIRST;
     m_InvitedAlliance   = 0;
     m_InvitedHorde      = 0;
-    m_ArenaType         = 0;
+    m_ArenaType         = ARENA_TYPE_NONE;
     m_IsArena           = false;
     m_Winner            = 2;
     m_StartTime         = 0;
@@ -540,15 +540,19 @@ void BattleGround::SetTeamStartLoc(Team team, float X, float Y, float Z, float O
 
 void BattleGround::SendPacketToAll(WorldPacket *packet)
 {
-    for(BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    BattleGroundPlayerMap::const_iterator itr;
+    if (!m_Players.empty())
     {
-        if (itr->second.OfflineRemoveTime)
-            continue;
+        for(itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+        {
+            if (itr->second.OfflineRemoveTime)
+                continue;
 
-        if (Player *plr = sObjectMgr.GetPlayer(itr->first))
-            plr->GetSession()->SendPacket(packet);
-        else
-            sLog.outError("BattleGround:SendPacketToAll: %s not found!", itr->first.GetString().c_str());
+            if (Player *plr = sObjectMgr.GetPlayer(itr->first))
+                plr->GetSession()->SendPacket(packet);
+            else
+                sLog.outError("BattleGround:SendPacketToAll: %s not found!", itr->first.GetString().c_str());
+        }
     }
 }
 
@@ -1165,10 +1169,11 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
 
             if (!team) team = plr->GetTeam();
 
+            plr->RemoveArenaAuras(true);                // removes debuffs / dots etc., we don't want the player to die after porting out
+
             // if arena, remove the specific arena auras
             if (isArena())
             {
-                plr->RemoveArenaAuras(true);                // removes debuffs / dots etc., we don't want the player to die after porting out
                 bgTypeId=BATTLEGROUND_AA;                   // set the bg type to all arenas (it will be used for queue refreshing)
 
                 // unsummon current and summon old pet if there was one and there isn't a current pet
@@ -1187,7 +1192,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
             if (SendPacket)
             {
                 WorldPacket data;
-                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_NONE, 0, 0, 0);
+                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_NONE, 0, 0, ARENA_TYPE_NONE);
                 plr->GetSession()->SendPacket(&data);
             }
 
@@ -1222,7 +1227,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
         {
             // a player has left the battleground, so there are free slots -> add to queue
             AddToBGFreeSlotQueue();
-            sBattleGroundMgr.ScheduleQueueUpdate(0, 0, bgQueueTypeId, bgTypeId, GetBracketId());
+            sBattleGroundMgr.ScheduleQueueUpdate(0, ARENA_TYPE_NONE, bgQueueTypeId, bgTypeId, GetBracketId());
         }
 
         // Let others know
@@ -1254,7 +1259,7 @@ void BattleGround::Reset()
     SetStatus(STATUS_WAIT_QUEUE);
     SetStartTime(0);
     SetEndTime(0);
-    SetArenaType(0);
+    SetArenaType(ARENA_TYPE_NONE);
     SetRated(false);
 
     m_Events = 0;

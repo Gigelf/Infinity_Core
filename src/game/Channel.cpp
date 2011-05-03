@@ -47,6 +47,8 @@ Channel::Channel(const std::string& name, uint32 channel_id)
     }
     else                                                    // it's custom channel
     {
+        m_announce = false;                                 // no join/leave announces
+
         m_flags |= CHANNEL_FLAG_CUSTOM;
     }
 }
@@ -82,9 +84,7 @@ void Channel::Join(uint64 p, const char *pass)
 
     if(plr)
     {
-        if(HasFlag(CHANNEL_FLAG_LFG) &&
-            sWorld.getConfig(CONFIG_BOOL_RESTRICTED_LFG_CHANNEL) && plr->GetSession()->GetSecurity() == SEC_PLAYER &&
-            (plr->GetGroup() || plr->m_lookingForGroup.Empty()) )
+        if(HasFlag(CHANNEL_FLAG_LFG) && sWorld.getConfig(CONFIG_BOOL_RESTRICTED_LFG_CHANNEL) && plr->GetSession()->GetSecurity() == SEC_PLAYER )
         {
             MakeNotInLfg(&data);
             SendToOne(&data, p);

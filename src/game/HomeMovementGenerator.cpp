@@ -24,20 +24,17 @@
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
 
-void
-HomeMovementGenerator<Creature>::Initialize(Creature & owner)
+void HomeMovementGenerator<Creature>::Initialize(Creature & owner)
 {
     owner.RemoveSplineFlag(SPLINEFLAG_WALKMODE);
     _setTargetLocation(owner);
 }
 
-void
-HomeMovementGenerator<Creature>::Reset(Creature &)
+void HomeMovementGenerator<Creature>::Reset(Creature &)
 {
 }
 
-void
-HomeMovementGenerator<Creature>::_setTargetLocation(Creature & owner)
+void HomeMovementGenerator<Creature>::_setTargetLocation(Creature & owner)
 {
     if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
         return;
@@ -62,8 +59,7 @@ HomeMovementGenerator<Creature>::_setTargetLocation(Creature & owner)
     owner.clearUnitState(UNIT_STAT_ALL_STATE);
 }
 
-bool
-HomeMovementGenerator<Creature>::Update(Creature &owner, const uint32& time_diff)
+bool HomeMovementGenerator<Creature>::Update(Creature &owner, const uint32& time_diff)
 {
     CreatureTraveller traveller( owner);
 
@@ -87,6 +83,9 @@ HomeMovementGenerator<Creature>::Update(Creature &owner, const uint32& time_diff
                 owner.SendHeartBeat(false);
             }
         }
+
+        if (owner.GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_REACH_HOME)
+            owner.ClearTemporaryFaction();
 
         owner.LoadCreatureAddon(true);
         owner.AI()->JustReachedHome();

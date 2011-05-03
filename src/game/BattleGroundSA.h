@@ -317,5 +317,12 @@ class BattleGroundSA : public BattleGround
         void _GydOccupied(uint8 node,Team team);
         void ToggleTimer();
         void ResetWorldStates();
+        /* check to avoid to much messages */
+        bool GateRoomAncientShrineDamaged;
+        bool GateGreenEmeraldDamaged;
+        bool GateBlueSaphireDamaged;
+        bool GateMauveAmethystDamaged;
+        bool GateRedSunDamaged;
+        bool GateYellowMoonDamaged;
 };
 #endif

@@ -136,9 +136,8 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
     }
 
     D::_addUnitStateMove(owner);
-    if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly() &&
-        !(((Creature*)&owner)->CanWalk() && ((Creature*)&owner)->IsAtGroundLevel(x,y,z)))
-        ((Creature&)owner).AddSplineFlag(SPLINEFLAG_UNKNOWN7);
+    if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly())
+        ((Creature&)owner).AddSplineFlag(SPLINEFLAG_FLYING);
 }
 
 template<>
@@ -286,13 +285,10 @@ void ChaseMovementGenerator<Creature>::Initialize(Creature &owner)
     owner.addUnitState(UNIT_STAT_CHASE|UNIT_STAT_CHASE_MOVE);
     owner.RemoveSplineFlag(SPLINEFLAG_WALKMODE);
 
-    _setTargetLocation(owner);
-    float x,y,z;
-    i_destinationHolder.GetDestination(x,y,z);
+    if (((Creature*)&owner)->CanFly())
+        owner.AddSplineFlag(SPLINEFLAG_FLYING);
 
-    if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly() &&
-        !(((Creature*)&owner)->CanWalk() && ((Creature*)&owner)->IsAtGroundLevel(x,y,z)))
-        owner.AddSplineFlag(SPLINEFLAG_UNKNOWN7);
+    _setTargetLocation(owner);
 }
 
 template<class T>
@@ -360,14 +356,10 @@ void FollowMovementGenerator<Creature>::Initialize(Creature &owner)
     _updateWalkMode(owner);
     _updateSpeed(owner);
 
+    if (((Creature*)&owner)->CanFly())
+        owner.AddSplineFlag(SPLINEFLAG_FLYING);
+
     _setTargetLocation(owner);
-
-    float x,y,z;
-    i_destinationHolder.GetDestination(x,y,z);
-
-    if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly() &&
-        !(((Creature*)&owner)->CanWalk() && ((Creature*)&owner)->IsAtGroundLevel(x,y,z)))
-        owner.AddSplineFlag(SPLINEFLAG_UNKNOWN7);
 }
 
 template<class T>

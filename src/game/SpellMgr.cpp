@@ -26,6 +26,7 @@
 #include "Spell.h"
 #include "BattleGroundMgr.h"
 #include "MapManager.h"
+#include "Unit.h"
 
 SpellMgr::SpellMgr()
 {
@@ -59,6 +60,29 @@ int32 GetSpellMaxDuration(SpellEntry const *spellInfo)
     if(!du)
         return 0;
     return (du->Duration[2] == -1) ? -1 : abs(du->Duration[2]);
+}
+
+int32 CalculateSpellDuration(SpellEntry const *spellInfo, Unit const* caster)
+{
+    int32 duration = GetSpellDuration(spellInfo);
+
+    if (duration != -1 && caster)
+    {
+        int32 maxduration = GetSpellMaxDuration(spellInfo);
+
+        if (duration != maxduration && caster->GetTypeId() == TYPEID_PLAYER)
+            duration += int32((maxduration - duration) * ((Player*)caster)->GetComboPoints() / 5);
+
+        if (Player* modOwner = caster->GetSpellModOwner())
+        {
+            modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_DURATION, duration);
+
+            if (duration < 0)
+                duration = 0;
+        }
+    }
+
+    return duration;
 }
 
 uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
@@ -639,6 +663,11 @@ bool IsPositiveEffect(SpellEntry const *spellproto, SpellEffectIndex effIndex)
 
     switch(spellproto->Id)
     {
+        case 72219:                                         // Gastric Bloat 10 N
+        case 72551:                                         // Gastric Bloat 10 H
+        case 72552:                                         // Gastric Bloat 25 N
+        case 72553:                                         // Gastric Bloat 25 H
+            return false;
         case 47540:                                         // Penance start dummy aura - Rank 1
         case 53005:                                         // Penance start dummy aura - Rank 2
         case 53006:                                         // Penance start dummy aura - Rank 3
@@ -908,6 +937,11 @@ bool IsPositiveSpell(uint32 spellId)
     if (!spellproto)
         return false;
 
+    return IsPositiveSpell(spellproto);
+}
+
+bool IsPositiveSpell(SpellEntry const *spellproto)
+{
     // spells with at least one negative effect are considered negative
     // some self-applied spells have negative effects but in self casting case negative check ignored.
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -2048,7 +2082,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     if (spellId_1 == 35081 && spellInfo_2->SpellIconID==561 && spellInfo_2->SpellVisual[0]==7992)
                         return false;
                     // Drums of Forgotten Kings and Blessing of Kings
-                    if( spellInfo_1->Id == 72586 && spellInfo_2->SpellFamilyFlags & UI64LIT(0x10000000))
+                    if( spellInfo_1->Id == 72586 && spellInfo_2->SpellFamilyFlags & UI64LIT(0x1000000))
                         return true;
                 }
                 case SPELLFAMILY_PRIEST:
@@ -2165,6 +2199,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Defensive/Berserker/Battle stance aura can not stack (needed for dummy auras)
                 if (((spellInfo_1->SpellFamilyFlags & UI64LIT(0x800000)) && (spellInfo_2->SpellFamilyFlags & UI64LIT(0x800000))) ||
                     ((spellInfo_2->SpellFamilyFlags & UI64LIT(0x800000)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x800000))))
+                    return true;
+
+                // Enrage and Wrecking Crew
+                if (spellInfo_1->SpellIconID == 95 && spellInfo_2->SpellIconID == 95)
                     return true;
             }
 
@@ -2432,7 +2470,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 return false;
 
             // Blessing of Kings and Drums of Forgotten Kings
-            if( spellInfo_1->SpellFamilyFlags & UI64LIT(0x10000000) && spellInfo_2->Id == 72586)
+            if( spellInfo_1->SpellFamilyFlags & UI64LIT(0x1000000) && spellInfo_2->Id == 72586)
                 return true;
             break;
 
@@ -2633,7 +2671,7 @@ SpellEntry const* SpellMgr::SelectAuraRankForLevel(SpellEntry const* spellInfo, 
             break;
 
         // if found appropriate level
-        if (level + 10 >= spellInfo->spellLevel)
+        if (level + 10 >= nextSpellInfo->spellLevel)
             return nextSpellInfo;
 
         // one rank less then
@@ -4605,6 +4643,12 @@ SpellEntry const* GetSpellEntryByDifficulty(uint32 id, Difficulty difficulty)
 
     if (!spellDiff)
         return NULL;
+
+    if (!spellDiff->spellId[difficulty])
+    {
+        if (difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+            difficulty = RAID_DIFFICULTY_25MAN_NORMAL;
+    }
 
     if (!spellDiff->spellId[difficulty])
         return NULL;

@@ -137,12 +137,20 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
         return false;
     }
 
+    CreatureInfo const *creatureInfo = ObjectMgr::GetCreatureTemplate(petentry);
+
+    if (!creatureInfo)
+    {
+        sLog.outError("Pet entry %u does not exist but used at pet load (owner: %s).", petentry, owner->GetGuidStr().c_str());
+        delete result;
+        return false;
+    }
+
     setPetType(PetType(fields[18].GetUInt8()));
 
     if(getPetType() == HUNTER_PET)
     {
-        CreatureInfo const* creatureInfo = ObjectMgr::GetCreatureTemplate(petentry);
-        if(!creatureInfo || !creatureInfo->isTameable(owner->CanTameExoticPets()))
+        if (!creatureInfo->isTameable(owner->CanTameExoticPets()))
         {
             delete result;
             return false;
@@ -180,7 +188,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
 
     uint32 guid = pos.GetMap()->GenerateLocalLowGuid(HIGHGUID_PET);
 
-    if (!Create(guid, pos, petentry, pet_number, owner))
+    if (!Create(guid, pos, creatureInfo, pet_number, owner))
     {
         delete result;
         return false;
@@ -195,6 +203,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     m_charmInfo->SetReactState(ReactStates(fields[6].GetUInt8()));
 
 
+    // reget for sure use real creature info selected for Pet at load/creating
     CreatureInfo const *cinfo = GetCreatureInfo();
 
     if (cinfo->type == CREATURE_TYPE_CRITTER)
@@ -209,17 +218,9 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     {
         case SUMMON_PET:
             petlevel=owner->getLevel();
-            SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
-            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
             break;
         case HUNTER_PET:
-            SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_WARRIOR);
-            SetByteValue(UNIT_FIELD_BYTES_0, 2, GENDER_NONE);
-            SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_FOCUS);
-            SetSheath(SHEATH_STATE_MELEE);
-            SetByteFlag(UNIT_FIELD_BYTES_2, 2, (fields[9].GetUInt8() == 0) ? UNIT_CAN_BE_ABANDONED : UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
-            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-                                                            // this enables popup window (pet abandon, cancel)
+            SetByteFlag(UNIT_FIELD_BYTES_2, 2, fields[9].GetBool() ? UNIT_CAN_BE_ABANDONED : UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
             SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
             SetPower(POWER_HAPPINESS, fields[12].GetUInt32());
             setPowerType(POWER_FOCUS);
@@ -250,10 +251,16 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     if (fields[7].GetUInt32() != 0)
     {
         CharacterDatabase.BeginTransaction();
-        CharacterDatabase.PExecute("UPDATE character_pet SET slot = '%u' WHERE owner = '%u' AND slot = '%u' AND id <> '%u'",
-            PET_SAVE_NOT_IN_SLOT, ownerid, PET_SAVE_AS_CURRENT, m_charmInfo->GetPetNumber());
-        CharacterDatabase.PExecute("UPDATE character_pet SET slot = '%u' WHERE owner = '%u' AND id = '%u'",
-            PET_SAVE_AS_CURRENT, ownerid, m_charmInfo->GetPetNumber());
+
+        static SqlStatementID id_1;
+        static SqlStatementID id_2;
+
+        SqlStatement stmt = CharacterDatabase.CreateStatement(id_1, "UPDATE character_pet SET slot = ? WHERE owner = ? AND slot = ? AND id <> ?");
+        stmt.PExecute(uint32(PET_SAVE_NOT_IN_SLOT), ownerid, uint32(PET_SAVE_AS_CURRENT), m_charmInfo->GetPetNumber());
+
+        stmt = CharacterDatabase.CreateStatement(id_2, "UPDATE character_pet SET slot = ? WHERE owner = ? AND id = ?");
+        stmt.PExecute(uint32(PET_SAVE_AS_CURRENT), ownerid, m_charmInfo->GetPetNumber());
+
         CharacterDatabase.CommitTransaction();
     }
 
@@ -496,8 +503,8 @@ void Pet::SetDeathState(DeathState s)                       // overwrite virtual
         else
         {
             // pet corpse non lootable and non skinnable
-            SetUInt32Value( UNIT_DYNAMIC_FLAGS, 0x00 );
-            RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+            SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
+            RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
             //lose happiness when died and not in BG/Arena
             MapEntry const* mapEntry = sMapStore.LookupEntry(GetMapId());
@@ -588,21 +595,7 @@ void Pet::Update(uint32 update_diff, uint32 diff)
                     return;
                 }
             }
-
-            //regenerate focus for hunter pets or energy for deathknight's ghoul
-            if(m_regenTimer <= update_diff)
-            {
-                Regenerate(getPowerType(), REGEN_TIME_FULL);
-                m_regenTimer = REGEN_TIME_FULL;
-
-                if(getPetType() == HUNTER_PET)
-                    Regenerate(POWER_HAPPINESS, REGEN_TIME_FULL);
-
-                if (!isInCombat() || IsPolymorphed())
-                    RegenerateHealth(REGEN_TIME_FULL);
-            }
-            else
-                m_regenTimer -= update_diff;
+            RegenerateAll(update_diff);
 
             break;
         }
@@ -618,6 +611,26 @@ void Pet::Update(uint32 update_diff, uint32 diff)
 
     if (IsInWorld())
         Creature::Update(update_diff, diff);
+
+}
+
+void Pet::RegenerateAll( uint32 update_diff )
+{
+    //regenerate focus for hunter pets or energy for deathknight's ghoul
+    if(m_regenTimer <= update_diff)
+    {
+        Regenerate(getPowerType(), REGEN_TIME_FULL);
+        m_regenTimer = REGEN_TIME_FULL;
+
+        if(getPetType() == HUNTER_PET)
+            Regenerate(POWER_HAPPINESS, REGEN_TIME_FULL);
+
+        if (!isInCombat() || IsPolymorphed())
+            RegenerateHealth(REGEN_TIME_FULL);
+    }
+    else
+        m_regenTimer -= update_diff;
+
 }
 
 HappinessState Pet::GetHappinessState()
@@ -820,7 +833,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature, Unit* owner)
     if(!owner)
         return false;
 
-    CreatureInfo const *cinfo = creature->GetCreatureInfo();
+    CreatureInfo const* cinfo = creature->GetCreatureInfo();
     if(!cinfo)
     {
         sLog.outError("CreateBaseAtCreature() failed, creatureInfo is missing!");
@@ -833,7 +846,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature, Unit* owner)
 
     BASIC_LOG("Create pet");
 
-    if (!Create(0, pos, creature->GetEntry(), 0, owner))
+    if (!Create(0, pos, cinfo, 0, owner))
         return false;
 
 
@@ -940,6 +953,11 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
     {
         case SUMMON_PET:
         {
+            SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
+
+            // this enables popup window (pet dismiss, cancel)
+            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+
             if (cinfo->family == CREATURE_FAMILY_GHOUL)
                 setPowerType(POWER_ENERGY);
             break;
@@ -948,6 +966,13 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
         {
             if (!pInfo)         //If no pet levelstats in DB - use 1 for default hunter pet
                 pInfo = sObjectMgr.GetPetLevelInfo(1, petlevel);
+
+            SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_WARRIOR);
+            SetByteValue(UNIT_FIELD_BYTES_0, 2, GENDER_NONE);
+            SetSheath(SHEATH_STATE_MELEE);
+
+            // this enables popup window (pet abandon, cancel)
+            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
 
             CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family);
             if(cFamily && cFamily->minScale > 0.0f && getPetType()==HUNTER_PET)
@@ -1241,7 +1266,7 @@ void Pet::_LoadAuras(uint32 timediff)
 {
     RemoveAllAuras();
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT caster_guid,item_guid,spell,stackcount,remaincharges,basepoints0,basepoints1,basepoints2,maxduration0,maxduration1,maxduration2,remaintime0,remaintime1,remaintime2,effIndexMask FROM pet_aura WHERE guid = '%u'",m_charmInfo->GetPetNumber());
+    QueryResult *result = CharacterDatabase.PQuery("SELECT caster_guid,item_guid,spell,stackcount,remaincharges,basepoints0,basepoints1,basepoints2,periodictime0,periodictime1,periodictime2,maxduration,remaintime,effIndexMask FROM pet_aura WHERE guid = '%u'", m_charmInfo->GetPetNumber());
 
     if(result)
     {
@@ -1253,16 +1278,18 @@ void Pet::_LoadAuras(uint32 timediff)
             uint32 spellid = fields[2].GetUInt32();
             uint32 stackcount = fields[3].GetUInt32();
             uint32 remaincharges = fields[4].GetUInt32();
-            int32 damage[MAX_EFFECT_INDEX];
-            int32 maxduration[MAX_EFFECT_INDEX];
-            int32 remaintime[MAX_EFFECT_INDEX];
+            int32  damage[MAX_EFFECT_INDEX];
+            uint32 periodicTime[MAX_EFFECT_INDEX];
+
             for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
                 damage[i] = fields[i+5].GetInt32();
-                maxduration[i] = fields[i+8].GetInt32();
-                remaintime[i] = fields[i+11].GetInt32();
+                periodicTime[i] = fields[i+8].GetUInt32();
             }
-            uint32 effIndexMask = fields[14].GetUInt32();
+
+            int32 maxduration = fields[11].GetInt32();
+            int32 remaintime = fields[12].GetInt32();
+            uint32 effIndexMask = fields[13].GetUInt32();
 
             SpellEntry const* spellproto = sSpellStore.LookupEntry(spellid);
             if (!spellproto)
@@ -1274,6 +1301,14 @@ void Pet::_LoadAuras(uint32 timediff)
             // do not load single target auras (unless they were cast by the player)
             if (caster_guid != GetGUID() && IsSingleTargetSpell(spellproto))
                 continue;
+
+            if (remaintime != -1 && !IsPositiveSpell(spellproto))
+            {
+                if (remaintime/IN_MILLISECONDS <= int32(timediff))
+                    continue;
+
+                remaintime -= timediff*IN_MILLISECONDS;
+            }
 
             // prevent wrong values of remaincharges
             uint32 procCharges = spellproto->procCharges;
@@ -1292,34 +1327,24 @@ void Pet::_LoadAuras(uint32 timediff)
             else if (!stackcount)
                 stackcount = 1;
 
-
             SpellAuraHolder *holder = CreateSpellAuraHolder(spellproto, this, NULL);
+            holder->SetLoadedState(caster_guid, ObjectGuid(HIGHGUID_ITEM, item_lowguid), stackcount, remaincharges, maxduration, remaintime);
+
             for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
                 if ((effIndexMask & (1 << i)) == 0)
                     continue;
 
-                if (remaintime[i] != -1 && !IsPositiveEffect(spellproto, SpellEffectIndex(i)))
-                {
-                    if (remaintime[i]/IN_MILLISECONDS <= int32(timediff))
-                    continue;
-
-                    remaintime[i] -= timediff*IN_MILLISECONDS;
-                }
-
                 Aura* aura = CreateAura(spellproto, SpellEffectIndex(i), NULL, holder, this);
                 if (!damage[i])
                     damage[i] = aura->GetModifier()->m_amount;
 
-                aura->SetLoadedState(damage[i], maxduration[i], remaintime[i]);
+                aura->SetLoadedState(damage[i], periodicTime[i]);
                 holder->AddAura(aura, SpellEffectIndex(i));
             }
 
             if (!holder->IsEmptyHolder())
-            {
-                holder->SetLoadedState(caster_guid, ObjectGuid(HIGHGUID_ITEM, item_lowguid), stackcount, remaincharges);
                 AddSpellAuraHolder(holder);
-            }
             else
                 delete holder;
         }
@@ -1342,6 +1367,10 @@ void Pet::_SaveAuras()
     if (auraHolders.empty())
         return;
 
+    stmt = CharacterDatabase.CreateStatement(insAuras, "INSERT INTO pet_aura (guid, caster_guid, item_guid, spell, stackcount, remaincharges, "
+        "basepoints0, basepoints1, basepoints2, periodictime0, periodictime1, periodictime2, maxduration, remaintime, effIndexMask) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
     for(SpellAuraHolderMap::const_iterator itr = auraHolders.begin(); itr != auraHolders.end(); ++itr)
     {
         SpellAuraHolder *holder = itr->second;
@@ -1363,16 +1392,14 @@ void Pet::_SaveAuras()
         //do not save single target holders (unless they were cast by the player)
         if (save && !holder->IsPassive() && !IsChanneledSpell(holder->GetSpellProto()) && (holder->GetCasterGUID() == GetGUID() || !holder->IsSingleTarget()))
         {
-            int32 damage[MAX_EFFECT_INDEX];
-            int32 remaintime[MAX_EFFECT_INDEX];
-            int32 maxduration[MAX_EFFECT_INDEX];
+            int32  damage[MAX_EFFECT_INDEX];
+            uint32 periodicTime[MAX_EFFECT_INDEX];
             uint32 effIndexMask = 0;
 
-            for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
                 damage[i] = 0;
-                remaintime[i] = 0;
-                maxduration[i] = 0;
+                periodicTime[i] = 0;
 
                 if (Aura *aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
                 {
@@ -1381,17 +1408,13 @@ void Pet::_SaveAuras()
                         continue;
 
                     damage[i] = aur->GetModifier()->m_amount;
-                    remaintime[i] = aur->GetAuraDuration();
-                    maxduration[i] = aur->GetAuraMaxDuration();
+                    periodicTime[i] = aur->GetModifier()->periodictime;
                     effIndexMask |= (1 << i);
                 }
             }
 
             if (!effIndexMask)
                 continue;
-
-            stmt = CharacterDatabase.CreateStatement(insAuras, "INSERT INTO pet_aura (guid, caster_guid, item_guid, spell, stackcount, remaincharges, basepoints0, basepoints1, basepoints2, maxduration0, maxduration1, maxduration2, remaintime0, remaintime1, remaintime2, effIndexMask) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             stmt.addUInt32(m_charmInfo->GetPetNumber());
             stmt.addUInt64(holder->GetCasterGuid().GetRawValue());
@@ -1400,15 +1423,14 @@ void Pet::_SaveAuras()
             stmt.addUInt32(holder->GetStackAmount());
             stmt.addUInt8(holder->GetAuraCharges());
 
-            for (int i = EFFECT_INDEX_0; i <= EFFECT_INDEX_2; ++i )
+            for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
                 stmt.addInt32(damage[i]);
 
-            for (int i = EFFECT_INDEX_0; i <= EFFECT_INDEX_2; ++i )
-                stmt.addInt32(maxduration[i]);
+            for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                stmt.addUInt32(periodicTime[i]);
 
-            for (int i = EFFECT_INDEX_0; i <= EFFECT_INDEX_2; ++i )
-                stmt.addInt32(remaintime[i]);
-
+            stmt.addInt32(holder->GetAuraMaxDuration());
+            stmt.addInt32(holder->GetAuraDuration());
             stmt.addUInt32(effIndexMask);
             stmt.Execute();
         }
@@ -1525,7 +1547,7 @@ bool Pet::addSpell(uint32 spell_id,ActiveStates active /*= ACT_DECIDE*/, PetSpel
     else
         m_charmInfo->AddSpellToActionBar(spell_id, ActiveStates(newspell.active));
 
-    if(newspell.active == ACT_ENABLED || !isControlled())
+    if(newspell.active == ACT_ENABLED)
         ToggleAutocast(spell_id, true);
 
     uint32 talentCost = GetTalentSpellCost(spell_id);
@@ -1981,20 +2003,19 @@ bool Pet::IsPermanentPetFor(Player* owner)
     }
 }
 
-bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, uint32 Entry, uint32 pet_number, Unit* owner)
+bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, uint32 pet_number, Unit* owner)
 {
     if (!owner)
         return false;
 
-    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(Entry);
-
-    if (!cInfo)
+    if (!cinfo)
         return false;
 
     m_loading = true;
 
     SetMap(cPos.GetMap());
     SetPhaseMask(cPos.GetPhaseMask(), false);
+    m_originalEntry = cinfo->Entry;
 
     if (!guidlow)
         guidlow = cPos.GetMap()->GenerateLocalLowGuid(HIGHGUID_PET);
@@ -2004,7 +2025,7 @@ bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, uint32 Entry, uint32 p
 
     Object::_Create(ObjectGuid(HIGHGUID_PET, pet_number, guidlow));
 
-    if (!InitEntry(Entry))
+    if (!InitEntry(cinfo->Entry))
         return false;
 
     cPos.SelectFinalPoint(this);
@@ -2014,8 +2035,6 @@ bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, uint32 Entry, uint32 p
 
 
     SetSheath(SHEATH_STATE_MELEE);
-
-    m_originalEntry = Entry;
 
     if(owner->GetTypeId() == TYPEID_PLAYER)
         m_charmInfo->SetPetNumber(pet_number, IsPermanentPetFor((Player*)owner));
@@ -2031,7 +2050,7 @@ bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, uint32 Entry, uint32 p
     if (GetCreateSpellID())
         SetUInt32Value(UNIT_CREATED_BY_SPELL, GetCreateSpellID());
 
-    if(getPetType() == MINI_PET)                            // always non-attackable
+    if (getPetType() == MINI_PET)                           // always non-attackable
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
     return true;
@@ -3028,8 +3047,8 @@ bool Pet::ReapplyScalingAura(SpellAuraHolder* holder, SpellEntry const *spellpro
     }
 
     Aura* aura = CreateAura(spellproto, index, &basePoints, holder, this, this, NULL);
-    aura->SetAuraDuration(aura->GetAuraMaxDuration());
     holder->AddAura(aura, index);
+    holder->SetAuraDuration(aura->GetAuraMaxDuration());
     AddAuraToModList(aura);
     aura->ApplyModifier(true,true);
 
