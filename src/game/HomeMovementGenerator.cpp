@@ -65,11 +65,24 @@ bool HomeMovementGenerator<Creature>::Update(Creature &owner, const uint32& time
 
     if (i_destinationHolder.UpdateTraveller(traveller, time_diff, false))
     {
-        if (!IsActive(owner))                               // force stop processing (movement can move out active zone with cleanup movegens list)
-            return true;                                    // not expire now, but already lost
+        if (!IsActive(owner)) // force stop processing (movement can move out active zone with cleanup movegens list)
+            return true; // not expire now, but already lost
     }
 
-    if (time_diff > i_travel_time)
+    if (time_diff >= i_travel_timer)
+    {
+        i_travel_timer = 0; // Used as check in Finalize
+        return false;
+    }
+
+    i_travel_timer -= time_diff;
+
+    return true;
+}
+
+void HomeMovementGenerator<Creature>::Finalize(Creature& owner)
+{
+    if (i_travel_timer == 0)
     {
         owner.AddSplineFlag(SPLINEFLAG_WALKMODE);
 
@@ -89,10 +102,5 @@ bool HomeMovementGenerator<Creature>::Update(Creature &owner, const uint32& time
 
         owner.LoadCreatureAddon(true);
         owner.AI()->JustReachedHome();
-        return false;
     }
-
-    i_travel_time -= time_diff;
-
-    return true;
 }
