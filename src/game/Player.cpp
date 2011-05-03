@@ -1555,7 +1555,23 @@ void Player::Update( uint32 update_diff, uint32 p_time )
         SetHealth(0);
 
     if (m_deathState == JUST_DIED)
-    {   // Prevent death of jailed players
+    {
+        KillPlayer();
+ 		// For SotA Seaforium Bomb - spawn the bomb if the player die
+ 		if (InBattleGround() && (GetBattleGround()->GetMapId() == 607) && HasItemCount(39213, 1))
+ 		{
+ 			if (GetTeam() == ALLIANCE)
+ 			{
+ 				SummonGameobject(402000,GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation(),0);
+ 			}
+ 			else
+ 			{
+ 				SummonGameobject(402001,GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation(),0);
+ 			}
+ 			DestroyItemCount(39213, 1, true);
+ 		}
+
+        // Prevent death of jailed players
         if (!m_jail_isjailed) KillPlayer();
         else
         {
