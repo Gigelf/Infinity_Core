@@ -7950,7 +7950,7 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
                 // Additional Bladestorm Immunity check (not immuned to disarm / bleed)
                 if ((*i)->GetId() == 46924 && (spellInfo->Mechanic == MECHANIC_DISARM || spellInfo->Mechanic == MECHANIC_BLEED || spellInfo->Mechanic == MECHANIC_INFECTED))
                     continue;
-                
+
                 // Additional check if Player has BG Preparation aura
                 if((*i)->GetId() == 44521 && (spellInfo->Mechanic == MECHANIC_MOUNT))
                     continue;
@@ -10910,6 +10910,13 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
         SpellProcEventEntry const* spellProcEvent = NULL;
         if(!IsTriggeredAtSpellProcEvent(pTarget, itr->second, procSpell, procFlag, procExtra, attType, isVictim, spellProcEvent))
            continue;
+
+    // Frost Nova
+    if (itr->second->GetCaster() == pTarget)
+      if (SpellEntry const* spellInfo = itr->second->GetSpellProto())
+        if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->SpellFamilyFlags & UI64LIT(0x000000000000000000000040)
+          && procSpell->SpellFamilyName == SPELLFAMILY_MAGE && procSpell->SpellFamilyFlags & UI64LIT(0x000000000000000000000040))
+          continue;
 
         itr->second->SetInUse(true);                        // prevent holder deletion
         procTriggered.push_back( ProcTriggeredData(spellProcEvent, itr->second) );
