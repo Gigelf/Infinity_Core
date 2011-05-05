@@ -10913,7 +10913,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
 
     // Frost Nova
     if (itr->second->GetCaster() == pTarget)
-      if (SpellEntry const* spellInfo = itr->second->GetSpellProto())
+      if (SpellEntry const* spellInfo = itr->second->GetSpellProto() && procSpell)
         if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->SpellFamilyFlags & UI64LIT(0x000000000000000000000040)
           && procSpell->SpellFamilyName == SPELLFAMILY_MAGE && procSpell->SpellFamilyFlags & UI64LIT(0x000000000000000000000040))
           continue;
