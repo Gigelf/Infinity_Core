@@ -247,8 +247,7 @@ Item::Item( )
 
 bool Item::Create( uint32 guidlow, uint32 itemid, Player const* owner)
 {
-    Object::_Create(ObjectGuid(HIGHGUID_ITEM, guidlow));
-//    Object::_Create(guidlow, 0, HIGHGUID_ITEM);
+    Object::_Create(guidlow, 0, HIGHGUID_ITEM);
 
     SetEntry(itemid);
     SetObjectScale(DEFAULT_OBJECT_SCALE);
@@ -1136,6 +1135,9 @@ bool Item::IsLimitedToAnotherMapOrZone( uint32 cur_mapId, uint32 cur_zoneId) con
 // time.
 void Item::SendTimeUpdate(Player* owner)
 {
+    if (!owner || !owner->IsInWorld() || owner->GetPlayerbotAI())
+        return;
+
     uint32 duration = GetUInt32Value(ITEM_FIELD_DURATION);
     if (!duration)
         return;

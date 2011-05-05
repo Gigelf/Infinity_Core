@@ -116,7 +116,7 @@ ConfVersion=2010102201
 #
 ###################################################################################################################
 
-AuctionHouseBot.Seller.Enabled = 1
+AuctionHouseBot.Seller.Enabled = 0
 
 AuctionHouseBot.Alliance.Items.Amount.Ratio = 100
 AuctionHouseBot.Horde.Items.Amount.Ratio = 100
@@ -203,7 +203,7 @@ AuctionHouseBot.Class.Glyph = 3
 #
 ###################################################################################################################
 
-AuctionHouseBot.Buyer.Enabled = 1
+AuctionHouseBot.Buyer.Enabled = 0
 
 AuctionHouseBot.Buyer.Alliance.Enabled = 1
 AuctionHouseBot.Buyer.Horde.Enabled = 1

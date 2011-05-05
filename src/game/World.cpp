@@ -83,23 +83,6 @@ float World::m_VisibleObjectGreyDistance      = 0;
 float  World::m_relocation_lower_limit_sq     = 10.f * 10.f;
 uint32 World::m_relocation_ai_notify_delay    = 1000u;
 
-/*///PVP Announcer
-void World::SendPvPAnnounce(Player* killer, Player* killed)
-{
-  std::ostringstream msg;
-  std::ostringstream KillerName;
-  std::ostringstream KilledName;
-  std::string KillerColor = sConfig.GetStringDefault("PvPAnnouncer.ColorKiller", "|CFFFFFF01");
-  std::string KilledColor = sConfig.GetStringDefault("PvPAnnouncer.ColorKilled", "|CFFFFFF01");
-  std::string AreaColor = sConfig.GetStringDefault("PvPAnnouncer.ColorArea", "|CFFFE8A0E");
-
-  KillerName << killer->GetName();
-  KilledName << killed->GetName();
-
-  msg << KillerColor << KillerName.str().c_str() << "]" << "|CFF0042FF Has Killed " << KilledColor << KilledName.str().c_str() << "]" << "|CFFE55BB0 in " << AreaColor << "[" << killer->GetMap()->GetMapName() << "]";
-  SendWorldText(LANG_SYSTEMMESSAGE, msg.str().c_str());
-}*/
-
 /// World constructor
 World::World()
 {
@@ -210,8 +193,24 @@ void World::AddSession(WorldSession* s)
     addSessQueue.add(s);
 }
 
-void
-World::AddSession_ (WorldSession* s)
+///PVP Announcer
+void World::SendPvPAnnounce(Player* killer, Player* killed)
+{
+  std::ostringstream msg;
+  std::ostringstream KillerName;
+  std::ostringstream KilledName;
+  std::string KillerColor = sConfig.GetStringDefault("PvPAnnouncer.ColorKiller", "|CFFFFFF01");
+  std::string KilledColor = sConfig.GetStringDefault("PvPAnnouncer.ColorKilled", "|CFFFFFF01");
+  std::string AreaColor = sConfig.GetStringDefault("PvPAnnouncer.ColorArea", "|CFFFE8A0E");
+
+  KillerName << killer->GetName();
+  KilledName << killed->GetName();
+
+  msg << KillerColor << KillerName.str().c_str() << "]" << "|CFF0042FF Has Killed " << KilledColor << KilledName.str().c_str() << "]" << "|CFFE55BB0 in " << AreaColor << "[" << killer->GetMap()->GetMapName() << "]";
+  SendWorldText(LANG_SYSTEMMESSAGE, msg.str().c_str());
+}
+
+void World::AddSession_ (WorldSession* s)
 {
     MANGOS_ASSERT (s);
 
@@ -622,9 +621,18 @@ void World::LoadConfigSettings(bool reload)
     setConfigMinMax(CONFIG_UINT32_PLAYERBOT_RESTRICTLEVEL, "PlayerbotAI.RestrictBotLevel", getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL), 1, getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
     setConfig(CONFIG_FLOAT_PLAYERBOT_MINDISTANCE, "PlayerbotAI.FollowDistanceMin", 0.5f);
     setConfig(CONFIG_FLOAT_PLAYERBOT_MAXDISTANCE, "PlayerbotAI.FollowDistanceMax", 1.0f);
+    setConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_COMBAT, "PlayerbotAI.Collect.Combat", true);
+    setConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_QUESTS, "PlayerbotAI.Collect.Quest", true);
+    setConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_PROFESSION, "PlayerbotAI.Collect.Profession", true);
+    setConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_LOOT, "PlayerbotAI.Collect.Loot", true);
+    setConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_SKIN, "PlayerbotAI.Collect.Skin", true);
+    setConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_OBJECTS, "PlayerbotAI.Collect.Objects", true);
+    setConfig(CONFIG_BOOL_PLAYERBOT_SELL_TRASH, "PlayerbotAI.SellGarbage", true);
 
     setConfig(CONFIG_BOOL_LFG_ENABLE, "LFG.Enable",false);
     setConfig(CONFIG_BOOL_LFR_ENABLE, "LFR.Enable",false);
+    setConfig(CONFIG_BOOL_LFG_DEBUG_ENABLE, "LFG.Debug",false);
+    setConfig(CONFIG_BOOL_LFR_EXTEND, "LFR.Extend",false);
     setConfigMinMax(CONFIG_UINT32_LFG_MAXKICKS, "LFG.MaxKicks", 5, 1, 10);
     setConfigMinMax(CONFIG_UINT32_LFG_KICKVOTES, "LFG.KickVotes", 3, 1, 5);
 
@@ -828,16 +836,16 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMID,"PvPToken.ItemID", 29434);
     setConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMCOUNT,"PvPToken.ItemCount", 1);
     setConfig(CONFIG_FLOAT_PVP_TOKEN_GOLD,"PvPToken.Gold", 100000);
-    setConfig(CONFIG_PVP_TOKEN_HONOR,"PvPToken.Honor", 75000);  
-    setConfig(CONFIG_PVP_TOKEN_ARENA,"PvPToken.Arena", 5000);
+    setConfig(CONFIG_FLOAT_PVP_TOKEN_HONOR,"PvPToken.Honor", 75000);
+    setConfig(CONFIG_FLOAT_PVP_TOKEN_ARENA,"PvPToken.Arena", 5000);
     setConfig(CONFIG_FLOAT_PVP_TOKEN_RESTRICTION,"PvPToken.MapRestriction", 4);
 
     if(getConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMCOUNT) < 1)
         setConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMCOUNT,"PvPToken.ItemCount",1);
 
     /// PvP Announcer System
-    //setConfig(CONFIG_BOOL_PVP_ANNOUNCER,"PvPAnnouncer.Enable", true);
-	
+    setConfig(CONFIG_BOOL_PVP_ANNOUNCER,"PvPAnnouncer.Enable", true);
+
     /*  Flying Everywhere   */
     setConfig(CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE, "Custom.AllowFlyingMountsEverywhere", true);
 
@@ -1425,8 +1433,8 @@ void World::SetInitialWorldSettings()
 
     m_timers[WUPDATE_EXT_MAIL].SetInterval(m_configUint32Values[CONFIG_UINT32_EXTERNAL_MAIL_INTERVAL] * MINUTE * IN_MILLISECONDS);
 
-	// for AhBot
-	m_timers[WUPDATE_AHBOT].SetInterval(20*IN_MILLISECONDS); // every 20 sec
+    // for AhBot
+    m_timers[WUPDATE_AHBOT].SetInterval(20*IN_MILLISECONDS); // every 20 sec
 
     //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions
@@ -1579,6 +1587,13 @@ void World::Update(uint32 diff)
 
         ///- Handle expired auctions
         sAuctionMgr.Update();
+    }
+
+    /// <li> Handle AHBot operations
+    if (m_timers[WUPDATE_AHBOT].Passed())
+    {
+        auctionbot.Update();
+        m_timers[WUPDATE_AHBOT].Reset();
     }
 
     /// <li> Handle session updates when the timer has passed

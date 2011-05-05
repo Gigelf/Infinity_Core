@@ -902,18 +902,18 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         if(player_tap && player_tap != pVictim)
         {
             player_tap->ProcDamageAndSpell(pVictim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0);
-			
+
             // PvP Token
             int8 leveldiff = player_tap->getLevel() - pVictim->getLevel();
-            if((pVictim->GetTypeId() == TYPEID_PLAYER) && leveldiff < 10)
+            if((pVictim->GetTypeId() == TYPEID_PLAYER) && leveldiff < 1)
                 player_tap->ReceiveToken();
-				
-            /*/// PvP Announcer
+
+            /// PvP Announcer
             if (sWorld.getConfig(CONFIG_BOOL_PVP_ANNOUNCER))
             {
                 if (pVictim->GetTypeId() == TYPEID_PLAYER)
                     sWorld.SendPvPAnnounce(player_tap, ((Player*)pVictim));
-            }*/
+            }
 
             WorldPacket data(SMSG_PARTYKILLLOG, (8+8));     //send event PARTY_KILL
             data << player_tap->GetObjectGuid();            //player with killing blow
@@ -1448,7 +1448,7 @@ void Unit::CastSpell(float x, float y, float z, SpellEntry const *spellInfo, boo
             sLog.outError("CastSpell(x,y,z): unknown spell by caster: %s", GetGuidStr().c_str());
         return;
     }
-	
+
     if(sObjectMgr.IsSpellDisabled(spellInfo->Id))
         return;
 
@@ -2829,7 +2829,7 @@ void Unit::CalculateHealAbsorb(const uint32 heal, uint32 *absorb)
 
 void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool extra )
 {
-    if((hasUnitState(UNIT_STAT_CAN_NOT_REACT) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) && 
+    if((hasUnitState(UNIT_STAT_CAN_NOT_REACT) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) &&
         (!this->GetVehicle() || this->GetVehicle()->GetBase()->GetVehicleInfo()->GetEntry()->m_ID != 223))
         return;
 
@@ -4472,6 +4472,20 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder *holder)
 
                 // m_auraname can be modified to SPELL_AURA_NONE for area auras, use original
                 AuraType aurNameReal = AuraType(aurSpellInfo->EffectApplyAuraName[i]);
+
+                // Priest's Mind Flay must stack from different casters
+                if (const SpellEntry* sp = foundHolder->GetSpellProto())
+                {
+                    if (sp && sp->SpellFamilyName == SPELLFAMILY_PRIEST && sp->SpellIconID == 548 && (sp->SpellFamilyFlags2 & UI64LIT(0x00000040)))
+                        break;
+                }
+
+                // Warlock's Drain Soul must stack from different casters
+                if (const SpellEntry* sp = foundHolder->GetSpellProto())
+                {
+                    if (sp && sp->SpellFamilyName == SPELLFAMILY_WARLOCK && sp->SpellIconID == 113 && (sp->SpellFamilyFlags & UI64LIT(0x00004000)))
+                        break;
+                }
 
                 switch(aurNameReal)
                 {
@@ -7510,7 +7524,7 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
         case SPELL_DAMAGE_CLASS_RANGED:
         {
             if (pVictim)
-                crit_chance = GetUnitCriticalChance(attackType, pVictim);
+                crit_chance += GetUnitCriticalChance(attackType, pVictim);
 
             crit_chance+= GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, schoolMask);
             break;
@@ -7935,6 +7949,10 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
                 {
                 // Additional Bladestorm Immunity check (not immuned to disarm / bleed)
                 if ((*i)->GetId() == 46924 && (spellInfo->Mechanic == MECHANIC_DISARM || spellInfo->Mechanic == MECHANIC_BLEED || spellInfo->Mechanic == MECHANIC_INFECTED))
+                    continue;
+
+                // Additional check if Player has BG Preparation aura
+                if((*i)->GetId() == 44521 && (spellInfo->Mechanic == MECHANIC_MOUNT))
                     continue;
 
                 return true;
@@ -10893,6 +10911,16 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
         if(!IsTriggeredAtSpellProcEvent(pTarget, itr->second, procSpell, procFlag, procExtra, attType, isVictim, spellProcEvent))
            continue;
 
+    // Frost Nova
+    if (itr->second->GetCaster() == pTarget)
+    { 
+         SpellEntry const* spellInfo = itr->second->GetSpellProto(); 
+          if (procSpell && spellInfo) 
+              if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->SpellFamilyFlags & UI64LIT(0x000000000000000000000040) 
+                  && procSpell->SpellFamilyName == SPELLFAMILY_MAGE && procSpell->SpellFamilyFlags & UI64LIT(0x000000000000000000000040)) 
+                  continue; 
+    }
+
         itr->second->SetInUse(true);                        // prevent holder deletion
         procTriggered.push_back( ProcTriggeredData(spellProcEvent, itr->second) );
     }
@@ -11770,36 +11798,13 @@ void Unit::MonsterMoveWithSpeed(float x, float y, float z, uint32 transitTime)
     }
 }
 
-void Unit::MonsterMoveByPath(float x, float y, float z, uint32 speed, bool smoothPath)
+void Unit::MonsterMoveByPath(float x, float y, float z, uint32 speed, bool smoothPath, bool forceDest)
 {
-    PathInfo path(this, x, y, z, !smoothPath, true);
+    PathInfo path(this, x, y, z, !smoothPath, forceDest);
     PointPath pointPath = path.getFullPath();
 
     uint32 traveltime = uint32(pointPath.GetTotalLength()/float(speed));
     MonsterMoveByPath(pointPath, 1, pointPath.size(), traveltime);
-}
-
-
-void Unit::MonsterJump(float x, float y, float z, float o, uint32 transitTime, uint32 verticalSpeed)
-{
-    SendMonsterMove(x, y, z, SPLINETYPE_NORMAL, SplineFlags(SPLINEFLAG_TRAJECTORY | SPLINEFLAG_WALKMODE), transitTime, NULL, double(verticalSpeed));
-
-    if (GetTypeId() != TYPEID_PLAYER)
-    {
-        Creature* c = (Creature*)this;
-        // Creature relocation acts like instant movement generator, so current generator expects interrupt/reset calls to react properly
-        if (!c->GetMotionMaster()->empty())
-            if (MovementGenerator *movgen = c->GetMotionMaster()->top())
-                movgen->Interrupt(*c);
-
-        GetMap()->CreatureRelocation((Creature*)this, x, y, z, o);
-
-        // finished relocation, movegen can different from top before creature relocation,
-        // but apply Reset expected to be safe in any case
-        if (!c->GetMotionMaster()->empty())
-            if (MovementGenerator *movgen = c->GetMotionMaster()->top())
-                movgen->Reset(*c);
-    }
 }
 
 template<typename PathElem, typename PathNode>
@@ -12242,96 +12247,6 @@ void Unit::_AddAura(uint32 spellID, uint32 duration)
     }
 }
 
-bool Unit::IsAllowedDamageInArea(Unit* pVictim) const
-{
-    // can damage self anywhere
-    if (pVictim == this)
-        return true;
-
-    // non player controlled unit can damage anywhere
-    if (!IsCharmerOrOwnerPlayerOrPlayerItself())
-        return true;
-
-    // can damage own pet anywhere
-    if (pVictim->GetOwnerGuid() == GetObjectGuid())
-        return true;
-
-    // can damage non player controlled victim anywhere
-    if (!pVictim->IsCharmerOrOwnerPlayerOrPlayerItself())
-        return true;
-
-    // can't damage player controlled unit by player controlled unit in sanctuary
-    AreaTableEntry const* area = GetAreaEntryByAreaID(pVictim->GetAreaId());
-    if (area && area->flags & AREA_FLAG_SANCTUARY)
-        return false;
-
-    return true;
-}
-
-template<typename Elem, typename Node>
-void Unit::SendMonsterMoveByPath(Path<Elem,Node> const& path, uint32 start, uint32 end, SplineFlags flags, uint32 traveltime)
-{
-    uint32 pathSize = end - start;
-
-    if (pathSize < 1)
-    {
-        SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(), SPLINETYPE_STOP, flags, 0);
-        return;
-    }
-
-    if (pathSize == 1)
-    {
-        SendMonsterMove(path[start].x, path[start].y, path[start].z, SPLINETYPE_NORMAL, flags, traveltime);
-        return;
-    }
-
-    uint32 packSize = (flags & SplineFlags(SPLINEFLAG_FLYING | SPLINEFLAG_CATMULLROM)) ? pathSize*4*3 : 4*3 + (pathSize-1)*4;
-    WorldPacket data( SMSG_MONSTER_MOVE, (GetPackGUID().size()+1+4+4+4+4+1+4+4+4+packSize) );
-    data << GetPackGUID();
-    data << uint8(0);
-    data << GetPositionX();
-    data << GetPositionY();
-    data << GetPositionZ();
-    data << uint32(WorldTimer::getMSTime());
-    data << uint8(SPLINETYPE_NORMAL);
-    data << uint32(flags);
-    data << uint32(traveltime);
-    data << uint32(pathSize);
-
-    if (flags & SplineFlags(SPLINEFLAG_FLYING | SPLINEFLAG_CATMULLROM))
-    {
-        // sending a taxi flight path
-        for (uint32 i = start; i < end; ++i)
-        {
-            data << float(path[i].x);
-            data << float(path[i].y);
-            data << float(path[i].z);
-        }
-    }
-    else
-    {
-        // sending a series of points
-
-        // destination
-        data << path[end-1].x;
-        data << path[end-1].y;
-        data << path[end-1].z;
-
-        // all other points are relative to the center of the path
-        float mid_X = (GetPositionX() + path[end-1].x) * 0.5f;
-        float mid_Y = (GetPositionY() + path[end-1].y) * 0.5f;
-        float mid_Z = (GetPositionZ() + path[end-1].z) * 0.5f;
-
-        for (uint32 i = start; i < end - 1; ++i)
-            data.appendPackXYZ(mid_X - path[i].x, mid_Y - path[i].y, mid_Z - path[i].z);
-    }
-
-    SendMessageToSet(&data, true);
-}
-
-template void Unit::SendMonsterMoveByPath<PathNode>(const Path<PathNode> &, uint32, uint32, SplineFlags, uint32);
-template void Unit::SendMonsterMoveByPath<TaxiPathNodePtr, const TaxiPathNodeEntry>(const Path<TaxiPathNodePtr, const TaxiPathNodeEntry> &, uint32, uint32, SplineFlags, uint32);
-
 class RelocationNotifyEvent : public BasicEvent
 {
 public:
@@ -12412,6 +12327,119 @@ ObjectGuid const& Unit::GetCreatorGuid() const
 
         default:
             return ObjectGuid();
+    }
+}
+
+template<typename Elem, typename Node>
+void Unit::SendMonsterMoveByPath(Path<Elem,Node> const& path, uint32 start, uint32 end, SplineFlags flags, uint32 traveltime)
+{
+    uint32 pathSize = end - start;
+
+    if (pathSize < 1)
+    {
+        SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(), SPLINETYPE_STOP, flags, 0);
+        return;
+    }
+
+    if (pathSize == 1)
+    {
+        SendMonsterMove(path[start].x, path[start].y, path[start].z, SPLINETYPE_NORMAL, flags, traveltime);
+        return;
+    }
+
+    uint32 packSize = (flags & SplineFlags(SPLINEFLAG_FLYING | SPLINEFLAG_CATMULLROM)) ? pathSize*4*3 : 4*3 + (pathSize-1)*4;
+    WorldPacket data( SMSG_MONSTER_MOVE, (GetPackGUID().size()+1+4+4+4+4+1+4+4+4+packSize) );
+    data << GetPackGUID();
+    data << uint8(0);
+    data << GetPositionX();
+    data << GetPositionY();
+    data << GetPositionZ();
+    data << uint32(WorldTimer::getMSTime());
+    data << uint8(SPLINETYPE_NORMAL);
+    data << uint32(flags);
+    data << uint32(traveltime);
+    data << uint32(pathSize);
+
+    if (flags & SplineFlags(SPLINEFLAG_FLYING | SPLINEFLAG_CATMULLROM))
+    {
+        // sending a taxi flight path
+        for (uint32 i = start; i < end; ++i)
+        {
+            data << float(path[i].x);
+            data << float(path[i].y);
+            data << float(path[i].z);
+        }
+    }
+    else
+    {
+        // sending a series of points
+
+        // destination
+        data << path[end-1].x;
+        data << path[end-1].y;
+        data << path[end-1].z;
+
+        // all other points are relative to the center of the path
+        float mid_X = (GetPositionX() + path[end-1].x) * 0.5f;
+        float mid_Y = (GetPositionY() + path[end-1].y) * 0.5f;
+        float mid_Z = (GetPositionZ() + path[end-1].z) * 0.5f;
+
+        for (uint32 i = start; i < end - 1; ++i)
+            data.appendPackXYZ(mid_X - path[i].x, mid_Y - path[i].y, mid_Z - path[i].z);
+    }
+
+    SendMessageToSet(&data, true);
+}
+
+template void Unit::SendMonsterMoveByPath<PathNode>(const Path<PathNode> &, uint32, uint32, SplineFlags, uint32);
+template void Unit::SendMonsterMoveByPath<TaxiPathNodePtr, const TaxiPathNodeEntry>(const Path<TaxiPathNodePtr, const TaxiPathNodeEntry> &, uint32, uint32, SplineFlags, uint32);
+
+bool Unit::IsAllowedDamageInArea(Unit* pVictim) const
+{
+    // can damage self anywhere
+    if (pVictim == this)
+        return true;
+
+    // non player controlled unit can damage anywhere
+    if (!IsCharmerOrOwnerPlayerOrPlayerItself())
+        return true;
+
+    // can damage own pet anywhere
+    if (pVictim->GetOwnerGuid() == GetObjectGuid())
+        return true;
+
+    // can damage non player controlled victim anywhere
+    if (!pVictim->IsCharmerOrOwnerPlayerOrPlayerItself())
+        return true;
+
+    // can't damage player controlled unit by player controlled unit in sanctuary
+    AreaTableEntry const* area = GetAreaEntryByAreaID(pVictim->GetAreaId());
+    if (area && area->flags & AREA_FLAG_SANCTUARY)
+        return false;
+
+    return true;
+}
+
+
+void Unit::MonsterJump(float x, float y, float z, float o, uint32 transitTime, uint32 verticalSpeed)
+{
+    SendMonsterMove(x, y, z, SPLINETYPE_NORMAL, SplineFlags(SPLINEFLAG_TRAJECTORY | SPLINEFLAG_WALKMODE), transitTime, NULL, double(verticalSpeed));
+
+    if (GetTypeId() != TYPEID_PLAYER)
+    {
+        Creature* c = (Creature*)this;
+        // Creature relocation acts like instant movement generator, so current generator expects interrupt/reset calls to react properly
+        if (!c->GetMotionMaster()->empty())
+            if (MovementGenerator *movgen = c->GetMotionMaster()->top())
+                movgen->Interrupt(*c);
+
+        GetMap()->CreatureRelocation((Creature*)this, x, y, z, o);
+
+        // finished relocation, movegen can different from top before creature relocation,
+        // but apply Reset expected to be safe in any case
+        if (!c->GetMotionMaster()->empty())
+            if (MovementGenerator *movgen = c->GetMotionMaster()->top())
+                movgen->Reset(*c);
     }
 }
 

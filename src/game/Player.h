@@ -1202,6 +1202,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateInnerTime (time_t time) { time_inn_enter = time; }
 
         void RemovePet(PetSaveMode mode);
+        bool HasOrphan();
 
         uint32 GetPhaseMaskForSpawn() const;                // used for proper set phase for DB at GM-mode creature/GO spawn
 
@@ -1597,7 +1598,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void chompAndTrim(std::string& str);
         bool getNextQuestId(const std::string& pString, unsigned int& pStartPos, unsigned int& pId);
         void skill(std::list<uint32>& m_spellsToLearn);
-        void talent(std::ostringstream &out);
+        void MakeTalentGlyphLink(std::ostringstream &out);
         bool requiredQuests(const char* pQuestIdString);
 
         /*********************************************************/
@@ -1617,12 +1618,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SaveToDB();
         void SaveInventoryAndGoldToDB();                    // fast save function for item/money cheating preventing
         void SaveGoldToDB();
-		void SaveDataFieldToDB();
-		static bool SaveValuesArrayInDB(Tokens const& data,uint64 guid);
+        void SaveDataFieldToDB();
+        static bool SaveValuesArrayInDB(Tokens const& data,uint64 guid);
         static void SetUInt32ValueInArray(Tokens& data,uint16 index, uint32 value);
         static void SetFloatValueInArray(Tokens& data,uint16 index, float value);
-		static void SetUInt32ValueInDB(uint16 index, uint32 value, uint64 guid);
-		static void SetFloatValueInDB(uint16 index, float value, uint64 guid);
+        static void SetUInt32ValueInDB(uint16 index, uint32 value, uint64 guid);
+        static void SetFloatValueInDB(uint16 index, float value, uint64 guid);
         static void Customize(ObjectGuid guid, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair);
         static void SavePositionInDB(ObjectGuid guid, uint32 mapid, float x,float y,float z,float o,uint32 zone);
 
@@ -2491,8 +2492,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         // LFG
         LFGPlayerState* GetLFGState() { return m_LFGState;};
         uint32 GetEquipGearScore(bool withBags = true, bool withBank = false);
+        void   ResetEquipGearScore() { m_cachedGS = 0;};
         typedef std::vector<uint32/*item level*/> GearScoreMap;
         uint8 GetTalentsCount(uint8 tab);
+        void  ResetTalentsCount() { m_cachedTC[0] = 0; m_cachedTC[1] = 0; m_cachedTC[2] = 0;};
 
         /*********************************************************/
         /***                   GROUP SYSTEM                    ***/
@@ -2902,6 +2905,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         DungeonPersistentState* _pendingBind;
         uint32 _pendingBindTimer;
+
+        uint32 m_cachedGS;
+        uint8  m_cachedTC[3];
 
         // LFG
         LFGPlayerState* m_LFGState;

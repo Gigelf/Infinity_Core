@@ -1555,7 +1555,23 @@ void Player::Update( uint32 update_diff, uint32 p_time )
         SetHealth(0);
 
     if (m_deathState == JUST_DIED)
-    {   // Prevent death of jailed players
+    {
+        KillPlayer();
+ 		// For SotA Seaforium Bomb - spawn the bomb if the player die
+ 		if (InBattleGround() && (GetBattleGround()->GetMapId() == 607) && HasItemCount(39213, 1))
+ 		{
+ 			if (GetTeam() == ALLIANCE)
+ 			{
+ 				SummonGameobject(402000,GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation(),0);
+ 			}
+ 			else
+ 			{
+ 				SummonGameobject(402001,GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation(),0);
+ 			}
+ 			DestroyItemCount(39213, 1, true);
+ 		}
+
+        // Prevent death of jailed players
         if (!m_jail_isjailed) KillPlayer();
         else
         {
@@ -2935,6 +2951,7 @@ void Player::UpdateFreeTalentPoints(bool resetIfNeed)
         else
             SetFreeTalentPoints(talentPointsForLevel-m_usedTalentCount);
     }
+    ResetTalentsCount();
 }
 
 void Player::InitTalentForLevel()
@@ -4785,6 +4802,10 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 
     SetDeathState(ALIVE);
 
+    /*  Flying Everywhere   */
+    if (sWorld.getConfig(CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE))
+      CastSpell(this, 58601, true);   // needs a better umount spell  but this one removes all flight auras and triggers parachute so it is a fully clean wipe
+
     if(getRace() == RACE_NIGHTELF)
         RemoveAurasDueToSpell(20584);                       // speed bonuses
     RemoveAurasDueToSpell(8326);                            // SPELL_AURA_GHOST
@@ -5340,16 +5361,16 @@ void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, floa
             if(amount <= -100.0f)
                 amount = -200.0f;
 
-            // For Warriors, Shield Block Value PCT_MODs should be added, not multiplied 
-            if (modGroup == SHIELD_BLOCK_VALUE && getClass() == CLASS_WARRIOR) 
-            { 
-                val = amount / 100.0f; 
-                m_auraBaseMod[modGroup][modType] += apply ? val : -val; 
-            } 
-            else 
-            { 
-                val = (100.0f + amount) / 100.0f; 
-                m_auraBaseMod[modGroup][modType] *= apply ? val : (1.0f/val); 
+            // For Warriors, Shield Block Value PCT_MODs should be added, not multiplied
+            if (modGroup == SHIELD_BLOCK_VALUE && getClass() == CLASS_WARRIOR)
+            {
+                val = amount / 100.0f;
+                m_auraBaseMod[modGroup][modType] += apply ? val : -val;
+            }
+            else
+            {
+                val = (100.0f + amount) / 100.0f;
+                m_auraBaseMod[modGroup][modType] *= apply ? val : (1.0f/val);
             }
             break;
     }
@@ -11758,6 +11779,7 @@ Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update
     Item *pItem = Item::CreateItem( item, count, this );
     if( pItem )
     {
+        ResetEquipGearScore();
         ItemAddedQuestCheck( item, count );
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_RECEIVE_EPIC_ITEM, item, count);
         if(randomPropertyId)
@@ -11919,6 +11941,7 @@ Item* Player::EquipNewItem( uint16 pos, uint32 item, bool update )
 {
     if (Item *pItem = Item::CreateItem( item, 1, this ))
     {
+        ResetEquipGearScore();
         ItemAddedQuestCheck( item, 1 );
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_RECEIVE_EPIC_ITEM, item, 1);
         return EquipItem( pos, pItem, update );
@@ -12502,7 +12525,7 @@ void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
 {
     if (!pItem)
          return;
-		
+
     /*  Flying Everywhere   */
     if (sWorld.getConfig(CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE))
     {
@@ -13871,22 +13894,6 @@ void Player::PrepareGossipMenu(WorldObject *pSource, uint32 menuId)
                 case GOSSIP_OPTION_TABARDDESIGNER:
                 case GOSSIP_OPTION_AUCTIONEER:
                     break;                                  // no checks
-                case GOSSIP_OPTION_BOT:
-                {
-                    if (sWorld.getConfig(CONFIG_BOOL_PLAYERBOT_DISABLE) && !pCreature->isInnkeeper())
-                    {
-                        ChatHandler(this).PSendSysMessage("|cffff0000Playerbot system is currently disabled!");
-                        hasMenuItem = false;
-                        break;
-                    }
-
-                    std::string reqQuestIds = sConfig.GetStringDefault("PlayerbotAI.BotguyQuests","");
-                    uint32 cost = sWorld.getConfig(CONFIG_UINT32_PLAYERBOT_BOTGUYCOST);
-                    if((reqQuestIds == "" || requiredQuests(reqQuestIds.c_str())) && !pCreature->isInnkeeper() && this->GetMoney() >= cost)
-                        pCreature->LoadBotMenu(this);
-                    hasMenuItem = false;
-                    break;
-                }
                 default:
                     sLog.outErrorDb("Creature entry %u have unknown gossip option %u for menu %u", pCreature->GetEntry(), itr->second.option_id, itr->second.menu_id);
                     hasMenuItem = false;
@@ -14034,12 +14041,12 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
         }
     }
 
+    GossipMenuItemData pMenuData = gossipmenu.GetItemData(gossipListId);
+
     switch(gossipOptionId)
     {
         case GOSSIP_OPTION_GOSSIP:
         {
-            GossipMenuItemData pMenuData = gossipmenu.GetItemData(gossipListId);
-
             if (pMenuData.m_gAction_poi)
                 PlayerTalkClass->SendPointOfInterest(pMenuData.m_gAction_poi);
 
@@ -14127,59 +14134,6 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
             }
 
             GetSession()->SendBattlegGroundList(guid, bgTypeId);
-            break;
-        }
-        case GOSSIP_OPTION_BOT:
-        {
-            // DEBUG_LOG("GOSSIP_OPTION_BOT");
-            PlayerTalkClass->CloseGossip();
-            uint32 guidlo = PlayerTalkClass->GossipOptionSender(gossipListId);
-            uint32 cost = sWorld.getConfig(CONFIG_UINT32_PLAYERBOT_BOTGUYCOST);
-
-            if (!GetPlayerbotMgr())
-                SetPlayerbotMgr(new PlayerbotMgr(this));
-
-            if(GetPlayerbotMgr()->GetPlayerBot(guidlo) != NULL)
-            {
-                GetPlayerbotMgr()->LogoutPlayerBot(guidlo);
-            }
-            else if(GetPlayerbotMgr()->GetPlayerBot(guidlo) == NULL)
-            {
-                QueryResult *resultchar = CharacterDatabase.PQuery("SELECT COUNT(*) FROM characters WHERE online = '1' AND account = '%u'", m_session->GetAccountId());
-                if(resultchar)
-                {
-                    Field *fields = resultchar->Fetch();
-                    int maxnum = sWorld.getConfig(CONFIG_UINT32_PLAYERBOT_MAXBOTS);
-                    int acctcharcount = fields[0].GetUInt32();
-                    if(!(m_session->GetSecurity() > SEC_PLAYER))
-                        if(acctcharcount > maxnum)
-                        {
-                            ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon anymore bots.(Current Max: |cffffffff%u)",maxnum);
-                            delete resultchar;
-                            break;
-                        }
-                }
-                delete resultchar;
-
-                QueryResult *resultlvl = CharacterDatabase.PQuery("SELECT level,name FROM characters WHERE guid = '%u'", guidlo);
-                if(resultlvl)
-                {
-                    Field *fields=resultlvl->Fetch();
-                    int maxlvl = sWorld.getConfig(CONFIG_UINT32_PLAYERBOT_RESTRICTLEVEL);
-                    int charlvl = fields[0].GetUInt32();
-                    if(!(m_session->GetSecurity() > SEC_PLAYER))
-                        if(charlvl > maxlvl)
-                        {
-                            ChatHandler(this).PSendSysMessage("|cffff0000You cannot summon |cffffffff[%s]|cffff0000, it's level is too high.(Current Max:lvl |cffffffff%u)",fields[1].GetString(),maxlvl);
-                            delete resultlvl;
-                            break;
-                        }
-                }
-                delete resultlvl;
-
-                GetPlayerbotMgr()->AddPlayerBot(guidlo);
-                this->ModifyMoney(-(int32)cost);
-            }
             break;
         }
     }
@@ -23293,8 +23247,8 @@ void Player::ReceiveToken()
     uint32 itemID = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMID);
     uint32 itemCount = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_ITEMCOUNT);
     uint32 goldAmount = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_GOLD);
-    uint32 honorAmount = sWorld.getConfig(CONFIG_PVP_TOKEN_HONOR);  
-    uint32 arenaAmount = sWorld.getConfig(CONFIG_PVP_TOKEN_ARENA);
+    uint32 honorAmount = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_HONOR);
+    uint32 arenaAmount = sWorld.getConfig(CONFIG_FLOAT_PVP_TOKEN_ARENA);
 
     ItemPosCountVec dest;
     InventoryResult msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemID, itemCount);
@@ -23304,25 +23258,25 @@ void Player::ReceiveToken()
         return;
     }
 
-    Item* item = StoreNewItem( dest, itemID, true, Item::GenerateItemRandomPropertyId(itemID));  
-    SendNewItem(item,itemCount,true,false);  
-  
-   if( honorAmount > 0 )  
-       ModifyHonorPoints(honorAmount);  
-       SaveToDB();  
-       return;  
-  
-   if( goldAmount > 0 )  
-       ModifyMoney(goldAmount);  
-       SaveGoldToDB();  
-       return; 
-  
-   if( arenaAmount > 0 )  
-       ModifyArenaPoints(arenaAmount); 
-       SaveToDB(); 
+    Item* item = StoreNewItem( dest, itemID, true, Item::GenerateItemRandomPropertyId(itemID));
+    SendNewItem(item,itemCount,true,false);
+
+   if( honorAmount > 0 )
+       ModifyHonorPoints(honorAmount);
+       SaveToDB();
        return;
 
-    ChatHandler(this).PSendSysMessage(LANG_EVENTMESSAGE);
+   if( goldAmount > 0 )
+       ModifyMoney(goldAmount);
+       SaveGoldToDB();
+       return;
+
+   if( arenaAmount > 0 )
+       ModifyArenaPoints(arenaAmount);
+       SaveToDB();
+       return;
+
+    ChatHandler(this).PSendSysMessage(LANG_YOU_RECEIVE_TOKEN);
 }
 
 void Player::UnsummonPetTemporaryIfAny()
@@ -24179,7 +24133,7 @@ void Player::FlyingMountsSpellsToItems()
 
             if(! (isFlyingSpell(sEntry) || isFlyingFormSpell(sEntry)) )
                 continue;
- 
+
             if(HasSpell(pProto->Spells[i].SpellId))
             {
                 uint16 RindingSkill = GetSkillValue(SKILL_RIDING);
@@ -24187,8 +24141,8 @@ void Player::FlyingMountsSpellsToItems()
                 SetSkill(SKILL_RIDING, RindingSkill, 300);
                 break;
             }
- 
-        }        
+
+        }
     }
 
     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
@@ -24200,7 +24154,7 @@ void Player::FlyingMountsSpellsToItems()
                 Item* pItem = GetItemByPos( i, j );
                 if(!pItem)
                     continue;
- 
+
                 ItemPrototype const *pProto = sObjectMgr.GetItemPrototype(pItem->GetEntry());
                 if(!pProto)
                     continue;
@@ -24213,7 +24167,7 @@ void Player::FlyingMountsSpellsToItems()
 
                     if(! (isFlyingSpell(sEntry) || isFlyingFormSpell(sEntry)) )
                         continue;
- 
+
                     if(HasSpell(pProto->Spells[i].SpellId))
                     {
                         uint16 RindingSkill = GetSkillValue(SKILL_RIDING);
@@ -24239,7 +24193,7 @@ bool Player::CanUseFlyingMounts(SpellEntry const* sEntry)
         WorldPacket data(SMSG_CAST_FAILED, (4+1+1));
         data << uint8(0);
         data << uint32(sEntry->Id);
-        data << uint8(SPELL_FAILED_TARGET_IN_COMBAT); 
+        data << uint8(SPELL_FAILED_TARGET_IN_COMBAT);
         GetSession()->SendPacket(&data);
         return false;
     }
@@ -24249,7 +24203,7 @@ bool Player::CanUseFlyingMounts(SpellEntry const* sEntry)
         WorldPacket data(SMSG_CAST_FAILED, (4+1+1));
         data << uint8(0);
         data << uint32(sEntry->Id);
-        data << uint8(SPELL_FAILED_NOT_HERE); 
+        data << uint8(SPELL_FAILED_NOT_HERE);
         GetSession()->SendPacket(&data);
         return false;
     }
@@ -24532,6 +24486,9 @@ AreaLockStatus Player::GetAreaLockStatus(uint32 mapId, Difficulty difficulty)
 
 uint32 Player::GetEquipGearScore(bool withBags, bool withBank)
 {
+    if (m_cachedGS > 0)
+        return m_cachedGS;
+
     GearScoreMap gearScore (MAX_INVTYPE);
 
     for (uint8 i = INVTYPE_NON_EQUIP; i < MAX_INVTYPE; ++i)
@@ -24601,7 +24558,10 @@ uint32 Player::GetEquipGearScore(bool withBags, bool withBank)
     if (count)
     {
         DEBUG_LOG("Player: calculating gear score for %u. Result is %u",GetObjectGuid().GetCounter(), uint32( summ / count ));
-        return uint32( summ / count );
+
+        m_cachedGS = uint32( summ / count );
+
+        return m_cachedGS;
     }
     else return 0;
 }
@@ -24670,6 +24630,9 @@ uint8 Player::GetTalentsCount(uint8 tab)
     if (tab >2)
         return 0;
 
+    if (m_cachedTC[tab] > 0)
+        return m_cachedTC[tab];
+
     uint8 talentCount = 0;
 
     uint32 const* talentTabIds = GetTalentTabPages(getClass());
@@ -24689,5 +24652,34 @@ uint8 Player::GetTalentsCount(uint8 tab)
 
         talentCount += talent.currentRank + 1;
     }
+    m_cachedTC[tab] = talentCount;
     return talentCount;
+}
+
+bool Player::HasOrphan()
+{
+    if (GetMiniPet())
+    {
+        // We have a summon, is it an orphan?
+        bool hasOrphan = false;
+
+        switch (GetMiniPet()->GetEntry())
+        {
+            case 33532: //wolvar
+            case 14444: //orc
+            case 33533: //oracle
+            case 14305: //human
+            case 22818: //draenei
+            case 22817: //bloodelf
+            {
+                hasOrphan = true;
+                break;
+            }
+
+        }
+
+        if (hasOrphan)
+            return true;
+    }
+    return false;
 }

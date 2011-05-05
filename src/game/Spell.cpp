@@ -534,7 +534,7 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
         }
         case 47496: // Ghoul's explode
         {
-            FillAreaTargets(targetUnitMap,m_targets.m_destX, m_targets.m_destY,radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             break;
         }
         case 58912: // Deathstorm
@@ -556,7 +556,7 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
         }
         case 65045: // Flame of demolisher
         {
-            FillAreaTargets(targetUnitMap,m_targets.m_destX, m_targets.m_destY,radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             break;
         }
         case 65919: case 67858: case 67859: case 67860: //Anub'arak Cast Check Ice Spell
@@ -571,7 +571,7 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
             UnitList tmpUnitMap;
             bool m_bOneTargetHaveAura = false;
 
-            FillAreaTargets(tmpUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             if (!tmpUnitMap.empty())
             {
                 for (UnitList::const_iterator itr = tmpUnitMap.begin(); itr != tmpUnitMap.end(); ++itr)
@@ -604,9 +604,9 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
         }
         case 68921: case 69049: // Soulstorm (Forge of Souls - Bronjahm)
         {
-            FillAreaTargets(targetUnitMap,m_targets.m_destX, m_targets.m_destY,radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             UnitList tmpUnitMap;
-            FillAreaTargets(tmpUnitMap,m_targets.m_destX, m_targets.m_destY, 10.0f, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(tmpUnitMap, 10.0f, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             if (targetUnitMap.empty() || tmpUnitMap.empty())
                 break;
             for (UnitList::const_iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr)
@@ -625,7 +625,7 @@ bool Spell::FillCustomTargetMap(SpellEffectIndex i, UnitList &targetUnitMap)
         case 66862: case 67681: // Radiance (Trial of the Champion - Eadric the Pure)
         {
             UnitList tmpUnitMap;
-            FillAreaTargets(tmpUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             if (!tmpUnitMap.empty())
             {
                 for (UnitList::const_iterator itr = tmpUnitMap.begin(); itr != tmpUnitMap.end(); ++itr)
@@ -921,9 +921,9 @@ void Spell::prepareDataForTriggerSystem()
                 // Replenish Mana, item spell with triggered cases (Mana Agate, etc mana gems)
                 else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000010000000000))
                     m_canTrigger = true;
-				// Fingers of Frost triggered by Ice/Frost Armor
-				else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000100000))
-					 m_canTrigger = true;
+                // Fingers of Frost: triggered by Frost/Ice Armor
+                else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000100000))
+                    m_canTrigger = true;
                 // Living Bomb - can trigger Hot Streak
                 else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x1000000000000))
                     m_canTrigger = true;
@@ -2043,7 +2043,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             if (radius > 0.0f)
             {
                 // caster included here?
-                FillAreaTargets(targetUnitMap, dest_x, dest_y, radius, PUSH_DEST_CENTER, SPELL_TARGETS_ALL);
+                FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_ALL);
             }
             else if (IsPositiveSpell(m_spellInfo->Id))
                     targetUnitMap.push_back(m_caster);
@@ -2262,7 +2262,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             break;
         }
         case TARGET_ALL_ENEMY_IN_AREA:
-            FillAreaTargets(targetUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             if (m_spellInfo->Id == 62240 || m_spellInfo->Id == 62920)
             {
                 if (SpellAuraHolder *holder = m_caster->GetSpellAuraHolder(62239))
@@ -2305,7 +2305,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
             // fill real target list if no spell script target defined
             FillAreaTargets(bounds.first != bounds.second ? tempTargetUnitMap : targetUnitMap,
-                m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_DEST_CENTER, bounds.first != bounds.second ? SPELL_TARGETS_ALL : targetB);
+                radius, PUSH_DEST_CENTER, bounds.first != bounds.second ? SPELL_TARGETS_ALL : targetB);
 
             if (!tempTargetUnitMap.empty())
             {
@@ -2354,7 +2354,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             UnitList tempTargetUnitMap;
             SpellScriptTargetBounds bounds = sSpellMgr.GetSpellScriptTargetBounds(m_spellInfo->Id);
             // fill real target list if no spell script target defined
-            FillAreaTargets(bounds.first != bounds.second ? tempTargetUnitMap : targetUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_DEST_CENTER, SPELL_TARGETS_ALL);
+            FillAreaTargets(bounds.first != bounds.second ? tempTargetUnitMap : targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_ALL);
 
             if (!tempTargetUnitMap.empty())
             {
@@ -2481,7 +2481,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     targetUnitMap.push_back(m_caster);
                     break;
                 default:
-                    FillAreaTargets(targetUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+                    FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
                     break;
             }
             break;
@@ -2591,7 +2591,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             break;
         }
         case TARGET_ALL_HOSTILE_UNITS_AROUND_CASTER:
-            FillAreaTargets(targetUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_SELF_CENTER, SPELL_TARGETS_HOSTILE);
+            FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_HOSTILE);
             break;
         case TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER:
             switch (m_spellInfo->Id)
@@ -2600,7 +2600,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     FillRaidOrPartyHealthPriorityTargets(targetUnitMap, m_caster, m_caster, radius, 3, true, false, true);
                     break;
                 case 56153:                                 // Guardian Aura - Ahn'Kahet
-                    FillAreaTargets(targetUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
+                    FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
                     targetUnitMap.remove(m_caster);
                     break;
                 case 64844:                                 // Divine Hymn
@@ -2613,18 +2613,18 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     break;
                 case 45662:                                 // Encapsulate
                     // hack, to aoivd other hacks in spellbonusdmg-, crit-, etc. calc.
-                    FillAreaTargets(targetUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_SELF_CENTER, SPELL_TARGETS_HOSTILE);
+                    FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_HOSTILE);
                     break;
                 case 71447:                                 // Bloodbolt Splash 10N
                 case 71481:                                 // Bloodbolt Splash 25N
                 case 71482:                                 // Bloodbolt Splash 10H
                 case 71483:                                 // Bloodbolt Splash 25H
-                    FillAreaTargets(targetUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
+                    FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_FRIENDLY);
                     targetUnitMap.remove(m_caster);
                     break;
                 default:
                     // selected friendly units (for casting objects) around casting object
-                    FillAreaTargets(targetUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY, GetCastingObject());
+                    FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY, GetCastingObject());
                     break;
             }
             break;
@@ -2669,13 +2669,13 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             // Searing Light
             if (m_spellInfo->Id == 63023 || m_spellInfo->Id == 65120)
             {
-                FillAreaTargets(targetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_SELF_CENTER, SPELL_TARGETS_HOSTILE);
+                FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_HOSTILE);
                 break;
             }
             // Gravity Bomb
             else if (m_spellInfo->Id == 63025 || m_spellInfo->Id == 64233)
             {
-                FillAreaTargets(targetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_SELF_CENTER, SPELL_TARGETS_HOSTILE);
+                FillAreaTargets(targetUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_HOSTILE);
                 targetUnitMap.remove(m_caster);
                 break;
             }
@@ -2718,7 +2718,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 FillRaidOrPartyHealthPriorityTargets(targetUnitMap, m_caster, m_caster, radius, 1, true, false, false);
             }
             else
-                FillAreaTargets(targetUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_DEST_CENTER, SPELL_TARGETS_FRIENDLY);
+                FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_FRIENDLY);
             break;
              // Mana Detonation (Kel'Thuzad in Naxxramas) - should not damage caster
              if (m_spellInfo->Id == 27820)
@@ -2791,23 +2791,18 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 			// Pound (not turn caster to target)
 			if (m_spellInfo->SpellIconID == 66)
 				m_caster->SetOrientation(m_castOrientation);
-            FillAreaTargets(targetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), radius, inFront ? PUSH_IN_FRONT : PUSH_IN_BACK, SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap, radius, inFront ? PUSH_IN_FRONT : PUSH_IN_BACK, SPELL_TARGETS_AOE_DAMAGE);
             break;
         }
         case TARGET_LARGE_FRONTAL_CONE:
-            FillAreaTargets(targetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_IN_FRONT_90, SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap, radius, PUSH_IN_FRONT_90, SPELL_TARGETS_AOE_DAMAGE);
             break;
         case TARGET_NARROW_FRONTAL_CONE:
-            FillAreaTargets(targetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_IN_FRONT_15, SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap, radius, PUSH_IN_FRONT_15, SPELL_TARGETS_AOE_DAMAGE);
             break;
         case TARGET_IN_FRONT_OF_CASTER_30:
-        {
-            if (m_spellInfo->SpellFamilyName == SPELLFAMILY_GENERIC)
-                FillAreaTargets(targetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_IN_FRONT_30, SPELL_TARGETS_AOE_DAMAGE);
-            else
-                FillAreaTargets(targetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_IN_FRONT_90, SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap, radius, PUSH_IN_FRONT_30, SPELL_TARGETS_AOE_DAMAGE);
             break;
-        }
         case TARGET_DUELVSPLAYER:
         {
             Unit *target = m_targets.getUnitTarget();
@@ -2841,7 +2836,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
             // targets the ground, not the units in the area
             if (m_spellInfo->Effect[effIndex]!=SPELL_EFFECT_PERSISTENT_AREA_AURA)
-                FillAreaTargets(targetUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+                FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             break;
         case TARGET_MINION:
             if(m_spellInfo->Effect[effIndex] != SPELL_EFFECT_DUEL)
@@ -2956,7 +2951,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
                 UnitList tempTargetUnitMap;
 
-                FillAreaTargets(tempTargetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), max_range, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
+                FillAreaTargets(tempTargetUnitMap, max_range, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
 
                 if (m_caster != pUnitTarget && std::find(tempTargetUnitMap.begin(), tempTargetUnitMap.end(), m_caster) == tempTargetUnitMap.end())
                     tempTargetUnitMap.push_front(m_caster);
@@ -3010,7 +3005,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 targetUnitMap.push_back(currentTarget);
                 m_targets.setDestination(currentTarget->GetPositionX(), currentTarget->GetPositionY(), currentTarget->GetPositionZ());
                 if(m_spellInfo->EffectImplicitTargetB[effIndex] == TARGET_ALL_ENEMY_IN_AREA_INSTANT)
-                    FillAreaTargets(targetUnitMap, currentTarget->GetPositionX(), currentTarget->GetPositionY(), radius, PUSH_TARGET_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+                    FillAreaTargets(targetUnitMap, radius, PUSH_TARGET_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             }
             break;
         }
@@ -5510,6 +5505,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     {
         if (m_caster->IsTaxiFlying())
             return SPELL_FAILED_NOT_ON_TAXI;
+        // Flying mounts everywhere
         else if ((sWorld.getConfig(CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE)) && (m_spellInfo->Id==55884))
         {
             Player* player = (Player*)m_caster;
@@ -5947,12 +5943,12 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_EFFECT_CHARGE:
             {
                 if (m_caster->hasUnitState(UNIT_STAT_ROOT) && !(m_spellInfo->Id == 3411 && m_caster->HasAura(57499)))
-                { 
-                    // Intervene with Warbringer talent 
-                    if (m_spellInfo->Id == 3411 && m_caster->HasAura(57499, EFFECT_INDEX_2)) 
-                        m_caster->RemoveAurasAtMechanicImmunity(IMMUNE_TO_ROOT_AND_SNARE_MASK, 0); 
-                    else 
-                        return SPELL_FAILED_ROOTED; 
+                {
+                    // Intervene with Warbringer talent
+                    if (m_spellInfo->Id == 3411 && m_caster->HasAura(57499, EFFECT_INDEX_2))
+                        m_caster->RemoveAurasAtMechanicImmunity(IMMUNE_TO_ROOT_AND_SNARE_MASK, 0);
+                    else
+                        return SPELL_FAILED_ROOTED;
                 }
                 break;
             }
@@ -6882,6 +6878,7 @@ SpellCastResult Spell::CheckItems()
     Player* p_caster = (Player*)m_caster;
     bool isScrollItem = false;
     bool isVellumTarget = false;
+    // flying mounts everywhere
     if ((sWorld.getConfig(CONFIG_BOOL_ALLOW_FLYING_MOUNTS_EVERYWHERE)) && (m_spellInfo->Id==55884))
     {
         uint32 spellToLearn = ((m_spellInfo->Id==SPELL_ID_GENERIC_LEARN) || (m_spellInfo->Id==SPELL_ID_GENERIC_LEARN_PET)) ? damage : m_spellInfo->EffectTriggerSpell[0];
@@ -7831,10 +7828,10 @@ SpellCastResult Spell::CanOpenLock(SpellEffectIndex effIndex, uint32 lockId, Ski
  * @param spellTargets         Additional rules for target selection base at hostile/friendly state to original spell caster
  * @param originalCaster       If provided set alternative original caster, if =NULL then used Spell::GetAffectiveObject() return
  */
-void Spell::FillAreaTargets(UnitList &targetUnitMap, float x, float y, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster /*=NULL*/)
+void Spell::FillAreaTargets(UnitList &targetUnitMap, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster /*=NULL*/)
 {
     MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, targetUnitMap, radius, pushType, spellTargets, originalCaster);
-    Cell::VisitAllObjects(x, y, m_caster->GetMap(), notifier, radius);
+    Cell::VisitAllObjects(notifier.GetCenterX(), notifier.GetCenterY(), m_caster->GetMap(), notifier, radius);
 }
 
 void Spell::FillRaidOrPartyTargets(UnitList &targetUnitMap, Unit* member, Unit* center, float radius, bool raid, bool withPets, bool withcaster)

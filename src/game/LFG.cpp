@@ -77,6 +77,15 @@ LFGRoleMask LFGPlayerState::GetRoles()
     return rolesMask;
 };
 
+bool LFGPlayerState::IsSingleRole()
+{
+    if (   LFGRoleMask(rolesMask & ~LFG_ROLE_MASK_TANK   & ~LFG_ROLE_MASK_LEADER) == LFG_ROLE_MASK_NONE
+        || LFGRoleMask(rolesMask & ~LFG_ROLE_MASK_HEALER & ~LFG_ROLE_MASK_LEADER) == LFG_ROLE_MASK_NONE
+        || LFGRoleMask(rolesMask & ~LFG_ROLE_MASK_TANK   & ~LFG_ROLE_MASK_LEADER) == LFG_ROLE_MASK_NONE)
+        return true;
+    return false;
+}
+
 void LFGPlayerState::SetComment(std::string comment)
 {
     m_comment.clear();
@@ -100,9 +109,10 @@ void LFGGroupState::Clear()
 {
     queued = false;
     update = true;
-    status = LFG_STATUS_NOT_SAVED;
+    m_status = LFG_STATUS_NOT_SAVED;
     dungeonEntry = 0;
-    kicks = 0;
+    m_votesNeeded = 3;
+    m_kicksLeft = 5;
     kickActive = false;
     m_DungeonsList.clear();
     m_flags = LFG_MEMBER_FLAG_NONE |
@@ -110,6 +120,8 @@ void LFGGroupState::Clear()
               LFG_MEMBER_FLAG_ROLES |
               LFG_MEMBER_FLAG_BIND;
     m_proposal = NULL;
+    m_roleCheckCancelTime = 0;
+    m_roleCheckState      = LFG_ROLECHECK_NONE;
 }
 
 uint8 LFGGroupState::GetRoles(LFGRoles role)
@@ -123,4 +135,36 @@ uint8 LFGGroupState::GetRoles(LFGRoles role)
                     ++count;
     }
     return count;
+};
+
+uint8 LFGGroupState::GetVotesNeeded() const
+{
+    return m_votesNeeded;
+}
+
+uint8 LFGGroupState::GetKicksLeft() const
+{
+    return m_kicksLeft;
+}
+
+void LFGGroupState::StartRoleCheck()
+{
+    m_roleCheckCancelTime = time_t(time(NULL)) + LFG_TIME_ROLECHECK;
+    SetRoleCheckState(LFG_ROLECHECK_INITIALITING);
+}
+
+bool LFGGroupState::IsRoleCheckActive()
+{
+    if (GetRoleCheckState() != LFG_ROLECHECK_NONE && m_roleCheckCancelTime)
+        return true;
+
+    return false;
+}
+
+LFGType LFGGroupState::GetType()
+{
+    if (m_DungeonsList.empty())
+        return LFG_TYPE_NONE;
+    else
+        return LFGType((*m_DungeonsList.begin())->type);
 };

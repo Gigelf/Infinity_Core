@@ -8,6 +8,7 @@
 #include "../Chat.h"
 #include "../Language.h"
 #include "../Guild.h"
+#include "../WaypointMovementGenerator.h"
 
 class LoginQueryHolder;
 class CharacterHandler;
@@ -19,6 +20,12 @@ PlayerbotMgr::PlayerbotMgr(Player* const master) : m_master(master)
     m_confDebugWhisper = sWorld.getConfig(CONFIG_BOOL_PLAYERBOT_DEBUGWHISPER);
     m_confFollowDistance[0] = sWorld.getConfig(CONFIG_FLOAT_PLAYERBOT_MINDISTANCE);
     m_confFollowDistance[1] = sWorld.getConfig(CONFIG_FLOAT_PLAYERBOT_MAXDISTANCE);
+    m_confCollectCombat = sWorld.getConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_COMBAT);
+    m_confCollectQuest = sWorld.getConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_QUESTS);
+    m_confCollectProfession = sWorld.getConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_PROFESSION);
+    m_confCollectLoot = sWorld.getConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_LOOT);
+    m_confCollectSkin = sWorld.getConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_SKIN);
+    m_confCollectObjects = sWorld.getConfig(CONFIG_BOOL_PLAYERBOT_COLLECT_OBJECTS);
 }
 
 PlayerbotMgr::~PlayerbotMgr()
@@ -32,6 +39,178 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 {
     switch (packet.GetOpcode())
     {
+
+        case CMSG_ACTIVATETAXI:
+        {
+            WorldPacket p(packet);
+            p.rpos(0); // reset reader
+
+            ObjectGuid guid;
+            std::vector<uint32> nodes;
+            nodes.resize(2);
+            uint8 delay = 9;
+
+            p >> guid >> nodes[0] >> nodes[1];
+
+            DEBUG_LOG("PlayerbotMgr: Received CMSG_ACTIVATETAXI from %d to %d", nodes[0], nodes[1]);
+
+            for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            {
+
+                delay = delay + 3;
+                Player* const bot = it->second;
+                if (!bot)
+                    return;
+
+                Group* group = bot->GetGroup();
+                if (!group)
+                    continue;
+
+                Unit *target = ObjectAccessor::GetUnit(*bot, guid);
+
+                bot->GetPlayerbotAI()->SetIgnoreUpdateTime(delay);
+
+                bot->GetMotionMaster()->Clear(true);
+                bot->GetMotionMaster()->MoveFollow(target, INTERACTION_DISTANCE, bot->GetOrientation());
+                bot->GetPlayerbotAI()->GetTaxi(guid, nodes);
+            }
+            return;
+        }
+
+        case CMSG_ACTIVATETAXIEXPRESS:
+        {
+            WorldPacket p(packet);
+            p.rpos(0); // reset reader
+
+            ObjectGuid guid;
+            uint32 node_count;
+            uint8 delay = 9;
+
+            p >> guid >> node_count;
+
+            std::vector<uint32> nodes;
+
+            for (uint32 i = 0; i < node_count; ++i)
+            {
+                uint32 node;
+                p >> node;
+                nodes.push_back(node);
+            }
+
+            if (nodes.empty())
+                return;
+
+            DEBUG_LOG("PlayerbotMgr: Received CMSG_ACTIVATETAXIEXPRESS from %d to %d", nodes.front(), nodes.back());
+
+            for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            {
+
+                delay = delay + 3;
+                Player* const bot = it->second;
+                if (!bot)
+                    return;
+
+                Group* group = bot->GetGroup();
+                if (!group)
+                    continue;
+
+                Unit *target = ObjectAccessor::GetUnit(*bot, guid);
+
+                bot->GetPlayerbotAI()->SetIgnoreUpdateTime(delay);
+
+                bot->GetMotionMaster()->Clear(true);
+                bot->GetMotionMaster()->MoveFollow(target, INTERACTION_DISTANCE, bot->GetOrientation());
+                bot->GetPlayerbotAI()->GetTaxi(guid, nodes);
+            }
+            return;
+        }
+
+        case CMSG_MOVE_SPLINE_DONE:
+        {
+            DEBUG_LOG("PlayerbotMgr: Received CMSG_MOVE_SPLINE_DONE");
+
+            WorldPacket p(packet);
+            p.rpos(0); // reset reader
+
+            ObjectGuid guid;                                        // used only for proper packet read
+            MovementInfo movementInfo;                              // used only for proper packet read
+
+            p >> guid.ReadAsPacked();
+            p >> movementInfo;
+            p >> Unused<uint32>();                          // unk
+
+            for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            {
+
+                Player* const bot = it->second;
+                if (!bot)
+                    return;
+
+                // in taxi flight packet received in 2 case:
+                // 1) end taxi path in far (multi-node) flight
+                // 2) switch from one map to other in case multi-map taxi path
+                // we need process only (1)
+                uint32 curDest = bot->m_taxi.GetTaxiDestination();
+                if (!curDest)
+                    return;
+
+                TaxiNodesEntry const* curDestNode = sTaxiNodesStore.LookupEntry(curDest);
+
+                // far teleport case
+                if (curDestNode && curDestNode->map_id != bot->GetMapId())
+                {
+                    if (bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
+                    {
+                        // short preparations to continue flight
+                        FlightPathMovementGenerator* flight = (FlightPathMovementGenerator *) (bot->GetMotionMaster()->top());
+
+                        flight->Interrupt(*bot);                // will reset at map landing
+
+                        flight->SetCurrentNodeAfterTeleport();
+                        TaxiPathNodeEntry const& node = flight->GetPath()[flight->GetCurrentNode()];
+                        flight->SkipCurrentNode();
+
+                        bot->TeleportTo(curDestNode->map_id, node.x, node.y, node.z, bot->GetOrientation());
+                    }
+                    return;
+                }
+
+                uint32 destinationnode = bot->m_taxi.NextTaxiDestination();
+                if (destinationnode > 0)                                // if more destinations to go
+                {
+                    // current source node for next destination
+                    uint32 sourcenode = bot->m_taxi.GetTaxiSource();
+
+                    // Add to taximask middle hubs in taxicheat mode (to prevent having player with disabled taxicheat and not having back flight path)
+                    if (bot->isTaxiCheater())
+                        if (bot->m_taxi.SetTaximaskNode(sourcenode))
+                        {
+                            WorldPacket data(SMSG_NEW_TAXI_PATH, 0);
+                            bot->GetSession()->SendPacket(&data);
+                        }
+
+                    DEBUG_LOG("PlayerbotMgr: Taxi has to go from %u to %u", sourcenode, destinationnode);
+
+                    uint32 mountDisplayId = sObjectMgr.GetTaxiMountDisplayId(sourcenode, bot->GetTeam());
+
+                    uint32 path, cost;
+                    sObjectMgr.GetTaxiPath(sourcenode, destinationnode, path, cost);
+
+                    if (path && mountDisplayId)
+                        bot->GetSession()->SendDoFlight(mountDisplayId, path, 1);          // skip start fly node
+                    else
+                        bot->m_taxi.ClearTaxiDestinations();    // clear problematic path and next
+                }
+                else
+                    /* std::ostringstream out;
+                       out << "Destination reached" << bot->GetName();
+                       ChatHandler ch(m_master);
+                       ch.SendSysMessage(out.str().c_str()); */
+                    bot->m_taxi.ClearTaxiDestinations();        // Destination, clear source node
+            }
+            return;
+        }
+
         // if master is logging out, log out all bots
         case CMSG_LOGOUT_REQUEST:
         {
@@ -213,13 +392,11 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
         }
         break;
 
-        // if master talks to an NPC
-        case CMSG_GOSSIP_HELLO:
         case CMSG_QUESTGIVER_HELLO:
         {
             WorldPacket p(packet);
             p.rpos(0);    // reset reader
-            uint64 npcGUID;
+            ObjectGuid npcGUID;
             p >> npcGUID;
 
             WorldObject* pNpc = m_master->GetMap()->GetWorldObject(npcGUID);
@@ -236,28 +413,18 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             return;
         }
 
-        case CMSG_AREATRIGGER: 
-        { 
-            WorldPacket p(packet); 
- 
-            for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it) 
-            { 
-                Player* const bot = it->second; 
- 
-                p.rpos(0);         // reset reader 
-                bot->GetSession()->HandleAreaTriggerOpcode(p); 
-            } 
-            return; 
-        }
-
         // if master accepts a quest, bots should also try to accept quest
         case CMSG_QUESTGIVER_ACCEPT_QUEST:
         {
             WorldPacket p(packet);
             p.rpos(0);    // reset reader
-            uint64 guid;
+            ObjectGuid guid;
             uint32 quest;
-            p >> guid >> quest;
+            uint32 unk1;
+            p >> guid >> quest >> unk1;
+
+            DEBUG_LOG("PlayerbotMgr: Received CMSG_QUESTGIVER_ACCEPT_QUEST npc = %s, quest = %u, unk1 = %u", guid.GetString().c_str(), quest, unk1);
+
             Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest);
             if (qInfo)
                 for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
@@ -287,6 +454,44 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 }
             return;
         }
+
+        case CMSG_AREATRIGGER:
+        {
+            WorldPacket p(packet);
+
+            for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            {
+                Player* const bot = it->second;
+
+                p.rpos(0);         // reset reader
+                bot->GetSession()->HandleAreaTriggerOpcode(p);
+            }
+            return;
+        }
+
+        case CMSG_QUESTGIVER_COMPLETE_QUEST:
+        {
+            WorldPacket p(packet);
+            p.rpos(0);    // reset reader
+            uint32 quest;
+            ObjectGuid npcGUID;
+            p >> npcGUID >> quest;
+
+            DEBUG_LOG("PlayerbotMgr: Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %s, quest = %u", npcGUID.GetString().c_str(), quest);
+
+            WorldObject* pNpc = m_master->GetMap()->GetWorldObject(npcGUID);
+            if (!pNpc)
+                return;
+
+            // for all master's bots
+            for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            {
+                Player* const bot = it->second;
+                bot->GetPlayerbotAI()->TurnInQuests(pNpc);
+            }
+            return;
+        }
+
         case CMSG_LOOT_ROLL:
         {
 
@@ -298,7 +503,6 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             p >> Guid;    //guid of the item rolled
             p >> NumberOfPlayers;    //number of players invited to roll
             p >> rollType;    //need,greed or pass on roll
-
 
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
@@ -327,74 +531,82 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             }
             return;
         }
-        case CMSG_REPAIR_ITEM:
+        // Handle GOSSIP activate actions, prior to GOSSIP select menu actions
+        case CMSG_GOSSIP_HELLO:
         {
+            DEBUG_LOG("PlayerbotMgr: Received CMSG_GOSSIP_HELLO");
 
-            WorldPacket p(packet);    // WorldPacket packet for CMSG_REPAIR_ITEM, (8+8+1)
-
-            sLog.outDebug("PlayerbotMgr: CMSG_REPAIR_ITEM");
-
-            ObjectGuid npcGUID;
-            uint64 itemGUID;
-            uint8 guildBank;
-
-            p.rpos(0);    //reset packet pointer
-            p >> npcGUID;
-            p >> itemGUID;     // Not used for bot but necessary opcode data retrieval
-            p >> guildBank;    // Flagged if guild repair selected
+            WorldPacket p(packet);    //WorldPacket packet for CMSG_GOSSIP_HELLO, (8)
+            ObjectGuid guid;
+            p.rpos(0);                //reset packet pointer
+            p >> guid;
 
             for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
             {
-
                 Player* const bot = it->second;
                 if (!bot)
                     return;
 
-                Group* group = bot->GetGroup();      // check if bot is a member of group
-                if (!group)
-                    return;
-
-                Creature *unit = bot->GetNPCIfCanInteractWith(npcGUID, UNIT_NPC_FLAG_REPAIR);
-                if (!unit)     // Check if NPC can repair bot or not
+                Creature *pCreature = bot->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
+                if (!pCreature)
                 {
-                    sLog.outDebug("PlayerbotMgr: HandleRepairItemOpcode - Unit (GUID: %s) not found or you can't interact with him.", npcGUID.GetString().c_str());
+                    DEBUG_LOG("PlayerbotMgr: HandleGossipHelloOpcode - %s not found or you can't interact with him.", guid.GetString().c_str());
                     return;
                 }
 
-                // remove fake death
-                if (bot->hasUnitState(UNIT_STAT_DIED))
-                    bot->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
-
-                // reputation discount
-                float discountMod = bot->GetReputationPriceDiscount(unit);
-
-                uint32 TotalCost = 0;
-                if (itemGUID)     // Handle redundant feature (repair individual item) for bot
+                GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(pCreature->GetCreatureInfo()->GossipMenuId);
+                for (GossipMenuItemsMap::const_iterator itr = pMenuItemBounds.first; itr != pMenuItemBounds.second; ++itr)
                 {
-                    sLog.outDebug("ITEM: Repair single item is not applicable for %s", bot->GetName());
-                    continue;
-                }
-                else      // Handle feature (repair all items) for bot
-                {
-                    sLog.outDebug("ITEM: Repair all items, npcGUID = %s", npcGUID.GetString().c_str());
+                    uint32 npcflags = pCreature->GetUInt32Value(UNIT_NPC_FLAGS);
 
-                    TotalCost = bot->DurabilityRepairAll(true, discountMod, guildBank > 0 ? true : false);
-                }
-                if (guildBank)     // Handle guild repair
-                {
-                    uint32 GuildId = bot->GetGuildId();
-                    if (!GuildId)
-                        return;
-                    Guild *pGuild = sObjectMgr.GetGuildById(GuildId);
-                    if (!pGuild)
-                        return;
-                    pGuild->LogBankEvent(GUILD_BANK_LOG_REPAIR_MONEY, 0, bot->GetGUIDLow(), TotalCost);
-                    pGuild->SendMoneyInfo(bot->GetSession(), bot->GetGUIDLow());
-                }
+                    if (!(itr->second.npc_option_npcflag & npcflags))
+                        continue;
 
+                    switch (itr->second.option_id)
+                    {
+                        case GOSSIP_OPTION_TAXIVENDOR:
+                        {
+                            // bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_TAXIVENDOR");
+                            bot->GetSession()->SendLearnNewTaxiNode(pCreature);
+                            break;
+                        }
+                        case GOSSIP_OPTION_QUESTGIVER:
+                        {
+                            // bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_QUESTGIVER");
+                            bot->GetPlayerbotAI()->TurnInQuests(pCreature);
+                            break;
+                        }
+                        case GOSSIP_OPTION_VENDOR:
+                        {
+                            // bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_VENDOR");
+                            break;
+                        }
+                        case GOSSIP_OPTION_STABLEPET:
+                        {
+                            // bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_STABLEPET");
+                            break;
+                        }
+                        case GOSSIP_OPTION_AUCTIONEER:
+                        {
+                            // bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_AUCTIONEER");
+                            break;
+                        }
+                        case GOSSIP_OPTION_BANKER:
+                        {
+                            // bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_BANKER");
+                            break;
+                        }
+                        case GOSSIP_OPTION_INNKEEPER:
+                        {
+                            // bot->GetPlayerbotAI()->TellMaster("PlayerbotMgr:GOSSIP_OPTION_INNKEEPER");
+                            break;
+                        }
+                    }
+                }
             }
             return;
         }
+
         case CMSG_SPIRIT_HEALER_ACTIVATE:
         {
             // sLog.outDebug("SpiritHealer is resurrecting the Player %s",m_master->GetName());
@@ -408,7 +620,34 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
             return;
         }
 
-            
+        case CMSG_LIST_INVENTORY:
+        {
+            if (!sWorld.getConfig(CONFIG_BOOL_PLAYERBOT_SELL_TRASH))
+                return;
+
+            WorldPacket p(packet);
+            p.rpos(0);  // reset reader
+            ObjectGuid npcGUID;
+            p >> npcGUID;
+
+            Object* const pNpc = (WorldObject*) m_master->GetObjectByTypeMask(npcGUID, TYPEMASK_CREATURE_OR_GAMEOBJECT);
+            if (!pNpc)
+                return;
+
+            // for all master's bots
+            for(PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+            {
+                Player* const bot = it->second;
+                if (!bot->IsInMap(static_cast<WorldObject *>(pNpc)))
+                {
+                    bot->GetPlayerbotAI()->TellMaster("I'm too far away to sell items!");
+                    continue;
+                }
+                else
+                    bot->GetPlayerbotAI()->SellGarbage();
+            }
+            return;
+        }
                case CMSG_NAME_QUERY:
                case MSG_MOVE_START_FORWARD:
                case MSG_MOVE_STOP:
@@ -436,12 +675,12 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 out << "masterin: " << oc;
                 sLog.outError(out.str().c_str());
                }
-             
+
     }
 }
 void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& packet)
 {
-    
+
        switch (packet.GetOpcode())
        {
         // maybe our bots should only start looting after the master loots?
@@ -467,7 +706,7 @@ void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& packet)
             sLog.outError(out.str().c_str());
         }
        }
-     
+
 }
 
 void PlayerbotMgr::LogoutAllBots()
@@ -515,9 +754,7 @@ Player* PlayerbotMgr::GetPlayerBot(uint64 playerGuid) const
 
 void PlayerbotMgr::OnBotLogin(Player * const bot)
 {
-
-    bot->SetMap(m_master->GetMap());
-
+    bot->SetMap(sMapMgr.CreateMap(bot->GetMapId(), bot));
     // give the bot some AI, object is owned by the player class
     PlayerbotAI* ai = new PlayerbotAI(this, bot);
     bot->SetPlayerbotAI(ai);
@@ -549,54 +786,6 @@ void PlayerbotMgr::RemoveAllBotsFromGroup()
     }
 }
 
-void Creature::LoadBotMenu(Player *pPlayer)
-{
-
-    if (pPlayer->GetPlayerbotAI()) 
-        return;
-
-    if (sWorld.getConfig(CONFIG_BOOL_PLAYERBOT_DISABLE))
-        return;
-
-    uint64 guid = pPlayer->GetGUID();
-    uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(guid);
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid, name FROM characters WHERE account='%d'", accountId);
-    do
-    {
-        Field *fields = result->Fetch();
-        uint64 guidlo = fields[0].GetUInt64();
-        std::string name = fields[1].GetString();
-        std::string word = "";
-
-        if ((guid == 0) || (guid == guidlo))
-        {
-            //not found or himself
-        }
-        else
-        {
-            // create the manager if it doesn't already exist
-            if (!pPlayer->GetPlayerbotMgr())
-                pPlayer->SetPlayerbotMgr(new PlayerbotMgr(pPlayer));
-            if (pPlayer->GetPlayerbotMgr()->GetPlayerBot(guidlo) == NULL) // add (if not already in game)
-            {
-                word += "Recruit ";
-                word += name;
-                word += " as a Bot.";
-                pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8) 9, word, guidlo, GOSSIP_OPTION_BOT, word, false);
-            }
-            else if (pPlayer->GetPlayerbotMgr()->GetPlayerBot(guidlo) != NULL) // remove (if in game)
-            {
-                word += "Dismiss ";
-                word += name;
-                word += " from duty.";
-                pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8) 0, word, guidlo, GOSSIP_OPTION_BOT, word, false);
-            }
-        }
-    }
-    while (result->NextRow());
-    delete result;
-}
-
 void Player::skill(std::list<uint32>& m_spellsToLearn)
 {
     for (SkillStatusMap::const_iterator itr = mSkillStatus.begin(); itr != mSkillStatus.end(); ++itr)
@@ -610,70 +799,70 @@ void Player::skill(std::list<uint32>& m_spellsToLearn)
     }
 }
 
-void Player::talent(std::ostringstream &out) 
-{ 
- 
-    // |cff4e96f7|Htalent:1396:4|h[Unleashed Fury]|h|r 
-    // |cff66bbff|Hglyph:23:460|h[Glyph of Fortitude]|h|r 
- 
-    if(m_specsCount) 
-    { 
-        // loop through all specs (only 1 for now) 
-        for(uint32 specIdx = 0; specIdx < m_specsCount; ++specIdx) 
-        { 
-            // find class talent tabs (all players have 3 talent tabs) 
-            uint32 const* talentTabIds = GetTalentTabPages(getClass()); 
- 
-            out << "\n" << "Active Talents "; 
-  
-            for(uint32 i = 0; i < 3; ++i) 
-            { 
-                uint32 talentTabId = talentTabIds[i]; 
-                for(PlayerTalentMap::iterator iter = m_talents[specIdx].begin(); iter != m_talents[specIdx].end(); ++iter) 
-                { 
-                    PlayerTalent talent = (*iter).second; 
- 
-                    if (talent.state == PLAYERSPELL_REMOVED) 
-                        continue; 
- 
-                    // skip another tab talents 
-                    if(talent.m_talentEntry->TalentTab != talentTabId) 
-                        continue; 
- 
-                    TalentEntry const *talentInfo = sTalentStore.LookupEntry( talent.m_talentEntry->TalentID ); 
- 
-                    SpellEntry const* spell_entry = sSpellStore.LookupEntry(talentInfo->RankID[talent.currentRank]); 
- 
-                    out << "|cff4e96f7|Htalent:" << talent.m_talentEntry->TalentID << ":" << talent.currentRank 
-                    << " |h[" << spell_entry->SpellName[GetSession()->GetSessionDbcLocale()] << "]|h|r"; 
-                } 
-            } 
- 
-            uint32 freepoints = 0; 
- 
-            out << " Unspent points : "; 
- 
-            if((freepoints = GetFreeTalentPoints()) > 0) 
-                out << "|h|cff00ff00" << freepoints << "|h|r"; 
-            else 
-                out << "|h|cffff0000" << freepoints << "|h|r"; 
- 
-            out << "\n" << "Active Glyphs "; 
-            // GlyphProperties.dbc 
-            for(uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i) 
-            { 
-                GlyphPropertiesEntry const* glyph = sGlyphPropertiesStore.LookupEntry(m_glyphs[specIdx][i].GetId()); 
-                if(!glyph) 
-                    continue; 
- 
-                SpellEntry const* spell_entry = sSpellStore.LookupEntry(glyph->SpellId); 
- 
-                out << "|cff66bbff|Hglyph:" << GetGlyphSlot(i) << ":" << m_glyphs[specIdx][i].GetId() 
-                << " |h[" << spell_entry->SpellName[GetSession()->GetSessionDbcLocale()] << "]|h|r"; 
- 
-            } 
-        } 
-    } 
+void Player::MakeTalentGlyphLink(std::ostringstream &out)
+{
+
+    // |cff4e96f7|Htalent:1396:4|h[Unleashed Fury]|h|r
+    // |cff66bbff|Hglyph:23:460|h[Glyph of Fortitude]|h|r
+
+    if(m_specsCount)
+    {
+        // loop through all specs (only 1 for now)
+        for(uint32 specIdx = 0; specIdx < m_specsCount; ++specIdx)
+        {
+            // find class talent tabs (all players have 3 talent tabs)
+            uint32 const* talentTabIds = GetTalentTabPages(getClass());
+
+            out << "\n" << "Active Talents ";
+
+            for(uint32 i = 0; i < 3; ++i)
+            {
+                uint32 talentTabId = talentTabIds[i];
+                for(PlayerTalentMap::iterator iter = m_talents[specIdx].begin(); iter != m_talents[specIdx].end(); ++iter)
+                {
+                    PlayerTalent talent = (*iter).second;
+
+                    if (talent.state == PLAYERSPELL_REMOVED)
+                        continue;
+
+                    // skip another tab talents
+                    if(talent.m_talentEntry->TalentTab != talentTabId)
+                        continue;
+
+                    TalentEntry const *talentInfo = sTalentStore.LookupEntry( talent.m_talentEntry->TalentID );
+
+                    SpellEntry const* spell_entry = sSpellStore.LookupEntry(talentInfo->RankID[talent.currentRank]);
+
+                    out << "|cff4e96f7|Htalent:" << talent.m_talentEntry->TalentID << ":" << talent.currentRank
+                    << " |h[" << spell_entry->SpellName[GetSession()->GetSessionDbcLocale()] << "]|h|r";
+                }
+            }
+
+            uint32 freepoints = 0;
+
+            out << " Unspent points : ";
+
+            if((freepoints = GetFreeTalentPoints()) > 0)
+                out << "|h|cff00ff00" << freepoints << "|h|r";
+            else
+                out << "|h|cffff0000" << freepoints << "|h|r";
+
+            out << "\n" << "Active Glyphs ";
+            // GlyphProperties.dbc
+            for(uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
+            {
+                GlyphPropertiesEntry const* glyph = sGlyphPropertiesStore.LookupEntry(m_glyphs[specIdx][i].GetId());
+                if(!glyph)
+                    continue;
+
+                SpellEntry const* spell_entry = sSpellStore.LookupEntry(glyph->SpellId);
+
+                out << "|cff66bbff|Hglyph:" << GetGlyphSlot(i) << ":" << m_glyphs[specIdx][i].GetId()
+                << " |h[" << spell_entry->SpellName[GetSession()->GetSessionDbcLocale()] << "]|h|r";
+
+            }
+        }
+    }
 }
 
 void Player::chompAndTrim(std::string& str)
@@ -738,8 +927,8 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
 {
     if (sWorld.getConfig(CONFIG_BOOL_PLAYERBOT_DISABLE))
     {
-        /*PSendSysMessage("|cffff0000Playerbot system is currently disabled!");
-        SetSentErrorMessage(true);*/
+        PSendSysMessage("|cffff0000Playerbot system is currently disabled!");
+        SetSentErrorMessage(true);
         return false;
     }
 

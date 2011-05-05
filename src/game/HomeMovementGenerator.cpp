@@ -48,7 +48,7 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature & owner)
     CreatureTraveller traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z, false);
 
-    PathInfo path(&owner, x, y, z);
+    PathInfo path(&owner, x, y, z, false, true);
     PointPath pointPath = path.getFullPath();
 
     float speed = traveller.Speed() * 0.001f; // in ms
@@ -65,13 +65,13 @@ bool HomeMovementGenerator<Creature>::Update(Creature &owner, const uint32& time
 
     if (i_destinationHolder.UpdateTraveller(traveller, time_diff, false))
     {
-        if (!IsActive(owner))                               // force stop processing (movement can move out active zone with cleanup movegens list)
-            return true;                                    // not expire now, but already lost
+        if (!IsActive(owner)) // force stop processing (movement can move out active zone with cleanup movegens list)
+            return true; // not expire now, but already lost
     }
 
     if (time_diff >= i_travel_timer)
     {
-        i_travel_timer = 0;                                 // Used as check in Finalize
+        i_travel_timer = 0; // Used as check in Finalize
         return false;
     }
 
