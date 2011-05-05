@@ -134,7 +134,7 @@ class ChatHandler
         bool HandleAccountSetAddonCommand(char* args);
         bool HandleAccountSetGmLevelCommand(char* args);
         bool HandleAccountSetPasswordCommand(char* args);
-		bool HandleAHBotOptionsCommand(char* args);
+        bool HandleAHBotOptionsCommand(char* args);
 
         bool HandleAccountFriendAddCommand(char* args);
         bool HandleAccountFriendDeleteCommand(char* args);

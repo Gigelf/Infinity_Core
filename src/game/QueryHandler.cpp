@@ -154,10 +154,10 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
     if (pChar)
         SendNameQueryOpcode(pChar);
     else
-       if (guid!=auctionbot.GetAHBObjectGuid().GetRawValue())
-		   SendNameQueryOpcodeFromDB(guid);
-       else
-		   SendFakeNameForAHBotQueryOPcode();
+        if (guid!=auctionbot.GetAHBObjectGuid().GetRawValue())
+            SendNameQueryOpcodeFromDB(guid);
+        else
+            SendFakeNameForAHBotQueryOPcode();
 }
 
 void WorldSession::HandleQueryTimeOpcode( WorldPacket & /*recv_data*/ )
